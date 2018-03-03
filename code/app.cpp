@@ -105,6 +105,21 @@ v2 RenderMouseStartRight = Vec2_Zero;
 #include "app_default.cpp"
 
 // +--------------------------------------------------------------+
+// |                    Local Helper Functions                    |
+// +--------------------------------------------------------------+
+void AppLoadContent(bool firstLoad)
+{
+	if (!firstLoad)
+	{
+		DestroyShader(&app->defaultShader);
+		DestroyFont(&app->defaultFont);
+	}
+	
+	app->defaultShader = LoadShader(SHADERS_FOLDER "simple-vertex.glsl", SHADERS_FOLDER "simple-fragment.glsl");
+	app->defaultFont   = LoadFont(FONTS_FOLDER "consolab.ttf", 24, 256, 256, ' ', 96);
+}
+
+// +--------------------------------------------------------------+
 // |                       App Get Version                        |
 // +--------------------------------------------------------------+
 // Version_t App_GetVersion(bool* resetApplication)
@@ -158,12 +173,8 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// |      Initialize Things       |
 	// +==============================+
 	InitializeRenderContext();
+	AppLoadContent(true);
 	
-	// +==============================+
-	// |    Load App Base Content     |
-	// +==============================+
-	app->defaultShader = LoadShader(SHADERS_FOLDER "simple-vertex.glsl", SHADERS_FOLDER "simple-fragment.glsl");
-	app->defaultFont   = LoadFont(FONTS_FOLDER "consola.ttf", 12, 256, 256, ' ', 96);
 	
 	// +==============================+
 	// | Initialize Starting AppState |
@@ -200,6 +211,15 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	RenderMousePos = AppInput->mousePos;
 	RenderMouseStartLeft = AppInput->mouseStartPos[MouseButton_Left];
 	RenderMouseStartRight = AppInput->mouseStartPos[MouseButton_Right];
+	
+	// +==============================+
+	// |   Relaod Content Shortcut    |
+	// +==============================+
+	if (ButtonPressed(Button_F5))
+	{
+		DEBUG_WriteLine("Reloading app content");
+		AppLoadContent(false);
+	}
 	
 	// +==============================+
 	// |   Update Current AppState    |

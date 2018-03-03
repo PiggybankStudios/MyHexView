@@ -11,7 +11,11 @@ struct DefaultData_t
 {
 	bool initialized;
 	
-	//TODO: Added stuff here
+	Texture_t testTexture;
+	Texture_t circuitTexture;
+	Texture_t missingTexture;
+	
+	u32 backgroundColorIndex;
 };
 
 #endif //  _APP_DEFAULT_H

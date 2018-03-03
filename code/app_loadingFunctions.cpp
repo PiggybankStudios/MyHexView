@@ -174,6 +174,18 @@ Shader_t LoadShader(const char* vertShaderFileName, const char* fragShaderFileNa
 	return result;
 }
 
+void DestroyShader(Shader_t* shaderPntr)
+{
+	Assert(shaderPntr != nullptr);
+	
+	glDeleteVertexArrays(1, &shaderPntr->vertexArray);
+	glDeleteProgram(shaderPntr->programId);
+	glDeleteShader(shaderPntr->vertId);
+	glDeleteShader(shaderPntr->fragId);
+	
+	ClearPointer(shaderPntr);
+}
+
 Texture_t LoadTexture(const char* fileName, bool pixelated = false, bool repeat = true)
 {
 	Texture_t result = {};
@@ -311,4 +323,13 @@ Font_t LoadFont(const char* fileName,
 	}
 	
 	return result;
+}
+
+void DestroyFont(Font_t* fontPntr)
+{
+	Assert(fontPntr != nullptr);
+	
+	DestroyTexture(&fontPntr->bitmap);
+	
+	ClearPointer(fontPntr);
 }

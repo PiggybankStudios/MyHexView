@@ -329,6 +329,37 @@ void RcDrawTexturedRec(rec rectangle, Color_t color, rec sourceRectangle)
 	glDrawArrays(GL_TRIANGLES, 0, renderContext->squareBuffer.numVertices);
 }
 
+void RcDrawTexture(const Texture_t* texturePntr, v2 topLeft, r32 scale, Color_t color, rec sourceRectangle)
+{
+	RcBindTexture(texturePntr);
+	rec realSourceRec = NewRec(
+		sourceRectangle.x / (r32)renderContext->boundTexture->width,
+		sourceRectangle.y / (r32)renderContext->boundTexture->height,
+		sourceRectangle.width / (r32)renderContext->boundTexture->width,
+		sourceRectangle.height / (r32)renderContext->boundTexture->height);
+	RcSetSourceRectangle(realSourceRec);
+	RcBindTexture(renderContext->boundTexture);
+	RcSetColor(color);
+	mat4 worldMatrix = Mat4Multiply(
+		Mat4Translate(NewVec3(topLeft.x, topLeft.y, renderContext->depth)), //Position
+		Mat4Scale(NewVec3(renderContext->boundTexture->width * scale, renderContext->boundTexture->height * scale, 1.0f))); //Scale
+	RcSetWorldMatrix(worldMatrix);
+	RcBindBuffer(&renderContext->squareBuffer);
+	glDrawArrays(GL_TRIANGLES, 0, renderContext->squareBuffer.numVertices);
+}
+void RcDrawTexture(const Texture_t* texturePntr, v2 topLeft, r32 scale, Color_t color)
+{
+	RcDrawTexture(texturePntr, topLeft, scale, color, NewRec(0, 0, (r32)texturePntr->width, (r32)texturePntr->height));
+}
+void RcDrawTexture(const Texture_t* texturePntr, v2 topLeft, r32 scale)
+{
+	RcDrawTexture(texturePntr, topLeft, scale, NewColor(Color_White), NewRec(0, 0, (r32)texturePntr->width, (r32)texturePntr->height));
+}
+void RcDrawTexture(const Texture_t* texturePntr, v2 topLeft)
+{
+	RcDrawTexture(texturePntr, topLeft, 1.0f, NewColor(Color_White), NewRec(0, 0, (r32)texturePntr->width, (r32)texturePntr->height));
+}
+
 void RcDrawRectangle(rec rectangle, Color_t color)
 {
 	RcBindTexture(&renderContext->dotTexture);
