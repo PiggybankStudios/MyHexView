@@ -19,6 +19,9 @@
 			"APPLICATION_TEMP_DLL_NAME",
 			"APP_PERMANANT_MEMORY_SIZE",
 			"APP_TRANSIENT_MEMORY_SIZE",
+			"APP_VERSION_BUILD",
+			"APP_VERSION_MAJOR",
+			"APP_VERSION_MINOR",
 			"Axis_None",
 			"Axis_W",
 			"Axis_X",
@@ -410,12 +413,14 @@
 			"Platform_Linux",
 			"Platform_OSX",
 			"Platform_Windows",
+			"RESET_APPLICATION",
 			"SECONDS_PER_4YEARS",
 			"SECONDS_PER_DAY",
 			"SECONDS_PER_HOUR",
 			"SECONDS_PER_WEEK",
 			"SHOW_CONSOLE_WINDOW",
 			"TOPMOST_WINDOW",
+			"TRANSIENT_MAX_NUMBER_MARKS",
 			"TimeUnit_Days",
 			"TimeUnit_Hours",
 			"TimeUnit_Milliseconds",
@@ -795,10 +800,16 @@
 		"custom_globals":
 		[
 			"AppInput",
+			"AppOutput",
 			"PlatformInfo",
 			"PlatformVersion",
 			"TempArena",
-			"WorkingDirectory"
+			"WorkingDirectory",
+			"app",
+			"appOutput",
+			"input",
+			"mainHeap",
+			"platform"
 		],
 		"custom_types":
 		[
@@ -806,6 +817,7 @@
 			"AABB3_t",
 			"AABBInfo_t",
 			"AppClosing_f",
+			"AppData_t",
 			"AppGetVersion_f",
 			"AppInitialize_f",
 			"AppInput_t",

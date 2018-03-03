@@ -21,8 +21,8 @@ void GlfwWindowSizeCallback(GLFWwindow* window, i32 screenWidth, i32 screenHeigh
 {
 	DEBUG_PrintLine("Resized: %dx%d", screenWidth, screenHeight);
 	
-	PlatformInfo->screenSize = NewVec2i(screenWidth, screenHeight);
-	PlatformInfo->windowResized = true;
+	PlatformInfo_->screenSize = NewVec2i(screenWidth, screenHeight);
+	PlatformInfo_->windowResized = true;
 }
 void GlfwWindowMoveCallback(GLFWwindow* window, i32 posX, i32 posY)
 {
@@ -31,12 +31,12 @@ void GlfwWindowMoveCallback(GLFWwindow* window, i32 posX, i32 posY)
 void GlfwWindowMinimizeCallback(GLFWwindow* window, i32 isMinimized)
 {
 	DEBUG_PrintLine("Window %s", isMinimized ? "Minimized" : "Restored");
-	PlatformInfo->windowIsMinimized = (isMinimized > 0);
+	PlatformInfo_->windowIsMinimized = (isMinimized > 0);
 }
 void GlfwWindowFocusCallback(GLFWwindow* window, i32 isFocused)
 {
 	DEBUG_PrintLine("Window %s focus!", isFocused ? "Gained" : "Lost");
-	PlatformInfo->windowHasFocus = (isFocused > 0);
+	PlatformInfo_->windowHasFocus = (isFocused > 0);
 }
 void GlfwKeyPressedCallback(GLFWwindow* window, i32 key, i32 scanCode, i32 action, i32 modifiers)
 {
@@ -45,7 +45,7 @@ void GlfwKeyPressedCallback(GLFWwindow* window, i32 key, i32 scanCode, i32 actio
 	// if (action == GLFW_RELEASE) actionStr = "Released";
 	// DEBUG_PrintLine("KeyPress %d %d %s (%d)", key, scanCode, actionStr, modifiers);
 	
-	HandleKeyEvent(window, AppInput, key, action);
+	HandleKeyEvent(window, AppInput_, key, action);
 	
 	//Push enter, tab, and backspace characters onto the textInput
 	if (action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -57,10 +57,10 @@ void GlfwKeyPressedCallback(GLFWwindow* window, i32 key, i32 scanCode, i32 actio
 			if (key == GLFW_KEY_TAB)       { newChar = '\t'; }
 			if (key == GLFW_KEY_BACKSPACE) { newChar = '\b'; }
 			
-			if (AppInput->textInputLength < ArrayCount(AppInput->textInput))
+			if (AppInput_->textInputLength < ArrayCount(AppInput_->textInput))
 			{
-				AppInput->textInput[AppInput->textInputLength] = newChar;
-				AppInput->textInputLength++;
+				AppInput_->textInput[AppInput_->textInputLength] = newChar;
+				AppInput_->textInputLength++;
 			}
 		}
 	}
@@ -69,40 +69,40 @@ void GlfwCharPressedCallback(GLFWwindow* window, u32 codepoint)
 {
 	// DEBUG_PrintLine("Text Input: 0x%X", codepoint);
 	
-	if (AppInput->textInputLength < ArrayCount(AppInput->textInput))
+	if (AppInput_->textInputLength < ArrayCount(AppInput_->textInput))
 	{
-		AppInput->textInput[AppInput->textInputLength] = (u8)codepoint;
-		AppInput->textInputLength++;
+		AppInput_->textInput[AppInput_->textInputLength] = (u8)codepoint;
+		AppInput_->textInputLength++;
 	}
 }
 void GlfwCursorPosCallback(GLFWwindow* window, real64 mouseX, real64 mouseY)
 {
 	// DEBUG_PrintLine("Received GlfwCursorPosCallback: (%f, %f)", mouseX, mouseY);
 	
-	AppInput->mousePos = NewVec2((r32)mouseX, (r32)mouseY);
+	AppInput_->mousePos = NewVec2((r32)mouseX, (r32)mouseY);
 	
-	if (AppInput->buttons[MouseButton_Left].isDown)
+	if (AppInput_->buttons[MouseButton_Left].isDown)
 	{
-		r32 distance = Vec2Length(AppInput->mousePos - AppInput->mouseStartPos[MouseButton_Left]);
-		if (distance > AppInput->mouseMaxDist[MouseButton_Left])
+		r32 distance = Vec2Length(AppInput_->mousePos - AppInput_->mouseStartPos[MouseButton_Left]);
+		if (distance > AppInput_->mouseMaxDist[MouseButton_Left])
 		{
-			AppInput->mouseMaxDist[MouseButton_Left] = distance;
+			AppInput_->mouseMaxDist[MouseButton_Left] = distance;
 		}
 	}
-	if (AppInput->buttons[MouseButton_Right].isDown)
+	if (AppInput_->buttons[MouseButton_Right].isDown)
 	{
-		r32 distance = Vec2Length(AppInput->mousePos - AppInput->mouseStartPos[MouseButton_Right]);
-		if (distance > AppInput->mouseMaxDist[MouseButton_Right])
+		r32 distance = Vec2Length(AppInput_->mousePos - AppInput_->mouseStartPos[MouseButton_Right]);
+		if (distance > AppInput_->mouseMaxDist[MouseButton_Right])
 		{
-			AppInput->mouseMaxDist[MouseButton_Right] = distance;
+			AppInput_->mouseMaxDist[MouseButton_Right] = distance;
 		}
 	}
-	if (AppInput->buttons[MouseButton_Middle].isDown)
+	if (AppInput_->buttons[MouseButton_Middle].isDown)
 	{
-		r32 distance = Vec2Length(AppInput->mousePos - AppInput->mouseStartPos[MouseButton_Middle]);
-		if (distance > AppInput->mouseMaxDist[MouseButton_Middle])
+		r32 distance = Vec2Length(AppInput_->mousePos - AppInput_->mouseStartPos[MouseButton_Middle]);
+		if (distance > AppInput_->mouseMaxDist[MouseButton_Middle])
 		{
-			AppInput->mouseMaxDist[MouseButton_Middle] = distance;
+			AppInput_->mouseMaxDist[MouseButton_Middle] = distance;
 		}
 	}
 }
@@ -117,19 +117,19 @@ void GlfwMousePressCallback(GLFWwindow* window, i32 button, i32 action, i32 modi
 	if (action == GLFW_REPEAT)
 		return;
 	
-	HandleMouseEvent(window, AppInput, button, action == GLFW_PRESS);
+	HandleMouseEvent(window, AppInput_, button, action == GLFW_PRESS);
 }
 void GlfwMouseScrollCallback(GLFWwindow* window, real64 deltaX, real64 deltaY)
 {
 	// DEBUG_PrintLine("Received GlfwMouseScrollCallback: %f, %f", deltaX, deltaY);
 	
-	AppInput->scrollValue += NewVec2((r32)deltaX, (r32)deltaY);
-	AppInput->scrollDelta += NewVec2((r32)deltaX, (r32)deltaY);
+	AppInput_->scrollValue += NewVec2((r32)deltaX, (r32)deltaY);
+	AppInput_->scrollDelta += NewVec2((r32)deltaX, (r32)deltaY);
 }
 void GlfwCursorEnteredCallback(GLFWwindow* window, i32 entered)
 {
 	DEBUG_PrintLine("Mouse %s window", entered ? "entered" : "left");
-	AppInput->mouseInsideWindow = (entered > 0);
+	AppInput_->mouseInsideWindow = (entered > 0);
 }
 void GlfwDropCallback(GLFWwindow* window, i32 numPaths, const char** paths)
 {
@@ -139,14 +139,14 @@ void GlfwDropCallback(GLFWwindow* window, i32 numPaths, const char** paths)
 		const char* path = paths[pIndex];
 		DEBUG_PrintLine("[%d]: \"%s\"", pIndex, path);
 		
-		if (AppInput->numDroppedFiles < ArrayCount(AppInput->droppedFiles))
+		if (AppInput_->numDroppedFiles < ArrayCount(AppInput_->droppedFiles))
 		{
 			u32 pathLength = (u32)strlen(path);
 			char* tempLocation = (char*)malloc(pathLength+1);
 			memcpy(tempLocation, path, pathLength);
 			tempLocation[pathLength] = '\0';
-			AppInput->droppedFiles[AppInput->numDroppedFiles] = tempLocation;
-			AppInput->numDroppedFiles++;
+			AppInput_->droppedFiles[AppInput_->numDroppedFiles] = tempLocation;
+			AppInput_->numDroppedFiles++;
 		}
 		else
 		{

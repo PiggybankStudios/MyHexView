@@ -170,19 +170,19 @@ struct AppOutput_t
 #define AppGetVersion_DEFINITION(functionName)      Version_t functionName(bool* resetApplication)
 typedef AppGetVersion_DEFINITION(AppGetVersion_f);
 
-#define AppInitialize_DEFINITION(functionName)      void functionName(const PlatformInfo_t* platformInfo, const AppMemory_t* appMemory)
+#define AppInitialize_DEFINITION(functionName)      void functionName(const PlatformInfo_t* PlatformInfo, const AppMemory_t* AppMemory)
 typedef AppInitialize_DEFINITION(AppInitialize_f);
 
-#define AppReloading_DEFINITION(functionName)       void functionName(const PlatformInfo_t* platformInfo, const AppMemory_t* appMemory)
+#define AppReloading_DEFINITION(functionName)       void functionName(const PlatformInfo_t* PlatformInfo, const AppMemory_t* AppMemory)
 typedef AppReloading_DEFINITION(AppReloading_f);
 
-#define AppReloaded_DEFINITION(functionName)        void functionName(const PlatformInfo_t* platformInfo, const AppMemory_t* appMemory)
+#define AppReloaded_DEFINITION(functionName)        void functionName(const PlatformInfo_t* PlatformInfo, const AppMemory_t* AppMemory)
 typedef AppReloaded_DEFINITION(AppReloaded_f);
 
-#define AppUpdate_DEFINITION(functionName)          void functionName(const PlatformInfo_t* platformInfo, const AppMemory_t* appMemory, const AppInput_t* appInput, AppOutput_t* appOutput)
+#define AppUpdate_DEFINITION(functionName)          void functionName(const PlatformInfo_t* PlatformInfo, const AppMemory_t* AppMemory, const AppInput_t* AppInput, AppOutput_t* AppOutput)
 typedef AppUpdate_DEFINITION(AppUpdate_f);
 
-#define AppClosing_DEFINITION(functionName)         void functionName(const PlatformInfo_t* platformInfo, const AppMemory_t* appMemory)
+#define AppClosing_DEFINITION(functionName)         void functionName(const PlatformInfo_t* PlatformInfo, const AppMemory_t* AppMemory)
 typedef AppClosing_DEFINITION(AppClosing_f);
 
 #endif //  _PLATFORM_INTERFACE_H

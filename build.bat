@@ -16,8 +16,8 @@ set LibDirectory=..\..\..\lib
 set SourceDirectory=..\code
 set DataDirectory=..\data
 
-set CompilePlatform=1
-set CompileApplication=0
+set CompilePlatform=0
+set CompileApplication=1
 set DebugBuild=1
 set CopyToDataDirectory=1
 
@@ -71,7 +71,7 @@ if "%CompileApplication%"=="1" (
 	
 	set TimeString=%date:~-4,4%%date:~-10,2%%date:~-7,2%%time:~0,2%%time:~3,2%%time:~6,2%
 	
-	python ..\IncrementVersionNumber.py %SourceDirectory%\appVersion.h
+	python ..\IncrementVersionNumber.py %SourceDirectory%\app_version.h
 	
 	cl /Fe%ProjectName%.dll %CompilerFlags% %IncludeDirectories% %SourceDirectory%\app.cpp /link %LinkerFlags% %AppExports% /DLL /PDB:"%ProjectName%_%TimeString%.pdb"
 

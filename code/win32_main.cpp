@@ -24,6 +24,10 @@ Description:
 #include "win32_version.h"
 #include "platformInterface.h"
 
+//NOTE: There are two TempArena globals. One here in the platform layer and one in the application DLL.
+#include "my_tempMemory.h"
+#include "my_tempMemory.cpp"
+
 // +--------------------------------------------------------------+
 // |                     Common Source Files                      |
 // +--------------------------------------------------------------+
@@ -36,14 +40,11 @@ Description:
 // +--------------------------------------------------------------+
 // |                     Windows Source Files                     |
 // +--------------------------------------------------------------+
-//NOTE: There are two TempArena globals. One here in the platform layer and one in the application DLL.
-#include "my_tempMemory.cpp"
 #include "win32_debug.cpp"
 #include "win32_helpers.cpp"
 #include "win32_files.cpp"
 #include "win32_misc.cpp"
 #include "win32_appLoading.cpp"
-// #include "win32_clipboard.cpp"
 
 // +--------------------------------------------------------------+
 // |                   Windows Main Entry Point                   |
@@ -221,7 +222,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	// |      Fill Platform Info      |
 	// +==============================+
 	PlatformInfo_t platformInfo = {};
-	PlatformInfo = &platformInfo;
+	PlatformInfo_ = &platformInfo;
 	{
 		platformInfo.platformType   = Platform_Windows;
 		platformInfo.version        = PlatformVersion;
@@ -266,13 +267,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	// |     Initialize AppInput      |
 	// +==============================+
 	AppInput_t appInputArray[2] = {};
-	AppInput = &appInputArray[0];
+	AppInput_ = &appInputArray[0];
 	AppInput_t* lastInput = &appInputArray[1];
 	{
 		r64 mousePosX, mousePosY;
 		glfwGetCursorPos(window, &mousePosX, &mousePosY);
-		AppInput->mousePos = NewVec2((r32)mousePosX, (r32)mousePosY);
-		AppInput->mouseInsideWindow = (mousePosX >= 0 && mousePosY >= 0 && mousePosX < screenSize.width && mousePosY < screenSize.height);
+		AppInput_->mousePos = NewVec2((r32)mousePosX, (r32)mousePosY);
+		AppInput_->mouseInsideWindow = (mousePosX >= 0 && mousePosY >= 0 && mousePosX < screenSize.width && mousePosY < screenSize.height);
 	}
 	
 	// +==============================+
@@ -386,27 +387,27 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		// +==============================+
 		{
 			AppInput_t* tempPntr = lastInput;
-			lastInput = AppInput;
-			AppInput = tempPntr;
+			lastInput = AppInput_;
+			AppInput_ = tempPntr;
 			
-			memcpy(AppInput, lastInput, sizeof(AppInput_t));
-			AppInput->textInputLength = 0;
-			AppInput->scrollDelta = Vec2_Zero;
+			memcpy(AppInput_, lastInput, sizeof(AppInput_t));
+			AppInput_->textInputLength = 0;
+			AppInput_->scrollDelta = Vec2_Zero;
 			//Clear the transition counts
-			for (uint32_t bIndex = 0; bIndex < ArrayCount(AppInput->buttons); bIndex++)
+			for (uint32_t bIndex = 0; bIndex < ArrayCount(AppInput_->buttons); bIndex++)
 			{
-				AppInput->buttons[bIndex].transCount = 0;
-				AppInput->buttons[bIndex].pressCount = 0;
+				AppInput_->buttons[bIndex].transCount = 0;
+				AppInput_->buttons[bIndex].pressCount = 0;
 			}
 			//Free the dropped file paths that were malloc'd in the DropCallback
-			for (uint32_t fIndex = 0; fIndex < AppInput->numDroppedFiles; fIndex++)
+			for (uint32_t fIndex = 0; fIndex < AppInput_->numDroppedFiles; fIndex++)
 			{
-				if (AppInput->droppedFiles[fIndex] != nullptr)
+				if (AppInput_->droppedFiles[fIndex] != nullptr)
 				{
-					free((char*)AppInput->droppedFiles[fIndex]);
+					free((char*)AppInput_->droppedFiles[fIndex]);
 				}
 			}
-			AppInput->numDroppedFiles = 0;
+			AppInput_->numDroppedFiles = 0;
 		}
 		
 		// +==============================+
@@ -456,7 +457,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		// +==============================+
 		// |      Application Update      |
 		// +==============================+
-		application.Update(&platformInfo, &appMemory, AppInput, &appOutput);
+		application.Update(&platformInfo, &appMemory, AppInput_, &appOutput);
 		glfwSwapBuffers(window);
 		
 		// +==============================+
@@ -487,6 +488,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
 #if DEBUG
 void AssertFailure(const char* function, const char* filename, int lineNumber, const char* expressionStr)
 {
-	Win32_PrintLine("Assertion Failure! %s in \"%s\" line %d: (%s) is not true", function, GetFileNamePart(filename), lineNumber, expressionStr);
+	DEBUG_PrintLine("Assertion Failure! %s in \"%s\" line %d: (%s) is not true", function, GetFileNamePart(filename), lineNumber, expressionStr);
 }
 #endif

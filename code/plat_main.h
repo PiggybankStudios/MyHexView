@@ -53,8 +53,8 @@ Version_t PlatformVersion = {
 	PLATFORM_VERSION_MINOR,
 	PLATFORM_VERSION_BUILD
 };
-PlatformInfo_t* PlatformInfo = nullptr;
-AppInput_t* AppInput = nullptr;
+PlatformInfo_t* PlatformInfo_ = nullptr;
+AppInput_t* AppInput_ = nullptr;
 const char* WorkingDirectory = nullptr;
 
 #ifdef WINDOWS_COMPILATION

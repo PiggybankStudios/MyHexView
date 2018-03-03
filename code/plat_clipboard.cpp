@@ -16,7 +16,7 @@ CopyToClipboard_DEFINITION(PLT_CopyToClipboard)
 	memcpy(tempSpace, dataPntr, dataSize);
 	tempSpace[dataSize] = '\0';
 	
-	glfwSetClipboardString(PlatformInfo->window, tempSpace);
+	glfwSetClipboardString(PlatformInfo_->window, tempSpace);
 	
 	free(tempSpace);
 }
@@ -29,7 +29,7 @@ CopyFromClipboard_DEFINITION(PLT_CopyFromClipboard)
 {
 	*dataLengthOut = 0;
 	
-	const char* contents = glfwGetClipboardString(PlatformInfo->window);
+	const char* contents = glfwGetClipboardString(PlatformInfo_->window);
 	if (contents == nullptr) { return nullptr; }
 	
 	*dataLengthOut = (u32)strlen(contents);
