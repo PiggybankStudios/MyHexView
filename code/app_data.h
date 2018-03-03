@@ -13,7 +13,18 @@ struct AppData_t
 	MemoryArena_t tempArena;
 	u32 appInitTempHighWaterMark;
 	
-	//TODO: Add application data here
+	//AppState Data Structures
+	DefaultData_t defaultData;
+	
+	AppState_t appState;
+	AppState_t newAppState;
+	bool skipInitialization;
+	bool skipDeinitialization;
+	
+	RenderContext_t renderContext;
+	Shader_t defaultShader;
+	Font_t defaultFont;
+	Texture_t testTexture;
 };
 
 #endif //  _APP_DATA_H

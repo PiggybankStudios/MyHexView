@@ -24,6 +24,10 @@ Description:
 // |                   Application Header Files                   |
 // +--------------------------------------------------------------+
 #include "app_defines.h"
+#include "app_structs.h"
+#include "app_renderContext.h"
+
+#include "app_default.h"
 #include "app_data.h"
 
 // +--------------------------------------------------------------+
@@ -34,7 +38,14 @@ const AppInput_t* input = nullptr;
 AppOutput_t* appOutput = nullptr;
 
 AppData_t* app = nullptr;
+DefaultData_t* defData = nullptr;
+
 MemoryArena_t* mainHeap = nullptr;
+RenderContext_t* renderContext = nullptr;
+v2 RenderScreenSize = Vec2_Zero;
+v2 RenderMousePos = Vec2_Zero;
+v2 RenderMouseStartLeft = Vec2_Zero;
+v2 RenderMouseStartRight = Vec2_Zero;
 
 // +--------------------------------------------------------------+
 // |                      Application Macros                      |
@@ -84,6 +95,16 @@ MemoryArena_t* mainHeap = nullptr;
 #define ClickedOnRec(rectangle) (ButtonReleasedUnhandled(MouseButton_Left) && IsInsideRec(rectangle, RenderMousePos) && IsInsideRec(rectangle, RenderMouseStartPos))
 
 // +--------------------------------------------------------------+
+// |                   Application Source Files                   |
+// +--------------------------------------------------------------+
+#include "app_loadingFunctions.cpp"
+#include "app_fontHelpers.cpp"
+#include "app_renderContext.cpp"
+
+#include "app_helpers.cpp"
+#include "app_default.cpp"
+
+// +--------------------------------------------------------------+
 // |                       App Get Version                        |
 // +--------------------------------------------------------------+
 // Version_t App_GetVersion(bool* resetApplication)
@@ -105,7 +126,13 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	appOutput = nullptr;
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
+	defData = &app->defaultData;
 	TempArena = &app->tempArena;
+	renderContext = &app->renderContext;
+	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
+	RenderMousePos = Vec2_Zero;
+	RenderMouseStartLeft = Vec2_Zero;
+	RenderMouseStartRight = Vec2_Zero;
 	
 	DEBUG_WriteLine("Initializing application...");
 	
@@ -127,7 +154,27 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	
 	TempPushMark();
 	
+	// +==============================+
+	// |      Initialize Things       |
+	// +==============================+
+	InitializeRenderContext();
 	
+	// +==============================+
+	// |    Load App Base Content     |
+	// +==============================+
+	app->defaultShader = LoadShader(SHADERS_FOLDER "simple-vertex.glsl", SHADERS_FOLDER "simple-fragment.glsl");
+	app->defaultFont   = LoadFont(FONTS_FOLDER "consola.ttf", 12, 256, 256, ' ', 96);
+	
+	// +==============================+
+	// | Initialize Starting AppState |
+	// +==============================+
+	app->appState = AppState_Default;
+	app->newAppState = app->appState;
+	DEBUG_PrintLine("[Initializing AppState_%s]", GetAppStateStr(app->appState));
+	switch (app->appState)
+	{
+		case AppState_Default: InitializeDefaultState(); StartDefaultState(app->appState); break;
+	}
 	
 	DEBUG_WriteLine("Application initialization finished!");
 	TempPopMark();
@@ -146,9 +193,60 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	appOutput = AppOutput;
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
+	defData = &app->defaultData;
 	TempArena = &app->tempArena;
+	renderContext = &app->renderContext;
+	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
+	RenderMousePos = AppInput->mousePos;
+	RenderMouseStartLeft = AppInput->mouseStartPos[MouseButton_Left];
+	RenderMouseStartRight = AppInput->mouseStartPos[MouseButton_Right];
 	
+	// +==============================+
+	// |   Update Current AppState    |
+	// +==============================+
+	switch (app->appState)
+	{
+		case AppState_Default: UpdateAndRenderDefaultState(); break;
+	}
 	
+	// +==============================+
+	// |       Change AppStates       |
+	// +==============================+
+	if (app->newAppState != app->appState)
+	{
+		//Deinitialize
+		if (!app->skipDeinitialization)
+		{
+			DEBUG_PrintLine("[Deinitializing AppState_%s]", GetAppStateStr(app->appState));
+			switch (app->appState)
+			{
+				case AppState_Default: DeinitializeDefaultState(); break;
+			}
+		}
+		
+		AppState_t oldState = app->appState;
+		app->appState = app->newAppState;
+		
+		//Initialize
+		if (!app->skipInitialization)
+		{
+			DEBUG_PrintLine("[Initializing AppState_%s]", GetAppStateStr(app->appState));
+			switch (app->appState)
+			{
+				case AppState_Default: InitializeDefaultState(); break;
+			}
+		}
+		
+		app->skipInitialization = false;
+		app->skipDeinitialization = false;
+		
+		//Start
+		DEBUG_PrintLine("[Starting AppState_%s]", GetAppStateStr(app->appState));
+		switch (app->appState)
+		{
+			case AppState_Default: StartDefaultState(oldState); break;
+		}
+	}
 }
 
 // +--------------------------------------------------------------+
@@ -162,7 +260,13 @@ EXPORT AppReloading_DEFINITION(App_Reloading)
 	appOutput = nullptr;
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
+	defData = &app->defaultData;
 	TempArena = &app->tempArena;
+	renderContext = &app->renderContext;
+	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
+	RenderMousePos = Vec2_Zero;
+	RenderMouseStartLeft = Vec2_Zero;
+	RenderMouseStartRight = Vec2_Zero;
 	
 	//TODO: Deallocate stuff that might change
 }
@@ -178,7 +282,13 @@ EXPORT AppReloaded_DEFINITION(App_Reloaded)
 	appOutput = nullptr;
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
+	defData = &app->defaultData;
 	TempArena = &app->tempArena;
+	renderContext = &app->renderContext;
+	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
+	RenderMousePos = Vec2_Zero;
+	RenderMouseStartLeft = Vec2_Zero;
+	RenderMouseStartRight = Vec2_Zero;
 	
 	// TODO: Reallocate stuff that was deallocated in App_Reloading
 }
@@ -194,7 +304,13 @@ EXPORT AppClosing_DEFINITION(App_Closing)
 	appOutput = nullptr;
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
+	defData = &app->defaultData;
 	TempArena = &app->tempArena;
+	renderContext = &app->renderContext;
+	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
+	RenderMousePos = Vec2_Zero;
+	RenderMouseStartLeft = Vec2_Zero;
+	RenderMouseStartRight = Vec2_Zero;
 	
 	//TODO: Deallocate anything?
 }

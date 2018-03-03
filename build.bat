@@ -7,6 +7,9 @@ IF EXIST "build*" (
 	cd build
 )
 
+set TimeString=%date:~-4,4%%date:~-10,2%%date:~-7,2%%time:~0,2%%time:~3,2%%time:~6,2%
+rem echo Time: %TimeString%
+
 echo Running from %cd%
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
 
@@ -69,7 +72,6 @@ if "%CompilePlatform%"=="1" (
 if "%CompileApplication%"=="1" (
 	echo[
 	
-	set TimeString=%date:~-4,4%%date:~-10,2%%date:~-7,2%%time:~0,2%%time:~3,2%%time:~6,2%
 	
 	python ..\IncrementVersionNumber.py %SourceDirectory%\app_version.h
 	
