@@ -55,11 +55,11 @@ if "%CompilePlatform%"=="1" (
 	cl /Fe%ProjectName%.exe %CompilerFlags% %IncludeDirectories% %SourceDirectory%\win32_main.cpp /link %LinkerFlags% kernel32.lib %SourceDirectory%\plat_resources.res
 	
 	if "%ERRORLEVEL%"=="0" (
-		echo [Platform Build Succeeded!]
-		
 		if "%CopyToDataDirectory%"=="1" (
 			echo [Copying %ProjectName%.exe to data directory]
 			XCOPY ".\%ProjectName%.exe" "%DataDirectory%\" /Y > NUL
+		) else (
+			echo [Platform Build Succeeded!]
 		)
 	) else (
 		echo [Platform Build Failed! %ERRORLEVEL%]
@@ -76,11 +76,11 @@ if "%CompileApplication%"=="1" (
 	cl /Fe%ProjectName%.dll %CompilerFlags% %IncludeDirectories% %SourceDirectory%\app.cpp /link %LinkerFlags% %AppExports% /DLL /PDB:"%ProjectName%_%TimeString%.pdb"
 
 	if "%ERRORLEVEL%"=="0" (
-		echo [Application Build Succeeded!]
-		
 		if "%CopyToDataDirectory%"=="1" (
 			echo [Copying %ProjectName%.dll to data directory]
 			XCOPY ".\%ProjectName%.dll" "%DataDirectory%\" /Y > NUL
+		) else (
+			echo [Application Build Succeeded!]
 		)
 	) else (
 		echo [Application Build Failed! %ERRORLEVEL%]

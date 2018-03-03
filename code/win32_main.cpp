@@ -54,6 +54,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    int nCmdShow)
 #endif
 {
+	GLFWwindow* window = nullptr;
+	v2i screenSize = Vec2i_Zero;
+	
 	DEBUG_PrintLine(PROJECT_NAME " Windows Platform Layer v%u.%u(%u)", PlatformVersion.major, PlatformVersion.minor, PlatformVersion.build);
 	
 	//TODO: Add a platform layer
@@ -61,3 +64,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	return 1;
 }
 
+#if DEBUG
+void AssertFailure(const char* function, const char* filename, int lineNumber, const char* expressionStr)
+{
+	Win32_PrintLine("Assertion Failure! %s in \"%s\" line %d: (%s) is not true", function, GetFileNamePart(filename), lineNumber, expressionStr);
+}
+#endif

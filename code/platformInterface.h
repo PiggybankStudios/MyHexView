@@ -9,6 +9,7 @@ Description:
 #ifndef _PLATFORM_INTERFACE_H
 #define _PLATFORM_INTERFACE_H
 
+#define USE_ASSERT_FAILURE_FUNCTION true
 #include "mylib.h"
 
 #if WINDOWS_COMPILATION
