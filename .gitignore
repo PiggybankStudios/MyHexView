@@ -1,0 +1,8 @@
+*.sublime-workspace
+vc140.pdb
+build/
+.vs/
+data/Raw/
+*.VC.*
+*.DS_Store
+data/*.app/
