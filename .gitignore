@@ -6,3 +6,4 @@ data/Raw/
 *.VC.*
 *.DS_Store
 data/*.app/
+*.pyc
