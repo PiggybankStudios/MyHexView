@@ -9,6 +9,8 @@ Description:
 #ifndef _PLATFORM_INTERFACE_H
 #define _PLATFORM_INTERFACE_H
 
+#include <Python.h>
+
 #define USE_ASSERT_FAILURE_FUNCTION true
 #include "mylib.h"
 

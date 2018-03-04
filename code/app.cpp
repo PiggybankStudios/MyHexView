@@ -163,8 +163,8 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 		
 		InitializeMemoryArenaTemp(&app->tempArena, AppMemory->transientPntr, AppMemory->transientSize, TRANSIENT_MAX_NUMBER_MARKS);
 		
-		DEBUG_PrintLine("Main Heap:   %u bytes", mainHeapSize);
-		DEBUG_PrintLine("Temp Arena:  %u bytes", AppMemory->transientSize);
+		DEBUG_PrintLine("Main Heap:  %u bytes", mainHeapSize);
+		DEBUG_PrintLine("Temp Arena: %u bytes", AppMemory->transientSize);
 	}
 	
 	TempPushMark();
@@ -174,7 +174,6 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	InitializeRenderContext();
 	AppLoadContent(true);
-	
 	
 	// +==============================+
 	// | Initialize Starting AppState |
@@ -211,6 +210,8 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	RenderMousePos = AppInput->mousePos;
 	RenderMouseStartLeft = AppInput->mouseStartPos[MouseButton_Left];
 	RenderMouseStartRight = AppInput->mouseStartPos[MouseButton_Right];
+	
+	TempPushMark();
 	
 	// +==============================+
 	// |   Relaod Content Shortcut    |
@@ -267,6 +268,8 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 			case AppState_Default: StartDefaultState(oldState); break;
 		}
 	}
+	
+	TempPopMark();
 }
 
 // +--------------------------------------------------------------+

@@ -605,3 +605,13 @@ void RcDrawFormattedString(const char* nullTermString, v2 position, r32 maxWidth
 	RcDrawFormattedString(nullTermString, numCharacters, position, maxWidth, color, alignment, preserveWords);
 }
 
+void RcDrawLineArrow(v2 start, v2 end, r32 wingSize, r32 thickness, Color_t color)
+{
+	RcDrawLine(start, end, thickness, color);
+	r32 wingAngle = AtanR32(end.y - start.y, end.x - start.x) + (Pi32 * 3/4);
+	v2 wingVec = NewVec2(CosR32(wingAngle), SinR32(wingAngle));
+	RcDrawLine(end, end + wingVec*wingSize, thickness, color);
+	wingVec = Vec2PerpRight(wingVec);
+	RcDrawLine(end, end + wingVec*wingSize, thickness, color);
+}
+

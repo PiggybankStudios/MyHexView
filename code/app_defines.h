@@ -14,6 +14,7 @@ Date:   03\02\2018
 #define MUSIC_FOLDER    "Resources/Music/"
 #define SHADERS_FOLDER  "Resources/Shaders/"
 #define SOUNDS_FOLDER   "Resources/Sounds/"
+#define SCRIPTS_FOLDER  "Resources/Scripts/"
 #define SPRITES_FOLDER  "Resources/Sprites/"
 #define TEXTURES_FOLDER "Resources/Textures/"
 

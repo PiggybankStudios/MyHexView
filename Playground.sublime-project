@@ -2,6 +2,10 @@
 	"folders":
 	[
 		{
+			"folder_exclude_patterns":
+			[
+				"data/Lib"
+			],
 			"path": "."
 		},
 		{
@@ -424,6 +428,7 @@
 			"Platform_OSX",
 			"Platform_Windows",
 			"RESET_APPLICATION",
+			"SCRIPTS_FOLDER",
 			"SECONDS_PER_4YEARS",
 			"SECONDS_PER_DAY",
 			"SECONDS_PER_HOUR",
@@ -824,6 +829,7 @@
 			"void DestroyFont(Font_t* fontPntr)",
 			"void DestroyShader(Shader_t* shaderPntr)",
 			"void DestroyTexture(Texture_t* texturePntr)",
+			"void FindRatio(u32 num1, u32 num2, u32* out1, u32* out2)",
 			"void FreeDllCode(LoadedApp_t* loadedApp)",
 			"void FreeFileMemory(FileInfo_t* fileInfo)",
 			"void HandleKeyEvent(GLFWwindow* window, AppInput_t* currentInput, i32 glfwKeyCode, i32 action)",
@@ -852,6 +858,7 @@
 			"void RcDrawGradient(rec rectangle, Color_t color1, Color_t color2, Dir2_t direction)",
 			"void RcDrawHexCharacter(u8 hexValue, v2 bottomLeft, Color_t color, r32 scale = 1.0f)",
 			"void RcDrawLine(v2 p1, v2 p2, r32 thickness, Color_t color)",
+			"void RcDrawLineArrow(v2 start, v2 end, r32 wingSize, r32 thickness, Color_t color)",
 			"void RcDrawRectangle(rec rectangle, Color_t color)",
 			"void RcDrawString(const char* nullTermString, v2 position, Color_t color, r32 scale = 1.0f, Alignment_t alignment = Alignment_Left)",
 			"void RcDrawString(const char* string, u32 numCharacters, v2 position, Color_t color, r32 scale = 1.0f, Alignment_t alignment = Alignment_Left)",
@@ -976,6 +983,8 @@
 			"OpenFile_t",
 			"PlatformInfo_t",
 			"PlatformType_t",
+			"PyObject",
+			"PyTypeObject",
 			"Ray2_t",
 			"Ray3_t",
 			"RayvAABBResult_t",
@@ -1012,7 +1021,8 @@
 			"v3",
 			"v3i",
 			"v4",
-			"v4i"
+			"v4i",
+			"wchar_t"
 		]
 	}
 }

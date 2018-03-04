@@ -60,6 +60,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
 {
 	DEBUG_PrintLine(PROJECT_NAME " Windows Platform Layer v%u.%u(%u)", PlatformVersion.major, PlatformVersion.minor, PlatformVersion.build);
 	
+	char argv0[256];
+	DWORD moduleFilenameLength = GetModuleFileNameA(0, argv0, ArrayCount(argv0));
+	DEBUG_PrintLine("Argv[0] = \"%s\"", argv0);
+	
 	// +================================+
 	// | Initialize Platform Temp Arena |
 	// +================================+
@@ -198,6 +202,21 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		DEBUG_PrintLine("OpenGL Version %s", openglVersionStr);
 		DEBUG_PrintLine("Rendering with \"%s\"", rendererStr);
 		DEBUG_PrintLine("Monitor Refresh Rate: %dHz", glfwModePntr->refreshRate);
+	}
+	
+	// +==============================+
+	// |      Initialize Python       |
+	// +==============================+
+	{
+		DEBUG_WriteLine("Initializing Python");
+		wchar_t* program = Py_DecodeLocale(argv0, NULL);
+		if (program == nullptr)
+		{
+			HandleError("Cannot decode locale of argv!");
+		}
+		Py_SetProgramName(program);
+		Py_Initialize();
+		PyMem_RawFree(program);
 	}
 	
 	// +==============================+
@@ -480,6 +499,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	
 	application.Closing(&platformInfo, &appMemory);
 	glfwTerminate();
+	Py_FinalizeEx();
 	
 	DEBUG_WriteLine("Goodbye World!");
 	return 0;

@@ -89,6 +89,7 @@ void Win32_PrintLine(const char* formatString, ...);
 #define HandleError(outputString) do                                             \
 {                                                                                \
 	glfwTerminate();                                                             \
+	Py_FinalizeEx();                                                             \
 	DEBUG_WriteLine(outputString);                                               \
 	MessageBoxA(NULL, outputString, "Initialization Error Encountered!", MB_OK); \
 	return 1;                                                                    \
