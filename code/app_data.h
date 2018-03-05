@@ -25,6 +25,10 @@ struct AppData_t
 	Shader_t defaultShader;
 	Font_t defaultFont;
 	Texture_t testTexture;
+	
+	PyObject* pyLastErrorType;
+	PyObject* pyLastErrorValue;
+	PyObject* pyLastErrorTraceback;
 };
 
 #endif //  _APP_DATA_H

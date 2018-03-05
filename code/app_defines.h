@@ -9,6 +9,8 @@ Date:   03\02\2018
 
 #define TRANSIENT_MAX_NUMBER_MARKS 16
 #define TAB_WIDTH 4
+#define MAX_PLUGINS_IN_MODULE 32
+#define MAX_PLUGIN_NAME_LENGTH 128
 
 #define FONTS_FOLDER    "Resources/Fonts/"
 #define MUSIC_FOLDER    "Resources/Music/"

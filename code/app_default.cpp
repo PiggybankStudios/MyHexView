@@ -61,6 +61,7 @@ void UpdateAndRenderDefaultState()
 			else { defData->backgroundColorIndex = NUM_COLORS-1; }
 		}
 		
+		#if 0
 		const char* scriptPath = SCRIPTS_FOLDER "test.py";
 		if (ButtonPressed(Button_Enter))
 		{
@@ -77,108 +78,42 @@ void UpdateAndRenderDefaultState()
 				DEBUG_WriteLine("Could not open file");
 			}
 		}
+		#endif
 		
-		if (ButtonPressed(Button_Space))
+		// +--------------------------------------------------------------+
+		// |                  Load Python Modules Hotkey                  |
+		// +--------------------------------------------------------------+
+		if (ButtonPressed(Button_Backspace))
 		{
-			char* absScriptPath = platform->GetAbsolutePath(TempArena, scriptPath);
-			
-			PyObject* pyModule = PyImport_ImportModule("Resources.Scripts.myModule");
-			DEBUG_PrintLine("pyModule = %p", pyModule);
-			PyImport_ReloadModule(pyModule);
-			
-			if (pyModule != nullptr)
+			if (LoadPythonPluginModule(mainHeap, &defData->pluginModule, SCRIPTS_FOLDER "myModule.py"))
 			{
-				PyObject* pyFunction = PyObject_GetAttrString(pyModule, "SomeFunction");
-				
-				if (pyFunction != nullptr && PyCallable_Check(pyFunction))
-				{
-					long inputValue = 1000;
-					
-					PyObject* pyFuncArgs = PyTuple_New(1);
-					PyObject* pyArg0 = PyLong_FromLong(inputValue);
-					PyTuple_SetItem(pyFuncArgs, 0, pyArg0);
-					
-					PyObject* pyReturnValue = PyObject_CallObject(pyFunction, pyFuncArgs);
-					Py_DECREF(pyFuncArgs);
-					
-					if (pyReturnValue != nullptr)
-					{
-						long result = PyLong_AsLong(pyReturnValue);
-						DEBUG_PrintLine("SomeFunction returned %d", result);
-						Py_DECREF(pyReturnValue);
-					}
-					else
-					{
-						DEBUG_WriteLine("Failed to call function");
-					}
-				}
-				else
-				{
-					DEBUG_WriteLine("Couldn't find SomeFunction in the python script");
-				}
-				
-				Py_XDECREF(pyFunction);
-				
-				PyObject* pyObject = PyObject_GetAttrString(pyModule, "SomeClass");
-				DEBUG_PrintLine("pyObject = %p", pyObject);
-				if (pyObject != nullptr && PyType_Check(pyObject))
-				{
-					PyTypeObject* pyType = (PyTypeObject*)pyObject;
-					PyObject* pyCreateArgs = PyTuple_New(0);
-					PyObject* pyCreateKeywords = PyTuple_New(0);
-					PyObject* pyInstance = PyType_GenericNew(pyType, pyCreateArgs, pyCreateKeywords);
-					if (pyInstance != nullptr)
-					{
-						PyObject* pyInstanceFunc = PyObject_GetAttrString(pyInstance, "PrintLocalVar");
-						if (pyInstanceFunc != nullptr && PyCallable_Check(pyInstanceFunc))
-						{
-							for (u32 cIndex = 0; cIndex < 4; cIndex++)
-							{
-								PyObject* pyFuncArgs = PyTuple_New(0);
-								// PyTuple_SetItem(pyFuncArgs, 0, pyInstance);
-								
-								DEBUG_PrintLine("Calling instance function x%u", cIndex);
-								PyObject* pyReturnValue = PyObject_CallObject(pyInstanceFunc, pyFuncArgs);
-								if (pyReturnValue != nullptr)
-								{
-									DEBUG_WriteLine("Call successful");
-								}
-								else
-								{
-									DEBUG_WriteLine("Call failed");
-								}
-								
-								Py_XDECREF(pyFuncArgs);
-								Py_XDECREF(pyReturnValue);
-							}
-						}
-						else
-						{
-							DEBUG_WriteLine("Couldn't find instance function");
-						}
-						
-						Py_XDECREF(pyInstanceFunc);
-					}
-					else
-					{
-						DEBUG_WriteLine("Failed to create class instance");
-					}
-					
-					Py_XDECREF(pyCreateArgs);
-					Py_XDECREF(pyCreateKeywords);
-					Py_XDECREF(pyInstance);
-				}
-				else
-				{
-					DEBUG_WriteLine("Couldn't find class object");
-				}
-				
-				Py_XDECREF(pyObject);
-				Py_DECREF(pyModule);
+				DEBUG_PrintLine("Module loaded successfully. %u plugins found", defData->pluginModule.numPlugins);
 			}
 			else
 			{
-				DEBUG_WriteLine("Couldn't open python file as module");
+				DEBUG_WriteLine("Module was not loaded successfully");
+			}
+		}
+		
+		// +--------------------------------------------------------------+
+		// |                 Call Python Plugin Functions                 |
+		// +--------------------------------------------------------------+
+		// +==============================+
+		// |         MousePressed         |
+		// +==============================+
+		if (ButtonPressed(MouseButton_Left))
+		{
+			AllPlugins_MousePressed(RenderMousePos);
+		}
+		// +==============================+
+		// |        ButtonPressed         |
+		// +==============================+
+		for (u32 bIndex = Button_A; bIndex < Buttons_NumButtons; bIndex++)
+		{
+			Buttons_t button = (Buttons_t)bIndex;
+			if (ButtonPressed(button))
+			{
+				AllPlugins_ButtonPressed(GetButtonName(button));
 			}
 		}
 	}

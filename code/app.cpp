@@ -26,6 +26,7 @@ Description:
 #include "app_defines.h"
 #include "app_structs.h"
 #include "app_renderContext.h"
+#include "app_pythonPlugin.h"
 
 #include "app_default.h"
 #include "app_data.h"
@@ -100,6 +101,7 @@ v2 RenderMouseStartRight = Vec2_Zero;
 #include "app_loadingFunctions.cpp"
 #include "app_fontHelpers.cpp"
 #include "app_renderContext.cpp"
+#include "app_pythonPlugin.cpp"
 
 #include "app_helpers.cpp"
 #include "app_default.cpp"
