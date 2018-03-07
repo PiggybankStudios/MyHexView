@@ -380,9 +380,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
 						memset(appMemory.permanantPntr, 0x00, appMemory.permanantSize);
 						memset(appMemory.transientPntr, 0x00, appMemory.transientSize);
 						
+						DEBUG_WriteLine("Resetting python interpreter");
+						Py_FinalizeEx();
+						Py_Initialize();
+						
 						//TODO: Find a way to reset the opengl context or
 						//		maybe re-open the window altogether
 						
+						DEBUG_WriteLine("Calling AppInitialize");
 						application.Initialize(&platformInfo, &appMemory);
 					}
 					else

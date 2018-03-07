@@ -848,6 +848,7 @@
 			"void InitializeMemoryArenaTemp(MemoryArena_t* arena, void* base , u32 size, u32 maxNumMarks)",
 			"void InitializeRenderContext()",
 			"void LinkedListPop(LinkedList_t* list, MemoryArena_t* memoryArena, int32 index)",
+			"void LoadPlaygroundPythonModule()",
 			"void Plugin_ButtonPressed(const PythonPlugin_t* pluginPntr, const char* button)",
 			"void Plugin_MousePressed(const PythonPlugin_t* pluginPntr, v2 mousePos)",
 			"void Plugin_PluginLoaded(const PythonPlugin_t* pluginPntr)",

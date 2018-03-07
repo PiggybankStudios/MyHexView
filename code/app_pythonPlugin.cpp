@@ -89,6 +89,39 @@ void RemoveModuleFromSysModules(const char* moduleName)
 	PythonCheckError();
 }
 
+void LoadPlaygroundPythonModule()
+{
+	if (app->pyPlaygroundModule != nullptr) { Py_XDECREF(app->pyPlaygroundModule); app->pyPlaygroundModule = nullptr; }
+	if (app->pyPlaygroundClass != nullptr) { Py_XDECREF(app->pyPlaygroundClass); app->pyPlaygroundClass = nullptr; }
+	
+	const char* moduleName = "playground";
+	DEBUG_WriteLine("Attempting to load module playground module");
+	app->pyPlaygroundModule = PyImport_ImportModule(moduleName);
+	
+	if (app->pyPlaygroundModule != nullptr)
+	{
+		DEBUG_WriteLine("Loaded Playground module successfully");
+		
+		if (PyObject_HasAttrString(app->pyPlaygroundModule, "PlaygroundPlugin"))
+		{
+			app->pyPlaygroundClass = PyObject_GetAttrString(app->pyPlaygroundModule, "PlaygroundPlugin");
+		}
+		
+		if (app->pyPlaygroundClass != nullptr)
+		{
+			DEBUG_WriteLine("Found PlaygroundPlugin class");
+		}
+		else
+		{
+			DEBUG_WriteLine("Couldn't find PlaygroundPlugin class");
+		}
+	}
+	else
+	{
+		DEBUG_WriteLine("Couldn't load playground module");
+	}
+}
+
 void UnloadModule(PythonPluginModule_t* pluginModule)
 {
 	Assert(pluginModule != nullptr);
@@ -197,8 +230,15 @@ bool IsClassValidPlugin(PyObject* pyClass)
 	
 	if (PyType_Check(pyClass))
 	{
-		//TODO: Check the name and inheritance?
-		return true;
+		if (app->pyPlaygroundClass == nullptr || PyObject_IsSubclass(pyClass, app->pyPlaygroundClass))
+		{
+			return true;
+		}
+		else
+		{
+			DEBUG_WriteLine("Not a subclass of PlaygroundPlugin");
+			return false;
+		}
 	}
 	else
 	{
@@ -224,6 +264,17 @@ bool LoadPluginFromClass(PythonPlugin_t* pluginPntr, const char* className, PyOb
 	{
 		DEBUG_PrintLine("Created %s instance", className);
 		pluginPntr->loaded = true;
+		
+		if (PyObject_HasAttrString(pluginPntr->pyInstance, "__init__"))
+		{
+			PyObject* pyInitFunction = PyObject_GetAttrString(pluginPntr->pyInstance, "__init__");
+			PythonCheckError();
+			if (pyInitFunction != nullptr)
+			{
+				DEBUG_WriteLine("Calling __init__ function");
+				PyObject_CallFunction(pyInitFunction, "");
+			}
+		}
 		
 		if (PyObject_HasAttrString(pluginPntr->pyInstance, "PluginLoaded"))
 		{
@@ -294,7 +345,6 @@ bool LoadPythonPluginModule(MemoryArena_t* arenaPntr, PythonPluginModule_t* plug
 	
 	if (pluginModule->pyModule != nullptr)
 	{
-		// if (doReload) { PyImport_ReloadModule(pluginModule->pyModule); }
 		pluginModule->loaded = true;
 		
 		//Find and count how many classes exist

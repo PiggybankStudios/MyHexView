@@ -26,6 +26,9 @@ struct AppData_t
 	Font_t defaultFont;
 	Texture_t testTexture;
 	
+	PyObject* pyPlaygroundModule;
+	PyObject* pyPlaygroundClass;
+	
 	PyObject* pyLastErrorType;
 	PyObject* pyLastErrorValue;
 	PyObject* pyLastErrorTraceback;

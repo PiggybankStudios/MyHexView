@@ -1,5 +1,5 @@
 
-import os, re, sys, random
+import os, re, sys, random, playground
 
 print("We are being loaded! Everybody line up for roll call!!")
 
@@ -37,7 +37,7 @@ class TestPlugin():
 	#
 #
 
-class AwesomePlugin():
+class AwesomePlugin(playground.PlaygroundPlugin):
 #
 	def __init__(self):
 	#
@@ -56,11 +56,11 @@ class AwesomePlugin():
 		elif (r == 1): print("Stop clicking on that.")
 		elif (r == 2): print("What did you expect was going to happen?")
 		elif (r == 3): print("That's not important. Don't click that.")
-		else: print("I don't know what's happening...")s
+		else: print("I don't know what's happening...")
 	#
 #
 
-class ButtonCuratorPlugin():
+class ButtonCuratorPlugin(playground.PlaygroundPlugin):
 #
 	def ButtonPressed(self, button):
 	#
