@@ -64,7 +64,7 @@ class ButtonCuratorPlugin(playground.PlaygroundPlugin):
 #
 	def ButtonPressed(self, button):
 	#
-		if (button == "A"):
+		if (button == "Enter"):
 		#
 			print("I love %s!!!!" % (button))
 		#

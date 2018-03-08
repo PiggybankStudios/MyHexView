@@ -343,7 +343,7 @@ bool LoadPythonPluginModule(MemoryArena_t* arenaPntr, PythonPluginModule_t* plug
 	DEBUG_PrintLine("Attempting to load module \"%s\" from path \"%s\"", moduleName, filePath);
 	pluginModule->pyModule = PyImport_ImportModule(moduleName);
 	
-	if (pluginModule->pyModule != nullptr)
+	if (platform->GetFileTime(filePath, &pluginModule->fileWriteTime) && pluginModule->pyModule != nullptr)
 	{
 		pluginModule->loaded = true;
 		
@@ -417,6 +417,8 @@ bool LoadPythonPluginModule(MemoryArena_t* arenaPntr, PythonPluginModule_t* plug
 	}
 	else
 	{
+		Py_XDECREF(pluginModule->pyModule);
+		pluginModule->pyModule = nullptr;
 		PythonCheckError();
 		DEBUG_WriteLine("Unable to load module");
 		return false;

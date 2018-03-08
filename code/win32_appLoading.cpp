@@ -14,7 +14,7 @@ struct LoadedApp_t
 	bool isValid;
 	Version_t version;
 	HMODULE module;
-	FILETIME lastWriteTime;
+	FileTime_t lastWriteTime;
 	
 	AppGetVersion_f* GetVersion;
 	AppReloading_f*  Reloading;
@@ -61,7 +61,7 @@ bool LoadDllCode(const char* appDllName, const char* tempDllName, LoadedApp_t* l
 {
 	ClearPointer(loadedApp);
 	
-	loadedApp->lastWriteTime = GetFileWriteTime(appDllName);
+	Win32_GetFileTime(appDllName, &loadedApp->lastWriteTime);
 	
 	#if DEBUG
 		u32 copyTries = 0;

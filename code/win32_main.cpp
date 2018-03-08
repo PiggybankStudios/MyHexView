@@ -260,6 +260,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		platformInfo.AppendFile        = Win32_AppendFile;
 		platformInfo.CloseFile         = Win32_CloseFile;
 		platformInfo.LaunchFile        = Win32_LaunchFile;
+		platformInfo.GetFileTime       = Win32_GetFileTime;
+		platformInfo.CompareFileTimes  = Win32_CompareFileTimes;
 		platformInfo.CopyToClipboard   = PLT_CopyToClipboard;
 		platformInfo.CopyFromClipboard = PLT_CopyFromClipboard;
 		platformInfo.CreateNewWindow   = Win32_CreateNewWindow;
@@ -361,8 +363,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		{
 			//TOOD: Delay this so we don't get double loads
 			//Check to see if we should reload the application DLL
-			FILETIME newDllFiletime = GetFileWriteTime(appDllPath);
-			if (CompareFileTime(&newDllFiletime, &application.lastWriteTime) != 0)
+			FileTime_t newDllFiletime;
+			if (Win32_GetFileTime(appDllPath, &newDllFiletime) && Win32_CompareFileTimes(&newDllFiletime, &application.lastWriteTime) != 0)
 			{
 				application.Reloading(&platformInfo, &appMemory);
 				FreeDllCode(&application);

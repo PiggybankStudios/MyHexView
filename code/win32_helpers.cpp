@@ -23,6 +23,7 @@ u32 GetRunningDirectory(char* buffer, u32 maxBufferSize)
 	return (u32)(lastSlash - buffer);
 }
 
+#if 0
 inline FILETIME GetFileWriteTime(const char* filename)
 {
 	FILETIME lastWriteTime = {};
@@ -38,6 +39,7 @@ inline FILETIME GetFileWriteTime(const char* filename)
 	
 	return lastWriteTime;
 }
+#endif
 
 void UpdateWindowTitle(GLFWwindow* window, const char* baseName, Version_t* platformVersion, Version_t* appVersion)
 {

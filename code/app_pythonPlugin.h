@@ -34,6 +34,7 @@ struct PythonPluginModule_t
 	
 	char filePath[64];
 	char moduleName[64];
+	FileTime_t fileWriteTime;
 	
 	PyObject* pyModule;
 	

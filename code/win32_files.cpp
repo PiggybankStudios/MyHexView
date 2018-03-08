@@ -241,3 +241,41 @@ LaunchFile_DEFINITION(Win32_LaunchFile)
 		return false;
 	}
 }
+
+// +==============================+
+// |      Win32_GetFileTime       |
+// +==============================+
+// bool GetFileTime(const char* filePath, FileTime_t* fileTimeOut);
+GetFileTime_DEFINITION(Win32_GetFileTime)
+{
+	Assert(filePath != nullptr);
+	Assert(fileTimeOut != nullptr);
+	ClearPointer(fileTimeOut);
+	
+	WIN32_FIND_DATA findData;
+	HANDLE fileHandle = FindFirstFileA(filePath, &findData);
+	
+	if (fileHandle != INVALID_HANDLE_VALUE)
+	{
+		fileTimeOut->value = findData.ftLastWriteTime;
+		FindClose(fileHandle);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+// +==============================+
+// |    Win32_CompareFileTimes    |
+// +==============================+
+// i32 CompareFileTimes(const FileTime_t* fileTime1, const FileTime_t* fileTime2)
+CompareFileTimes_DEFINITION(Win32_CompareFileTimes)
+{
+	Assert(fileTime1 != nullptr);
+	Assert(fileTime2 != nullptr);
+	
+	i32 result = CompareFileTime(&fileTime1->value, &fileTime2->value);
+	return result;
+}

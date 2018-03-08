@@ -60,6 +60,11 @@ struct OpenFile_t
 	HANDLE handle;
 };
 
+struct FileTime_t
+{
+	FILETIME value;
+};
+
 #elif OSX_COMPILATION
 
 //TODO: Add platform specific types here

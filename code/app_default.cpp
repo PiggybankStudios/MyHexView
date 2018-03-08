@@ -83,7 +83,17 @@ void UpdateAndRenderDefaultState()
 		// +--------------------------------------------------------------+
 		// |                  Load Python Modules Hotkey                  |
 		// +--------------------------------------------------------------+
-		if (ButtonPressed(Button_Backspace))
+		bool fileModified = false;
+		FileTime_t newFileTime = {};
+		if (defData->pluginModule.loaded && platform->GetFileTime(defData->pluginModule.filePath, &newFileTime))
+		{
+			if (platform->CompareFileTimes(&newFileTime, &defData->pluginModule.fileWriteTime) != 0)
+			{
+				DEBUG_PrintLine("\"%s\" was modified", defData->pluginModule.filePath);
+				fileModified = true;
+			}
+		}
+		if (ButtonPressed(Button_Backspace) || fileModified)
 		{
 			if (LoadPythonPluginModule(mainHeap, &defData->pluginModule, SCRIPTS_FOLDER "myModule.py"))
 			{

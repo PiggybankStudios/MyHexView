@@ -1,14 +1,14 @@
 # This file holds all the notes and TODO lists for the project Playground
 
 # Python TODO List
-	[ ] Make a class we can inherit from that the importer checks type against before considering the class to be a plugin
 	[ ] Add a way to call "run" on a plugin using it's class name (should we reformat the class name somehow?)
 	[ ] Add a C function that can be called from the python code
 	[ ] Auto-load all python files in the Script folder on startup
-	[ ] Add a way for the application to detect if a file has changed
-	[ ] Reload modules that have been changed automatically
 	[ ] See if there is a way to reroute the output of the python script to our own functions for handling
 	
+	[X] Reload modules that have been changed automatically
+	[X] Add a way for the application to detect if a file has changed
+	[X] Make a class we can inherit from that the importer checks type against before considering the class to be a plugin
 	[X] See if we can get a trace/description of syntax errors in the file or other problems when we are unable to import a module
 	[-] Check the number of arguments in defined functions
 	[X] Get rid of errors when looking for functions
