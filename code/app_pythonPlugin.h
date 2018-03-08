@@ -29,6 +29,7 @@ struct PythonPlugin_t
 
 struct PythonPluginModule_t
 {
+	bool checked;
 	bool loaded;
 	MemoryArena_t* allocArena;
 	

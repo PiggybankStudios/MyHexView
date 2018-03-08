@@ -16,8 +16,6 @@ struct DefaultData_t
 	Texture_t missingTexture;
 	
 	u32 backgroundColorIndex;
-	
-	PythonPluginModule_t pluginModule;
 };
 
 #endif //  _APP_DEFAULT_H

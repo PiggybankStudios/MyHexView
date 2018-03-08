@@ -279,3 +279,90 @@ CompareFileTimes_DEFINITION(Win32_CompareFileTimes)
 	i32 result = CompareFileTime(&fileTime1->value, &fileTime2->value);
 	return result;
 }
+
+// +==============================+
+// |  Win32_GetNumFilesInFolder   |
+// +==============================+
+// u32 GetNumFilesInFolder(const char* folderPath)
+u32 Win32_GetNumFilesInFolder(const char* folderPath)
+{
+	Assert(folderPath != nullptr);
+	u32 result = 0;
+	TempPushMark();
+	
+	u32 folderPathLength = (u32)strlen(folderPath);
+	char* tempDirBuffer = PushArray(TempArena, char, folderPathLength+2);
+	memcpy(tempDirBuffer, folderPath, folderPathLength);
+	tempDirBuffer[folderPathLength] = '*';
+	tempDirBuffer[folderPathLength+1] = '\0';
+	StrReplaceCharInPlace(NtStr(tempDirBuffer), '/', '\\');
+	Assert(tempDirBuffer[folderPathLength-1] == '\\');
+	// Win32_PrintLine("Counting files in \"%s\"", tempDirBuffer);
+	
+	WIN32_FIND_DATA findData = {};
+	HANDLE findHandle = FindFirstFile(tempDirBuffer, &findData);
+	while (true)
+	{
+		if (findHandle == INVALID_HANDLE_VALUE) { break; }
+		
+		if (strcmp(findData.cFileName, ".") != 0 && strcmp(findData.cFileName, "..") != 0)
+		{
+			// Win32_PrintLine("Found file \"%s\"", findData.cFileName);
+			result++;
+		}
+		
+		if (FindNextFile(findHandle, &findData) == 0)
+		{
+			break;
+		}
+	}
+	
+	TempPopMark();
+	return result;
+}
+
+// +==============================+
+// |    Win32_GetFileInFolder     |
+// +==============================+
+// char* GetFileInFolder(MemoryArena_t* arenaPntr, const char* folderPath, u32 fileIndex)
+char* Win32_GetFileInFolder(MemoryArena_t* arenaPntr, const char* folderPath, u32 fileIndex)
+{
+	Assert(folderPath != nullptr);
+	char* result = nullptr;
+	TempPushMark();
+	
+	u32 folderPathLength = (u32)strlen(folderPath);
+	char* tempDirBuffer = PushArray(TempArena, char, folderPathLength+2);
+	memcpy(tempDirBuffer, folderPath, folderPathLength);
+	tempDirBuffer[folderPathLength] = '*';
+	tempDirBuffer[folderPathLength+1] = '\0';
+	StrReplaceCharInPlace(NtStr(tempDirBuffer), '/', '\\');
+	Assert(tempDirBuffer[folderPathLength-1] == '\\');
+	
+	WIN32_FIND_DATA findData = {};
+	HANDLE findHandle = FindFirstFile(tempDirBuffer, &findData);
+	u32 fIndex = 0;
+	while (true)
+	{
+		if (findHandle == INVALID_HANDLE_VALUE) { break; }
+		
+		if (strcmp(findData.cFileName, ".") != 0 && strcmp(findData.cFileName, "..") != 0)
+		{
+			// Win32_PrintLine("Found file \"%s\"", findData.cFileName);
+			if (fIndex == fileIndex)
+			{
+				result = ArenaString(arenaPntr, NtStr(findData.cFileName));
+				break;
+			}
+			fIndex++;
+		}
+		
+		if (FindNextFile(findHandle, &findData) == 0)
+		{
+			break;
+		}
+	}
+	
+	TempPopMark();
+	return result;
+}

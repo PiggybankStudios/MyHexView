@@ -413,6 +413,7 @@ bool LoadPythonPluginModule(MemoryArena_t* arenaPntr, PythonPluginModule_t* plug
 		TempPopMark();
 		
 		PythonCheckError();
+		pluginModule->checked = true;
 		return true;
 	}
 	else
@@ -421,7 +422,103 @@ bool LoadPythonPluginModule(MemoryArena_t* arenaPntr, PythonPluginModule_t* plug
 		pluginModule->pyModule = nullptr;
 		PythonCheckError();
 		DEBUG_WriteLine("Unable to load module");
+		pluginModule->checked = true;
 		return false;
+	}
+}
+
+void UpdatePythonModuleLoader()
+{
+	if (app->maxModules == 0)
+	{
+		//NOTE: On first pass we should allocate a single time for the maximum number of files found in the script folder
+		Assert(app->numModules == 0);
+		Assert(app->modules == nullptr);
+		u32 numFiles = platform->GetNumFilesInFolder(SCRIPTS_FOLDER "/");
+		
+		app->maxModules = numFiles;
+		if (app->maxModules < 8) { app->maxModules = 8; }
+		app->modules = PushArray(mainHeap, PythonPluginModule_t, app->maxModules);
+		
+	}
+	Assert(app->modules != nullptr);
+	
+	TempPushMark();
+	u32 fIndex = 0;
+	while (char* fileName = platform->GetFileInFolder(TempArena, SCRIPTS_FOLDER, fIndex++))
+	{
+		if (strstr(fileName, ".py") != nullptr)
+		{
+			PythonPluginModule_t* modulePntr = nullptr;
+			char* filePath = StrCat(TempArena, NtStr(SCRIPTS_FOLDER), NtStr(fileName));
+			
+			for (u32 mIndex = 0; mIndex < app->numModules; mIndex++)
+			{
+				if (strcmp(filePath, app->modules[mIndex].filePath) == 0)
+				{
+					modulePntr = &app->modules[mIndex];
+					break;
+				}
+			}
+			
+			FileTime_t newFileTime;
+			if (modulePntr == nullptr)
+			{
+				DEBUG_PrintLine("Found new python module: \"%s\"", GetFileNamePart(filePath));
+				if (app->numModules >= app->maxModules)
+				{
+					//not enough space for new module
+					u32 newMax = app->maxModules + 8;
+					DEBUG_PrintLine("Resizing module array allocation to hold %u modules", newMax);
+					PythonPluginModule_t* newSpace = PushArray(mainHeap, PythonPluginModule_t, newMax);
+					memcpy(newSpace, app->modules, app->maxModules * sizeof(PythonPluginModule_t));
+					ArenaPop(mainHeap, app->modules);
+					app->modules = newSpace;
+					app->maxModules = newMax;
+				}
+				modulePntr = &app->modules[app->numModules];
+				ClearPointer(modulePntr);
+				
+				LoadPythonPluginModule(mainHeap, modulePntr, filePath);
+				app->numModules++;
+				Assert(app->numModules <= app->maxModules);
+			}
+			else if (platform->GetFileTime(filePath, &newFileTime) && platform->CompareFileTimes(&newFileTime, &modulePntr->fileWriteTime) != 0)
+			{
+				DEBUG_PrintLine("%s module \"%s\"", modulePntr->loaded ? "Reloading" : "Loading", GetFileNamePart(filePath));
+				LoadPythonPluginModule(mainHeap, modulePntr, filePath);
+			}
+		}
+		
+		TempPopMark();
+		TempPushMark();
+	}
+	TempPopMark();
+}
+
+void UnloadAllPythonModules()
+{
+	DEBUG_WriteLine("Unloading all modules");
+	
+	if (app->numModules > 0)
+	{
+		for (u32 mIndex = 0; mIndex < app->numModules; mIndex++)
+		{
+			PythonPluginModule_t* modulePntr = &app->modules[mIndex];
+			if (modulePntr->loaded)
+			{
+				UnloadModule(modulePntr);
+			}
+		}
+		
+		app->numModules = 0;
+	}
+	
+	if (app->modules != nullptr)
+	{
+		ArenaPop(mainHeap, app->modules);
+		app->modules = nullptr;
+		app->maxModules = 0;
 	}
 }
 
@@ -508,19 +605,31 @@ void Plugin_MousePressed(const PythonPlugin_t* pluginPntr, v2 mousePos)
 // +--------------------------------------------------------------+
 void AllPlugins_ButtonPressed(const char* button)
 {
-	PythonPluginModule_t* pluginModule = &defData->pluginModule;
-	for (u32 pIndex = 0; pIndex < pluginModule->numPlugins; pIndex++)
+	for (u32 mIndex = 0; mIndex < app->numModules; mIndex++)
 	{
-		PythonPlugin_t* pluginPntr = &pluginModule->plugins[pIndex];
-		if (pluginPntr->loaded) { Plugin_ButtonPressed(pluginPntr, button); }
+		PythonPluginModule_t* modulePntr = &app->modules[mIndex];
+		if (modulePntr->loaded)
+		{
+			for (u32 pIndex = 0; pIndex < modulePntr->numPlugins; pIndex++)
+			{
+				PythonPlugin_t* pluginPntr = &modulePntr->plugins[pIndex];
+				if (pluginPntr->loaded) { Plugin_ButtonPressed(pluginPntr, button); }
+			}
+		}
 	}
 }
 void AllPlugins_MousePressed(v2 mousePos)
 {
-	PythonPluginModule_t* pluginModule = &defData->pluginModule;
-	for (u32 pIndex = 0; pIndex < pluginModule->numPlugins; pIndex++)
+	for (u32 mIndex = 0; mIndex < app->numModules; mIndex++)
 	{
-		PythonPlugin_t* pluginPntr = &pluginModule->plugins[pIndex];
-		if (pluginPntr->loaded) { Plugin_MousePressed(pluginPntr, mousePos); }
+		PythonPluginModule_t* modulePntr = &app->modules[mIndex];
+		if (modulePntr->loaded)
+		{
+			for (u32 pIndex = 0; pIndex < modulePntr->numPlugins; pIndex++)
+			{
+				PythonPlugin_t* pluginPntr = &modulePntr->plugins[pIndex];
+				if (pluginPntr->loaded) { Plugin_MousePressed(pluginPntr, mousePos); }
+			}
+		}
 	}
 }

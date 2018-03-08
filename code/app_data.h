@@ -29,9 +29,9 @@ struct AppData_t
 	PyObject* pyPlaygroundModule;
 	PyObject* pyPlaygroundClass;
 	
-	PyObject* pyLastErrorType;
-	PyObject* pyLastErrorValue;
-	PyObject* pyLastErrorTraceback;
+	u32 numModules;
+	u32 maxModules;
+	PythonPluginModule_t* modules;
 };
 
 #endif //  _APP_DATA_H

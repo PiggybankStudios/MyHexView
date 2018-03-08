@@ -249,23 +249,25 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		platformInfo.windowHasFocus = true;
 		platformInfo.window         = window;
 		
-		platformInfo.DebugWrite        = Win32_Write;
-		platformInfo.DebugWriteLine    = Win32_WriteLine;
-		platformInfo.DebugPrint        = Win32_Print;
-		platformInfo.DebugPrintLine    = Win32_PrintLine;
-		platformInfo.FreeFileMemory    = Win32_FreeFileMemory;
-		platformInfo.ReadEntireFile    = Win32_ReadEntireFile;
-		platformInfo.WriteEntireFile   = Win32_WriteEntireFile;
-		platformInfo.OpenFile          = Win32_OpenFile;
-		platformInfo.AppendFile        = Win32_AppendFile;
-		platformInfo.CloseFile         = Win32_CloseFile;
-		platformInfo.LaunchFile        = Win32_LaunchFile;
-		platformInfo.GetFileTime       = Win32_GetFileTime;
-		platformInfo.CompareFileTimes  = Win32_CompareFileTimes;
-		platformInfo.CopyToClipboard   = PLT_CopyToClipboard;
-		platformInfo.CopyFromClipboard = PLT_CopyFromClipboard;
-		platformInfo.CreateNewWindow   = Win32_CreateNewWindow;
-		platformInfo.GetAbsolutePath   = Win32_GetAbsolutePath;
+		platformInfo.DebugWrite          = Win32_Write;
+		platformInfo.DebugWriteLine      = Win32_WriteLine;
+		platformInfo.DebugPrint          = Win32_Print;
+		platformInfo.DebugPrintLine      = Win32_PrintLine;
+		platformInfo.FreeFileMemory      = Win32_FreeFileMemory;
+		platformInfo.ReadEntireFile      = Win32_ReadEntireFile;
+		platformInfo.WriteEntireFile     = Win32_WriteEntireFile;
+		platformInfo.OpenFile            = Win32_OpenFile;
+		platformInfo.AppendFile          = Win32_AppendFile;
+		platformInfo.CloseFile           = Win32_CloseFile;
+		platformInfo.LaunchFile          = Win32_LaunchFile;
+		platformInfo.GetFileTime         = Win32_GetFileTime;
+		platformInfo.CompareFileTimes    = Win32_CompareFileTimes;
+		platformInfo.GetNumFilesInFolder = Win32_GetNumFilesInFolder;
+		platformInfo.GetFileInFolder     = Win32_GetFileInFolder;
+		platformInfo.CopyToClipboard     = PLT_CopyToClipboard;
+		platformInfo.CopyFromClipboard   = PLT_CopyFromClipboard;
+		platformInfo.CreateNewWindow     = Win32_CreateNewWindow;
+		platformInfo.GetAbsolutePath     = Win32_GetAbsolutePath;
 	}
 	
 	// +==============================+

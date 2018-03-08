@@ -230,14 +230,16 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	if (ButtonPressed(Button_F6))
 	{
 		DEBUG_WriteLine("Restarting python interpreter");
-		if (defData->initialized && defData->pluginModule.loaded)
-		{
-			UnloadModule(&defData->pluginModule);
-		}
+		UnloadAllPythonModules();
 		Py_FinalizeEx();
 		Py_Initialize();
 		LoadPlaygroundPythonModule();
 	}
+	
+	// +==============================+
+	// |     Load Python Modules      |
+	// +==============================+
+	UpdatePythonModuleLoader();
 	
 	// +==============================+
 	// |   Update Current AppState    |

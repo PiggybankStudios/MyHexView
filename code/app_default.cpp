@@ -83,6 +83,7 @@ void UpdateAndRenderDefaultState()
 		// +--------------------------------------------------------------+
 		// |                  Load Python Modules Hotkey                  |
 		// +--------------------------------------------------------------+
+		#if 0
 		bool fileModified = false;
 		FileTime_t newFileTime = {};
 		if (defData->pluginModule.loaded && platform->GetFileTime(defData->pluginModule.filePath, &newFileTime))
@@ -104,6 +105,7 @@ void UpdateAndRenderDefaultState()
 				DEBUG_WriteLine("Module was not loaded successfully");
 			}
 		}
+		#endif
 		
 		// +--------------------------------------------------------------+
 		// |                 Call Python Plugin Functions                 |

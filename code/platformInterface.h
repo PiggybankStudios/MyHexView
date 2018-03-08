@@ -45,15 +45,17 @@ Description:
 #define DebugPrint_DEFINITION(functionName)        void functionName(const char* formatString, ...)
 #define DebugPrintLine_DEFINITION(functionName)    void functionName(const char* formatString, ...)
 
-#define FreeFileMemory_DEFINITION(functionName)    void functionName(FileInfo_t* fileInfo)
-#define ReadEntireFile_DEFINITION(functionName)    FileInfo_t functionName(const char* filename)
-#define WriteEntireFile_DEFINITION(functionName)   bool functionName(const char* filename, void* memory, uint32 memorySize)
-#define OpenFile_DEFINITION(functionName)          bool functionName(const char* fileName, OpenFile_t* openFileOut)
-#define AppendFile_DEFINITION(functionName)        bool functionName(OpenFile_t* filePntr, const void* newData, u32 newDataSize)
-#define CloseFile_DEFINITION(functionName)         void functionName(OpenFile_t* filePntr)
-#define LaunchFile_DEFINITION(functionName)        bool functionName(const char* filename)
-#define GetFileTime_DEFINITION(functionName)       bool functionName(const char* filePath, FileTime_t* fileTimeOut)
-#define CompareFileTimes_DEFINITION(functionName)  i32 functionName(const FileTime_t* fileTime1, const FileTime_t* fileTime2)
+#define FreeFileMemory_DEFINITION(functionName)      void functionName(FileInfo_t* fileInfo)
+#define ReadEntireFile_DEFINITION(functionName)      FileInfo_t functionName(const char* filename)
+#define WriteEntireFile_DEFINITION(functionName)     bool functionName(const char* filename, void* memory, uint32 memorySize)
+#define OpenFile_DEFINITION(functionName)            bool functionName(const char* fileName, OpenFile_t* openFileOut)
+#define AppendFile_DEFINITION(functionName)          bool functionName(OpenFile_t* filePntr, const void* newData, u32 newDataSize)
+#define CloseFile_DEFINITION(functionName)           void functionName(OpenFile_t* filePntr)
+#define LaunchFile_DEFINITION(functionName)          bool functionName(const char* filename)
+#define GetFileTime_DEFINITION(functionName)         bool functionName(const char* filePath, FileTime_t* fileTimeOut)
+#define CompareFileTimes_DEFINITION(functionName)    i32 functionName(const FileTime_t* fileTime1, const FileTime_t* fileTime2)
+#define GetNumFilesInFolder_DEFINITION(functionName) u32 functionName(const char* folderPath)
+#define GetFileInFolder_DEFINITION(functionName)     char* functionName(MemoryArena_t* arenaPntr, const char* folderPath, u32 fileIndex)
 
 #define CopyToClipboard_DEFINITION(functionName)   void functionName(const void* dataPntr, u32 dataSize)
 #define CopyFromClipboard_DEFINITION(functionName) void* functionName(MemoryArena_t* arenaPntr, u32* dataLengthOut)
@@ -75,6 +77,8 @@ typedef CloseFile_DEFINITION(CloseFile_f);
 typedef LaunchFile_DEFINITION(LaunchFile_f);
 typedef GetFileTime_DEFINITION(GetFileTime_f);
 typedef CompareFileTimes_DEFINITION(CompareFileTimes_f);
+typedef GetNumFilesInFolder_DEFINITION(GetNumFilesInFolder_f);
+typedef GetFileInFolder_DEFINITION(GetFileInFolder_f);
 
 typedef CopyToClipboard_DEFINITION(CopyToClipboard_f);
 typedef CopyFromClipboard_DEFINITION(CopyFromClipboard_f);
@@ -96,15 +100,17 @@ struct PlatformInfo_t
 	bool windowHasFocus;
 	bool windowIsMinimized;
 	
-	FreeFileMemory_f*   FreeFileMemory;
-	ReadEntireFile_f*   ReadEntireFile;
-	WriteEntireFile_f*  WriteEntireFile;
-	OpenFile_f*         OpenFile;
-	AppendFile_f*       AppendFile;
-	CloseFile_f*        CloseFile;
-	LaunchFile_f*       LaunchFile;
-	GetFileTime_f*      GetFileTime;
-	CompareFileTimes_f* CompareFileTimes;
+	FreeFileMemory_f*      FreeFileMemory;
+	ReadEntireFile_f*      ReadEntireFile;
+	WriteEntireFile_f*     WriteEntireFile;
+	OpenFile_f*            OpenFile;
+	AppendFile_f*          AppendFile;
+	CloseFile_f*           CloseFile;
+	LaunchFile_f*          LaunchFile;
+	GetFileTime_f*         GetFileTime;
+	CompareFileTimes_f*    CompareFileTimes;
+	GetNumFilesInFolder_f* GetNumFilesInFolder;
+	GetFileInFolder_f*     GetFileInFolder;
 	
 	DebugWrite_f*     DebugWrite;
 	DebugWriteLine_f* DebugWriteLine;
