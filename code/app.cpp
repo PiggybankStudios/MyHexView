@@ -101,6 +101,7 @@ v2 RenderMouseStartRight = Vec2_Zero;
 #include "app_loadingFunctions.cpp"
 #include "app_fontHelpers.cpp"
 #include "app_renderContext.cpp"
+#include "app_pythonFunctions.cpp"
 #include "app_pythonPlugin.cpp"
 
 #include "app_helpers.cpp"
@@ -176,6 +177,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	InitializeRenderContext();
 	AppLoadContent(true);
+	AddPythonFunctions();
 	LoadPlaygroundPythonModule();
 	
 	// +==============================+
@@ -233,6 +235,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		UnloadAllPythonModules();
 		Py_FinalizeEx();
 		Py_Initialize();
+		AddPythonFunctions();
 		LoadPlaygroundPythonModule();
 	}
 	

@@ -128,6 +128,10 @@ void UpdateAndRenderDefaultState()
 				AllPlugins_ButtonPressed(GetButtonName(button));
 			}
 		}
+		if (ButtonDown(Button_Control) && ButtonPressed(Button_R))
+		{
+			RunCommand("AwesomePlugin");
+		}
 	}
 	
 	// +--------------------------------------------------------------+

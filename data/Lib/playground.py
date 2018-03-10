@@ -1,4 +1,6 @@
 
+import SomeOtherName as pg
+
 class PlaygroundPlugin():
 #
 	def __init__(self):

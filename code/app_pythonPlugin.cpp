@@ -286,6 +286,16 @@ bool LoadPluginFromClass(PythonPlugin_t* pluginPntr, const char* className, PyOb
 			}
 		}
 		
+		if (PyObject_HasAttrString(pluginPntr->pyInstance, "Run"))
+		{
+			pluginPntr->pyFunc_Run = PyObject_GetAttrString(pluginPntr->pyInstance, "Run");
+			PythonCheckError();
+			if (pluginPntr->pyFunc_Run != nullptr)
+			{
+				DEBUG_PrintLine("Linked %s.Run", pluginPntr->className);
+			}
+		}
+		
 		if (PyObject_HasAttrString(pluginPntr->pyInstance, "ButtonPressed"))
 		{
 			pluginPntr->pyFunc_ButtonPressed = PyObject_GetAttrString(pluginPntr->pyInstance, "ButtonPressed");
@@ -522,6 +532,27 @@ void UnloadAllPythonModules()
 	}
 }
 
+PythonPlugin_t* GetPluginByName(const char* nameStr)
+{
+	for (u32 mIndex = 0; mIndex < app->numModules; mIndex++)
+	{
+		PythonPluginModule_t* modulePntr = &app->modules[mIndex];
+		if (modulePntr->loaded)
+		{
+			for (u32 pIndex = 0; pIndex < modulePntr->numPlugins; pIndex++)
+			{
+				PythonPlugin_t* pluginPntr = &modulePntr->plugins[pIndex];
+				if (strcmp(pluginPntr->className, nameStr) == 0)
+				{
+					return pluginPntr;
+				}
+			}
+		}
+	}
+	
+	return nullptr;
+}
+
 // +--------------------------------------------------------------+
 // |                       Plugin Functions                       |
 // +--------------------------------------------------------------+
@@ -535,6 +566,31 @@ void Plugin_PluginLoaded(const PythonPlugin_t* pluginPntr)
 		
 		PythonCheckError();
 		PyObject* pyReturnValue = PyObject_CallFunction(pluginPntr->pyFunc_PluginLoaded, nullptr);
+		if (pyReturnValue != nullptr)
+		{
+			// DEBUG_WriteLine("Call Success!");
+		}
+		else
+		{
+			DEBUG_WriteLine("Call Failed!");
+		}
+		
+		Py_XDECREF(pyReturnValue);
+	}
+	
+	PythonCheckError();
+}
+
+void Plugin_Run(const PythonPlugin_t* pluginPntr)
+{
+	Assert(pluginPntr != nullptr);
+	
+	if (pluginPntr->pyFunc_Run != nullptr)
+	{
+		DEBUG_PrintLine("Calling %s.Run()", pluginPntr->className);
+		
+		PythonCheckError();
+		PyObject* pyReturnValue = PyObject_CallFunction(pluginPntr->pyFunc_Run, nullptr);
 		if (pyReturnValue != nullptr)
 		{
 			// DEBUG_WriteLine("Call Success!");
@@ -631,5 +687,20 @@ void AllPlugins_MousePressed(v2 mousePos)
 				if (pluginPntr->loaded) { Plugin_MousePressed(pluginPntr, mousePos); }
 			}
 		}
+	}
+}
+
+
+bool RunCommand(const char* command)
+{
+	PythonPlugin_t* pluginPntr = GetPluginByName(command);
+	if (pluginPntr != nullptr)
+	{
+		Plugin_Run(pluginPntr);
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }

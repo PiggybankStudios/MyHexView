@@ -44,6 +44,12 @@ class AwesomePlugin(playground.PlaygroundPlugin):
 		print("By initializing AwesomePlugin you have consented to the terms and conditions of my harassment protocol!")
 	#
 	
+	def Run(self):
+	#
+		print("Running TestPlugin")
+		pg.SetBackgroundColor(10)
+	#
+	
 	def PluginLoaded(self):
 	#
 		print("Please don't click on anything.")

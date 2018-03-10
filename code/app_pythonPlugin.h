@@ -21,6 +21,7 @@ struct PythonPlugin_t
 		struct
 		{
 			PyObject* pyFunc_PluginLoaded;
+			PyObject* pyFunc_Run;
 			PyObject* pyFunc_ButtonPressed;
 			PyObject* pyFunc_MousePressed;
 		};
