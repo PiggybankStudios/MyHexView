@@ -615,3 +615,54 @@ void RcDrawLineArrow(v2 start, v2 end, r32 wingSize, r32 thickness, Color_t colo
 	RcDrawLine(end, end + wingVec*wingSize, thickness, color);
 }
 
+
+inline r32 LinearFormula(r32 a, r32 b, r32 t)
+{
+	return a + (b-a)*t;
+}
+
+inline r32 QuadFormula(r32 a, r32 b, r32 c, r32 t)
+{
+	return a - 2*a*t + 2*b*t + a*t*t - 2*b*t*t + c*t*t;
+	// return LinearFormula(LinearFormula(a, b, t), LinearFormula(b, c, t), t);
+}
+
+inline v2 QuadFormula2d(v2 a, v2 b, v2 c, r32 t)
+{
+	return NewVec2(QuadFormula(a.x, b.x, c.x, t), QuadFormula(a.y, b.y, c.y, t));
+}
+
+void RcDrawQuadCurve(v2 p1, v2 c1, v2 p2, u32 numLines, r32 thickness, Color_t color)
+{
+	for (u32 lIndex = 0; lIndex < numLines; lIndex++)
+	{
+		r32 time1 = (r32)lIndex * (1.0f / (r32)numLines);
+		r32 time2 = (r32)(lIndex+1) * (1.0f / (r32)numLines);
+		v2 pos1 = QuadFormula2d(p1, c1, p2, time1);
+		v2 pos2 = QuadFormula2d(p1, c1, p2, time2);
+		RcDrawLine(pos1, pos2, thickness, color);
+	}
+}
+
+inline r32 CubicFormula(r32 a, r32 b, r32 c, r32 d, r32 t)
+{
+	return a - 3*a*t + 3*b*t + 3*a*t*t - 6*b*t*t + 3*c*t*t - a*t*t*t + 3*b*t*t*t - 3*c*t*t*t + d*t*t*t;
+	// return LinearFormula(QuadFormula(a, b, c, t), QuadFormula(b, c, d, t), t);
+}
+
+inline v2 CubicFormula2d(v2 a, v2 b, v2 c, v2 d, r32 t)
+{
+	return NewVec2(CubicFormula(a.x, b.x, c.x, d.x, t), CubicFormula(a.y, b.y, c.y, d.y, t));
+}
+
+void RcDrawCubicCurve(v2 p1, v2 c1, v2 c2, v2 p2, u32 numLines, r32 thickness, Color_t color)
+{
+	for (u32 lIndex = 0; lIndex < numLines; lIndex++)
+	{
+		r32 time1 = (r32)lIndex * (1.0f / (r32)numLines);
+		r32 time2 = (r32)(lIndex+1) * (1.0f / (r32)numLines);
+		v2 pos1 = CubicFormula2d(p1, c1, c2, p2, time1);
+		v2 pos2 = CubicFormula2d(p1, c1, c2, p2, time2);
+		RcDrawLine(pos1, pos2, thickness, color);
+	}
+}

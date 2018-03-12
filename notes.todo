@@ -13,6 +13,32 @@
 	[-] Check the number of arguments in defined functions
 	[X] Get rid of errors when looking for functions
 
+#Bezier Curve Formulas
+dist2(x, y, z, w) = (z-x)^2 + (w-y)^2
+dist2(x, y, z, w) = (zz - 2zx + xx) + (ww - 2wy + yy)
+linear(a, b) = a + (b-a)t
+quad(a, b, c) = a - 2at + 2bt + att - 2btt + ctt
+cubic(a, b, c, d) = a - 3at + 3bt + 3att - 6btt + 3ctt - attt + 3bttt - 3cttt + dttt
+cubic(a, b, c, d) = a - 3a2t + 3b2t + 3a2tt - 6b2tt + 3c2tt - a2ttt + 3b2ttt - 3c2ttt + d2ttt
+
+dist2(x, y, cubic(a1,b1,c1,d1), cubic(a2,b2,c2,d2)) =
+: -2a1x + 6a1tx - 6b1tx - 6a1ttx + 12b1ttx - 6c1ttx + 2a1tttx - 6b1tttx + 6c1tttx - 2d1tttx
+: xx + yy
+: -2a2y + 6a2ty - 6b2ty - 6a2tty + 12b2tty - 6c2tty + 2a2ttty - 6b2ttty + 6c2ttty - 2d2ttty
+: (a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)*(a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)
+: a1a1 -3a1a1t + 3a1b1t + 3a1a1tt -6a1b1tt + 3a1c1tt -a1a1ttt + 3a1b1ttt -3a1c1ttt + a1d1ttt
+: -3a1ta1 + 9a1a1tt -9a1b1tt -9a1a1ttt + 18a1b1ttt -9a1c1ttt + 3a1a1tttt -9a1b1tttt + 9a1c1tttt -3a1d1tttt
+: 3b1t(a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)
+: 3a1tt(a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)
+: -6b1tt(a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)
+: 3c1tt(a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)
+: -a1ttt(a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)
+: 3b1ttt(a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)
+: -3c1ttt(a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)
+: d1ttt(a1 - 3a1t + 3b1t + 3a1tt - 6b1tt + 3c1tt - a1ttt + 3b1ttt - 3c1ttt + d1ttt)
+: (a2 - 3a2t + 3b2t + 3a2tt - 6b2tt + 3c2tt - a2ttt + 3b2ttt - 3c2ttt + d2ttt)*(a2 - 3a2t + 3b2t + 3a2tt - 6b2tt + 3c2tt - a2ttt + 3b2ttt - 3c2ttt + d2ttt)
+
+: aa - 6aat + 6abt + 15aatt - 30abtt + 6actt - 16aattt + 60abttt - 24acttt + 2adttt + 3aatttt - 48abtttt + 36actttt - 6adtttt + 9bbtt - 36bbttt + 18bcttt + 54bbtttt - 54bctttt + 6bdtttt + 6aattttt + 6abttttt - 12acttttt + 6adttttt - 36bbttttt + 54bcttttt - 12bdttttt + 9cctttt - 18ccttttt + 6cdttttt + 1aatttttt + 6abtttttt - 6actttttt + 2adtttttt + 9bbtttttt - 18bctttttt + 6bdtttttt + 9cctttttt - 6cdtttttt + 1ddtttttt
 
 # Python Argument Format Strings
 @s (str or None) [char *] // Convert a null-terminated C string to a Python str object using 'utf-8' encoding. If the C string pointer is NULL, None is used.

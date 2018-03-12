@@ -17,6 +17,15 @@ void InitializeDefaultState()
 	defData->missingTexture = LoadTexture(TEXTURES_FOLDER "something_that_doesnt_exit.png");
 	
 	defData->initialized = true;
+	
+	defData->quadStart = NewVec2(10, 100);
+	defData->quadControl = NewVec2(50, 130);
+	defData->quadEnd = NewVec2(210, 100);
+	
+	defData->cubicStart = NewVec2(10, 100);
+	defData->cubicControl1 = NewVec2(50, 130);
+	defData->cubicControl2 = NewVec2(150, 30);
+	defData->cubicEnd = NewVec2(210, 100);
 }
 
 // +--------------------------------------------------------------+
@@ -59,6 +68,64 @@ void UpdateAndRenderDefaultState()
 		{
 			if (defData->backgroundColorIndex > 0) { defData->backgroundColorIndex--; }
 			else { defData->backgroundColorIndex = NUM_COLORS-1; }
+		}
+		
+		// +==============================+
+		// |     Refresh Algebra Test     |
+		// +==============================+
+		if (ButtonPressed(Button_A))
+		{
+			if (defData->algGroup.terms != nullptr)
+			{
+				DestroyAlgGroup(&defData->algGroup);
+			}
+			
+			CreateAlgGroup(&defData->algGroup, mainHeap, 8, nullptr);
+			
+			AlgGroup_t group1 = {};
+			CreateAlgGroup(&group1, mainHeap, 2, nullptr);
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("a"));
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("-3at"));
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("+3bt"));
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("+3att"));
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("-6btt"));
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("+3ctt"));
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("-attt"));
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("+3bttt"));
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("-3cttt"));
+			AlgGroupAddTerm(&group1, NewAlgTermFromString("+dttt"));
+			
+			MultiplyGroups(&group1, &group1, &defData->algGroup, mainHeap);
+			
+			DestroyAlgGroup(&group1);
+			
+		}
+		if (ButtonPressed(Button_C))
+		{
+			CombineLikeTerms(&defData->algGroup);
+			
+			if (ButtonDown(Button_Control))
+			{
+				TempPushMark();
+				char* groupStr = nullptr;
+				u32 groupStrLength = GetAlgGroupStr(TempArena, &defData->algGroup, &groupStr);
+				platform->CopyToClipboard(groupStr, groupStrLength);
+				TempPopMark();
+			}
+		}
+		
+		// +==============================+
+		// |      Change Quad Curve       |
+		// +==============================+
+		{
+			if (ButtonDown(MouseButton_Left))
+			{
+				defData->cubicControl1 = RenderMousePos;
+			}
+			if (ButtonDown(MouseButton_Right))
+			{
+				defData->cubicEnd = RenderMousePos;
+			}
 		}
 		
 		#if 0
@@ -148,47 +215,122 @@ void UpdateAndRenderDefaultState()
 			RcClearDepthBuffer(1.0f);
 		}
 		
+		// +==============================+
+		// | Draw Background Color String |
+		// +==============================+
 		RcDrawString(GetColorName(backgroundColor.value), NewVec2(5, app->defaultFont.maxExtendUp), ColorComplimentary(backgroundColor));
 		
-		v2 drawPos = NewVec2(0, 100);
-		
-		RcDrawTexture(&defData->testTexture, drawPos);
-		drawPos.x += renderContext->boundTexture->width;
-		
-		RcDrawTexture(&defData->circuitTexture, drawPos);
-		drawPos.x += renderContext->boundTexture->width;
-		
-		RcDrawTexture(&defData->missingTexture, drawPos);
-		drawPos.x += renderContext->boundTexture->width;
-		
-		rec colorRec = NewRec(0, 25, 20, 50);
-		for (u32 cIndex = 0; cIndex < 16; cIndex++)
+		// +==============================+
+		// |  Draw Algebra Group String   |
+		// +==============================+
 		{
-			Color_t recColor = NewColor(GetColorByIndex(cIndex));
-			RcDrawRectangle(colorRec, recColor);
-			colorRec.x += colorRec.width;
+			v2 algebraDrawPos = NewVec2(5, 200 + app->defaultFont.maxExtendUp);
+			TempPushMark();
+			char* groupStr = nullptr;
+			GetAlgGroupStr(TempArena, &defData->algGroup, &groupStr);
+			
+			if (groupStr == nullptr)
+			{
+				RcDrawString("(nullptr)", algebraDrawPos, ColorComplimentary(backgroundColor));
+			}
+			else
+			{
+				// RcDrawString(groupStr, algebraDrawPos, ColorComplimentary(backgroundColor));
+				RcDrawFormattedString(groupStr, algebraDrawPos, RenderScreenSize.width - algebraDrawPos.x, ColorComplimentary(backgroundColor), Alignment_Left, true);
+			}
+			TempPopMark();
 		}
 		
+		// +==============================+
+		// |        Draw Textures         |
+		// +==============================+
+		#if 0
+		{
+			v2 drawPos = NewVec2(0, 100);
+			
+			RcDrawTexture(&defData->testTexture, drawPos);
+			drawPos.x += renderContext->boundTexture->width;
+			
+			RcDrawTexture(&defData->circuitTexture, drawPos);
+			drawPos.x += renderContext->boundTexture->width;
+			
+			RcDrawTexture(&defData->missingTexture, drawPos);
+			drawPos.x += renderContext->boundTexture->width;
+		}
+		#endif
+		
+		// +==============================+
+		// |     Draw Color Swatches      |
+		// +==============================+
+		#if 1
+		{
+			rec colorRec = NewRec(0, 25, 20, 50);
+			for (u32 cIndex = 0; cIndex < 16; cIndex++)
+			{
+				Color_t recColor = NewColor(GetColorByIndex(cIndex));
+				RcDrawRectangle(colorRec, recColor);
+				colorRec.x += colorRec.width;
+			}
+		}
+		#endif
+		
+		// +==============================+
+		// |      Draw Cursor Donut       |
+		// +==============================+
+		#if 1
 		if (input->mouseInsideWindow)
 		{
 			RcDrawDonut(RenderMousePos, 11.0f, 4.0f, NewColor(Color_IvoryBlack));
 			RcDrawDonut(RenderMousePos, 10.0f, 5.0f, NewColor(Color_GhostWhite));
 		}
+		#endif
 		
-		RcDrawLineArrow(NewVec2(RenderScreenSize.width - 10, 0), NewVec2(RenderScreenSize.width - 10, RenderScreenSize.height), 10.0f, 2.0f, NewColor(Color_Red));
-		RcDrawLineArrow(NewVec2(RenderScreenSize.width - 10, RenderScreenSize.height), NewVec2(RenderScreenSize.width - 10, 0), 10.0f, 2.0f, NewColor(Color_Red));
-		char* heightStr = TempPrint("%.0f", RenderScreenSize.height);
-		RcDrawString(heightStr, NewVec2(RenderScreenSize.width-10, RenderScreenSize.height/2), NewColor(Color_Red), 1.0f, Alignment_Right);
+		// +==============================+
+		// |     Draw Quadratic Curve     |
+		// +==============================+
+		#if 0
+		{
+			RcDrawCircle(defData->quadStart, 3.0f, NewColor(Color_Yellow));
+			RcDrawCircle(defData->quadControl, 3.0f, NewColor(Color_Yellow));
+			RcDrawCircle(defData->quadEnd, 3.0f, NewColor(Color_Yellow));
+			RcDrawQuadCurve(defData->quadStart, defData->quadControl, defData->quadEnd, 60, 2, NewColor(Color_Red));
+		}
+		#endif
 		
-		u32 ratioWidth, ratioHeight;
-		FindRatio((u32)RenderScreenSize.width, (u32)RenderScreenSize.height, &ratioWidth, &ratioHeight);
-		char* ratioStr = TempPrint("%u:%u", ratioWidth, ratioHeight);
-		RcDrawString(ratioStr, NewVec2(RenderScreenSize.width-20, RenderScreenSize.height-15-app->defaultFont.maxExtendDown), NewColor(Color_Red), 1.0f, Alignment_Right);
+		// +==============================+
+		// |       Draw Cubic Curve       |
+		// +==============================+
+		#if 1
+		{
+			RcDrawCircle(defData->cubicStart, 3.0f, NewColor(Color_Yellow));
+			RcDrawCircle(defData->cubicControl1, 3.0f, NewColor(Color_Yellow));
+			RcDrawCircle(defData->cubicControl2, 3.0f, NewColor(Color_Yellow));
+			RcDrawCircle(defData->cubicEnd, 3.0f, NewColor(Color_Yellow));
+			RcDrawCubicCurve(defData->cubicStart, defData->cubicControl1, defData->cubicControl2, defData->cubicEnd, 60, 2, NewColor(Color_Red));
+		}
+		#endif
 		
-		RcDrawLineArrow(NewVec2(0, RenderScreenSize.height - 10), NewVec2(RenderScreenSize.width, RenderScreenSize.height - 10), 10.0f, 2.0f, NewColor(Color_Red));
-		RcDrawLineArrow(NewVec2(RenderScreenSize.width, RenderScreenSize.height - 10), NewVec2(0, RenderScreenSize.height - 10), 10.0f, 2.0f, NewColor(Color_Red));
-		char* widthStr = TempPrint("%.0f", RenderScreenSize.width);
-		RcDrawString(widthStr, NewVec2(RenderScreenSize.width/2, RenderScreenSize.height - 10 - app->defaultFont.maxExtendDown), NewColor(Color_Red), 1.0f, Alignment_Center);
+		// +==================================+
+		// | Draw Render Screen Measurements  |
+		// +==================================+
+		#if 1
+		{
+			RcDrawLineArrow(NewVec2(RenderScreenSize.width - 10, 0), NewVec2(RenderScreenSize.width - 10, RenderScreenSize.height), 10.0f, 2.0f, NewColor(Color_Red));
+			RcDrawLineArrow(NewVec2(RenderScreenSize.width - 10, RenderScreenSize.height), NewVec2(RenderScreenSize.width - 10, 0), 10.0f, 2.0f, NewColor(Color_Red));
+			char* heightStr = TempPrint("%.0f", RenderScreenSize.height);
+			RcDrawString(heightStr, NewVec2(RenderScreenSize.width-10, RenderScreenSize.height/2), NewColor(Color_Red), 1.0f, Alignment_Right);
+			
+			u32 ratioWidth, ratioHeight;
+			FindRatio((u32)RenderScreenSize.width, (u32)RenderScreenSize.height, &ratioWidth, &ratioHeight);
+			char* ratioStr = TempPrint("%u:%u", ratioWidth, ratioHeight);
+			RcDrawString(ratioStr, NewVec2(RenderScreenSize.width-20, RenderScreenSize.height-15-app->defaultFont.maxExtendDown), NewColor(Color_Red), 1.0f, Alignment_Right);
+			
+			RcDrawLineArrow(NewVec2(0, RenderScreenSize.height - 10), NewVec2(RenderScreenSize.width, RenderScreenSize.height - 10), 10.0f, 2.0f, NewColor(Color_Red));
+			RcDrawLineArrow(NewVec2(RenderScreenSize.width, RenderScreenSize.height - 10), NewVec2(0, RenderScreenSize.height - 10), 10.0f, 2.0f, NewColor(Color_Red));
+			char* widthStr = TempPrint("%.0f", RenderScreenSize.width);
+			RcDrawString(widthStr, NewVec2(RenderScreenSize.width/2, RenderScreenSize.height - 10 - app->defaultFont.maxExtendDown), NewColor(Color_Red), 1.0f, Alignment_Center);
+		}
+		#endif
 	}
 }
 

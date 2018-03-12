@@ -16,6 +16,17 @@ struct DefaultData_t
 	Texture_t missingTexture;
 	
 	u32 backgroundColorIndex;
+	
+	v2 quadStart;
+	v2 quadControl;
+	v2 quadEnd;
+	
+	v2 cubicStart;
+	v2 cubicControl1;
+	v2 cubicControl2;
+	v2 cubicEnd;
+	
+	AlgGroup_t algGroup;
 };
 
 #endif //  _APP_DEFAULT_H
