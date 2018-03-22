@@ -15,6 +15,7 @@ struct AppData_t
 	
 	//AppState Data Structures
 	DefaultData_t defaultData;
+	VisData_t visualizerData;
 	
 	AppState_t appState;
 	AppState_t newAppState;

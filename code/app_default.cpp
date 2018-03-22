@@ -16,8 +16,6 @@ void InitializeDefaultState()
 	defData->circuitTexture = LoadTexture(TEXTURES_FOLDER "circuit.png");
 	defData->missingTexture = LoadTexture(TEXTURES_FOLDER "something_that_doesnt_exit.png");
 	
-	defData->initialized = true;
-	
 	defData->quadStart = NewVec2(10, 100);
 	defData->quadControl = NewVec2(50, 130);
 	defData->quadEnd = NewVec2(210, 100);
@@ -26,6 +24,8 @@ void InitializeDefaultState()
 	defData->cubicControl1 = NewVec2(50, 130);
 	defData->cubicControl2 = NewVec2(150, 30);
 	defData->cubicEnd = NewVec2(210, 100);
+	
+	defData->initialized = true;
 }
 
 // +--------------------------------------------------------------+

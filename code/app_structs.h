@@ -14,6 +14,7 @@ typedef enum
 {
 	AppState_None = 0x00,
 	AppState_Default,
+	AppState_Visualizer,
 } AppState_t;
 
 typedef enum
@@ -142,6 +143,7 @@ const char* GetAppStateStr(AppState_t appState)
 	{
 		case AppState_None: return "None";
 		case AppState_Default: return "Default";
+		case AppState_Visualizer: return "Visualizer";
 		default: return "Unknown";
 	};
 }

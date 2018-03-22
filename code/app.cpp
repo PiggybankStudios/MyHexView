@@ -30,6 +30,7 @@ Description:
 #include "app_algebra.h"
 
 #include "app_default.h"
+#include "app_visualizer.h"
 #include "app_data.h"
 
 // +--------------------------------------------------------------+
@@ -41,6 +42,7 @@ AppOutput_t* appOutput = nullptr;
 
 AppData_t* app = nullptr;
 DefaultData_t* defData = nullptr;
+VisData_t* visData = nullptr;
 
 MemoryArena_t* mainHeap = nullptr;
 RenderContext_t* renderContext = nullptr;
@@ -108,6 +110,7 @@ v2 RenderMouseStartRight = Vec2_Zero;
 
 #include "app_helpers.cpp"
 #include "app_default.cpp"
+#include "app_visualizer.cpp"
 
 // +--------------------------------------------------------------+
 // |                    Local Helper Functions                    |
@@ -147,6 +150,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
+	visData = &app->visualizerData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -185,12 +189,13 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	// | Initialize Starting AppState |
 	// +==============================+
-	app->appState = AppState_Default;
+	app->appState = AppState_Visualizer;
 	app->newAppState = app->appState;
 	DEBUG_PrintLine("[Initializing AppState_%s]", GetAppStateStr(app->appState));
 	switch (app->appState)
 	{
 		case AppState_Default: InitializeDefaultState(); StartDefaultState(app->appState); break;
+		case AppState_Visualizer: InitializeVisualizerState(); StartVisualizerState(app->appState); break;
 	}
 	
 	DEBUG_WriteLine("Application initialization finished!");
@@ -211,6 +216,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
+	visData = &app->visualizerData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -252,6 +258,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	switch (app->appState)
 	{
 		case AppState_Default: UpdateAndRenderDefaultState(); break;
+		case AppState_Visualizer: UpdateAndRenderVisualizerState(); break;
 	}
 	
 	// +==============================+
@@ -266,6 +273,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 			switch (app->appState)
 			{
 				case AppState_Default: DeinitializeDefaultState(); break;
+				case AppState_Visualizer: DeinitializeVisualizerState(); break;
 			}
 		}
 		
@@ -279,6 +287,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 			switch (app->appState)
 			{
 				case AppState_Default: InitializeDefaultState(); break;
+				case AppState_Visualizer: InitializeVisualizerState(); break;
 			}
 		}
 		
@@ -290,6 +299,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		switch (app->appState)
 		{
 			case AppState_Default: StartDefaultState(oldState); break;
+			case AppState_Visualizer: StartVisualizerState(oldState); break;
 		}
 	}
 	
@@ -308,6 +318,7 @@ EXPORT AppReloading_DEFINITION(App_Reloading)
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
+	visData = &app->visualizerData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -330,6 +341,7 @@ EXPORT AppReloaded_DEFINITION(App_Reloaded)
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
+	visData = &app->visualizerData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -352,6 +364,7 @@ EXPORT AppClosing_DEFINITION(App_Closing)
 	app = (AppData_t*)AppMemory->permanantPntr;
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
+	visData = &app->visualizerData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
