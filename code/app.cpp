@@ -183,8 +183,10 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	InitializeRenderContext();
 	AppLoadContent(true);
+	#if USE_PYTHON
 	AddPythonFunctions();
 	LoadPlaygroundPythonModule();
+	#endif
 	
 	// +==============================+
 	// | Initialize Starting AppState |
@@ -234,6 +236,8 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		DEBUG_WriteLine("Reloading app content");
 		AppLoadContent(false);
 	}
+	
+	#if USE_PYTHON
 	// +==============================+
 	// |  Restart Python Interpreter  |
 	// +==============================+
@@ -251,6 +255,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	// |     Load Python Modules      |
 	// +==============================+
 	UpdatePythonModuleLoader();
+	#endif
 	
 	// +==============================+
 	// |   Update Current AppState    |
