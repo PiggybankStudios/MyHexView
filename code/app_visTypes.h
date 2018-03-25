@@ -26,6 +26,37 @@ typedef enum
 	VisViewMode_RawHex,
 } VisViewMode_t;
 
+const char* GetVisFileTypeStr(VisFileType_t fileType)
+{
+	switch (fileType)
+	{
+		case VisFileType_Unknown:  return "Unknown";
+		case VisFileType_IntelHex: return "HEX";
+		case VisFileType_Elf:      return "ELF";
+		case VisFileType_Png:      return "PNG";
+		case VisFileType_Jpeg:     return "JPEG";
+		case VisFileType_Bmp:      return "BMP";
+		case VisFileType_O:        return "O";
+		case VisFileType_Exe:      return "EXE";
+		default: return "Invalid";
+	};
+}
+const char* GetVisFileTypeString(VisFileType_t fileType)
+{
+	switch (fileType)
+	{
+		case VisFileType_Unknown:  return "Unknown";
+		case VisFileType_IntelHex: return "HEX (Intel Hex)";
+		case VisFileType_Elf:      return "ELF (Executable and Linker Format)";
+		case VisFileType_Png:      return "PNG (Portable Network Graphics)";
+		case VisFileType_Jpeg:     return "JPEG (Joint Photographic Experts Group)";
+		case VisFileType_Bmp:      return "BMP (Bitmap)";
+		case VisFileType_O:        return "O (Object)";
+		case VisFileType_Exe:      return "EXE (Executable)";
+		default: return "Invalid";
+	};
+}
+
 // +--------------------------------------------------------------+
 // |                         Raw Hex View                         |
 // +--------------------------------------------------------------+

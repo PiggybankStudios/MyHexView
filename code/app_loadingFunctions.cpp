@@ -248,10 +248,8 @@ Font_t LoadFont(const char* fileName,
 	result.firstChar = firstCharacter;
 	result.fontSize = fontSize;
 	
-	TempPushMark();
-	
-	u8* grayscaleData = TempArray(u8, bitmapWidth * bitmapHeight);
-	stbtt_bakedchar* charInfos = TempArray(stbtt_bakedchar, numCharacters);
+	u8* grayscaleData = PushArray(mainHeap, u8, bitmapWidth * bitmapHeight);
+	stbtt_bakedchar* charInfos = PushArray(mainHeap, stbtt_bakedchar, numCharacters);
 	
 	int bakeResult = stbtt_BakeFontBitmap((u8*)fontFile.content, 
 		0, fontSize,
@@ -273,7 +271,7 @@ Font_t LoadFont(const char* fileName,
 		result.chars[cIndex].advanceX = charInfos[cIndex].xadvance;
 	}
 	
-	u8* bitmapData = TempArray(u8, 4 * bitmapWidth * bitmapHeight);
+	u8* bitmapData = PushArray(mainHeap, u8, 4 * bitmapWidth * bitmapHeight);
 	
 	for (i32 y = 0; y < bitmapHeight; y++)
 	{
@@ -290,8 +288,9 @@ Font_t LoadFont(const char* fileName,
 	
 	result.bitmap = CreateTexture(bitmapData, bitmapWidth, bitmapHeight);
 	
-	TempPopMark();
-	
+	ArenaPop(mainHeap, grayscaleData);
+	ArenaPop(mainHeap, charInfos);
+	ArenaPop(mainHeap, bitmapData);
 	platform->FreeFileMemory(&fontFile);
 	
 	//Create information about character sizes

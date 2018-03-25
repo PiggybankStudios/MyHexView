@@ -54,6 +54,16 @@ struct VisHexData_t
 	rec structViewRec;
 	rec structTypesRec;
 	
+	v2 selInfoViewPos;
+	v2 selInfoViewPosGoto;
+	v2 selInfoGrabPos;
+	v2 selInfoDataSize;
+	
+	v2 fileInfoViewPos;
+	v2 fileInfoViewPosGoto;
+	v2 fileInfoGrabPos;
+	v2 fileInfoDataSize;
+	
 	bool draggingScrollbar;
 	v2 dragScrollbarOffset;
 };

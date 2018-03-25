@@ -28,7 +28,7 @@ Date:   03\02\2018
 #define WINDOW_ASPECT_RATIO         16, 10
 #define OPENGL_ANTIALIASING_SAMPLES 4
 #define PLATFORM_TEMP_ARENA_SIZE    Kilobytes(1)
-#define APP_PERMANANT_MEMORY_SIZE   Megabytes(1)
+#define APP_PERMANANT_MEMORY_SIZE   Megabytes(4)
 #define APP_TRANSIENT_MEMORY_SIZE   Megabytes(1)
 
 #ifdef WINDOWS_COMPILATION
