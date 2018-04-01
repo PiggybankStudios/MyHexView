@@ -36,6 +36,7 @@ struct VisHexData_t
 	v2 spacing;
 	v2 dataSize;
 	
+	u32 regionsSize;
 	MemoryArena_t* allocArena;
 	u32 numRegions;
 	VisHexDataRegion_t* regions;

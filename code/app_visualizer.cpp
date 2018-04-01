@@ -6,6 +6,8 @@ Description:
 	** Contains an application state that visualizes files that are dropped onto the window 
 */
 
+#include "app_parseIntelHex.cpp"
+
 void VisLoadFonts()
 {
 	if (visData->initialized)
@@ -25,91 +27,98 @@ void VisDetermineFileType()
 	//TODO: Determine the file type
 	visData->fileType = VisFileType_Unknown;
 	visData->viewMode = VisViewMode_RawHex;
+	
+	const char* fileExtension = GetFileExtPart(visData->filePath);
+	DEBUG_PrintLine("File extension: \"%s\"", fileExtension);
+	if (strcmp(fileExtension, "hex") == 0)
+	{
+		visData->fileType = VisFileType_IntelHex;
+		visData->viewMode = VisViewMode_RawHex;
+	}
 }
 
 void VisParseFile()
 {
-	if (visData->viewMode == VisViewMode_RawHex)
+	VisHexData_t* hexData = &visData->hexData;
+	if (hexData->allocArena != nullptr && hexData->regions != nullptr)
 	{
-		VisHexData_t* hexData = &visData->hexData;
-		if (hexData->allocArena != nullptr && hexData->regions != nullptr)
+		for (u32 rIndex = 0; rIndex < hexData->numRegions; rIndex++)
 		{
-			for (u32 rIndex = 0; rIndex < hexData->numRegions; rIndex++)
+			VisHexDataRegion_t* region = &hexData->regions[rIndex];
+			if (region->allocArena != nullptr && region->data != nullptr)
 			{
-				VisHexDataRegion_t* region = &hexData->regions[rIndex];
-				if (region->allocArena != nullptr && region->data != nullptr)
-				{
-					ArenaPop(region->allocArena, region->data);
-				}
+				ArenaPop(region->allocArena, region->data);
 			}
-			ArenaPop(hexData->allocArena, hexData->regions);
 		}
-		
-		ClearPointer(hexData);
-		
-		if (visData->fileType == VisFileType_IntelHex)
+		ArenaPop(hexData->allocArena, hexData->regions);
+	}
+	ClearPointer(hexData);
+	
+	bool parsedSuccessfully = false;
+	if (visData->fileType == VisFileType_IntelHex)
+	{
+		hexData->regions = VisParseIntelHex(mainHeap, (char*)visData->file.content, visData->file.size, &hexData->numRegions);
+		if (hexData->regions != nullptr)
 		{
-			
+			parsedSuccessfully = true;
 		}
 		else
 		{
-			hexData->numRegions = 1;
-			hexData->regions = PushArray(mainHeap, VisHexDataRegion_t, hexData->numRegions);
-			hexData->allocArena = mainHeap;
-			hexData->regions[0].allocArena = nullptr;
-			hexData->regions[0].address = 0x00000000;
-			hexData->regions[0].size = visData->file.size;
-			hexData->regions[0].data = (u8*)visData->file.content;
-			
-			hexData->numColumns = 32;
-			hexData->numRows = (visData->file.size / hexData->numColumns);
-			if (visData->file.size % hexData->numColumns) { hexData->numRows++; }
-			hexData->addressMin = 0x00000000;
-			hexData->addressMax = visData->file.size;
-			hexData->tileSize = MeasureString(&visData->smallFont, "00") + Vec2_One;
-			hexData->spacing = NewVec2(4);
-			hexData->dataSize = hexData->spacing + Vec2Multiply(hexData->tileSize + hexData->spacing, NewVec2((r32)hexData->numColumns, (r32)hexData->numRows));
-			
-			hexData->viewPos = Vec2_Zero;
-			hexData->viewPosGoto = hexData->viewPos;
-			
-			hexData->selInfoViewPos = Vec2_Zero;
-			hexData->selInfoViewPosGoto = hexData->selInfoViewPos;
-			hexData->selInfoGrabPos = Vec2_Zero;
-			
-			hexData->fileInfoViewPos = Vec2_Zero;
-			hexData->fileInfoViewPosGoto = hexData->fileInfoViewPos;
-			hexData->fileInfoGrabPos = Vec2_Zero;
+			DEBUG_WriteLine("Could not parse Intel HEX file correctly");
+			visData->fileType = VisFileType_Unknown;
 		}
 	}
-	else if (visData->fileType == VisFileType_IntelHex)
+	
+	if (!parsedSuccessfully)
 	{
-		
+		hexData->numRegions = 1;
+		hexData->regions = PushArray(mainHeap, VisHexDataRegion_t, hexData->numRegions);
+		hexData->allocArena = mainHeap;
+		hexData->regions[0].allocArena = nullptr;
+		hexData->regions[0].address = 0x00000000;
+		hexData->regions[0].size = visData->file.size;
+		hexData->regions[0].data = (u8*)visData->file.content;
 	}
-	else if (visData->fileType == VisFileType_Elf)
+	
+	hexData->addressMin = 0x00000000;
+	hexData->addressMax = 0x00000000;
+	hexData->regionsSize = 0;
+	for (u32 rIndex = 0; rIndex < hexData->numRegions; rIndex++)
 	{
-		
+		VisHexDataRegion_t* region = &hexData->regions[rIndex];
+		if (rIndex == 0 || region->address < hexData->addressMin)
+		{
+			hexData->addressMin = region->address;
+		}
+		if (region->address + region->size > hexData->addressMax)
+		{
+			hexData->addressMax = region->address + region->size;
+		}
+		hexData->regionsSize += region->size;
 	}
-	else if (visData->fileType == VisFileType_Png)
+	
+	hexData->numColumns = 32;
+	if (hexData->addressMin%hexData->numColumns != 0)
 	{
-		
+		hexData->addressMin = (hexData->addressMin/hexData->numColumns) * hexData->numColumns;
 	}
-	else if (visData->fileType == VisFileType_Jpeg)
-	{
-		
-	}
-	else if (visData->fileType == VisFileType_Bmp)
-	{
-		
-	}
-	else if (visData->fileType == VisFileType_O)
-	{
-		
-	}
-	else if (visData->fileType == VisFileType_Exe)
-	{
-		
-	}
+	
+	hexData->numRows = ((hexData->addressMax - hexData->addressMin) / hexData->numColumns);
+	if (visData->file.size % hexData->numColumns) { hexData->numRows++; }
+	hexData->tileSize = MeasureString(&visData->smallFont, "00") + Vec2_One;
+	hexData->spacing = NewVec2(4);
+	hexData->dataSize = hexData->spacing + Vec2Multiply(hexData->tileSize + hexData->spacing, NewVec2((r32)hexData->numColumns, (r32)hexData->numRows));
+	
+	hexData->viewPos = Vec2_Zero;
+	hexData->viewPosGoto = hexData->viewPos;
+	
+	hexData->selInfoViewPos = Vec2_Zero;
+	hexData->selInfoViewPosGoto = hexData->selInfoViewPos;
+	hexData->selInfoGrabPos = Vec2_Zero;
+	
+	hexData->fileInfoViewPos = Vec2_Zero;
+	hexData->fileInfoViewPosGoto = hexData->fileInfoViewPos;
+	hexData->fileInfoGrabPos = Vec2_Zero;
 }
 
 void VisGenerateUi()
@@ -534,13 +543,14 @@ void UpdateAndRenderVisualizerState()
 				u32 selectionMin = min(hexData->selectionStart, hexData->selectionEnd);
 				u32 selectionMax = max(hexData->selectionStart, hexData->selectionEnd);
 				u32 selectionLength = selectionMax - selectionMin;
+				if (hexData->selectionStart > hexData->selectionEnd) { selectionLength += 1; }
 				const u8* selectionDataPntr = nullptr;
 				for (u32 rIndex = 0; rIndex < hexData->numRegions; rIndex++)
 				{
 					VisHexDataRegion_t* regionPntr = &hexData->regions[rIndex];
-					if (regionPntr->address <= selectionMin && regionPntr->address+regionPntr->size >= selectionMax)
+					if (regionPntr->address <= hexData->addressMin + selectionMin && regionPntr->address + regionPntr->size >= hexData->addressMin + selectionMax)
 					{
-						selectionDataPntr = &regionPntr->data[selectionMin - regionPntr->address];
+						selectionDataPntr = &regionPntr->data[hexData->addressMin + selectionMin - regionPntr->address];
 						break;
 					}
 				}
@@ -569,12 +579,26 @@ void UpdateAndRenderVisualizerState()
 						tileRec = RecInflate(tileRec, hexData->spacing/2);
 						
 						u32 bIndex = (tileY*visData->hexData.numColumns) + tileX;
+						u32 byteAddress = hexData->addressMin + bIndex;
 						
 						if (bIndex < visData->file.size && RecIntersects(tileRec, visData->hexData.viewRec))
 						{
 							TempPushMark();
-							u8 byteValue = ((u8*)visData->file.content)[bIndex];
-							char* hexStr = TempPrint("%02X", byteValue);
+							bool byteFilled = false;
+							u8 byteValue = 0x00;
+							for (u32 rIndex = 0; rIndex < hexData->numRegions; rIndex++)
+							{
+								VisHexDataRegion_t* region = &hexData->regions[rIndex];
+								if (byteAddress >= region->address && byteAddress < region->address + region->size)
+								{
+									byteFilled = true;
+									byteValue = region->data[byteAddress - region->address];
+									break;
+								}
+							}
+							char* hexStr = nullptr;
+							if (byteFilled) { hexStr = TempPrint("%02X", byteValue); }
+							else { hexStr = "??"; }
 							v2 hexStrSize = MeasureString(&visData->smallFont, hexStr);
 							v2 hexStrPos = tileRec.topLeft + tileRec.size/2 - hexStrSize/2;
 							hexStrPos.y += visData->smallFont.maxExtendUp;
@@ -589,23 +613,30 @@ void UpdateAndRenderVisualizerState()
 							if (bIndex >= visData->hexData.selectionStart && bIndex < visData->hexData.selectionEnd) { isSelected = true; }
 							if (bIndex <= visData->hexData.selectionStart && bIndex >= visData->hexData.selectionEnd) { isSelected = true; }
 							
-							if (outlineByteFilled && byteValue == outlineByte) { backColor = VisSilver; }
-							if (visData->hexData.isHovering && bIndex == visData->hexData.hoverIndex)
+							if (byteFilled)
 							{
-								if (isSelected)
+								if (outlineByteFilled && byteValue == outlineByte) { backColor = VisSilver; }
+								if (visData->hexData.isHovering && bIndex == visData->hexData.hoverIndex)
 								{
-									backColor = VisPurple;
+									if (isSelected)
+									{
+										backColor = VisPurple;
+										textColor = VisWhite;
+									}
+									else
+									{
+										backColor = VisSilver;
+									}
+								}
+								else if (isSelected)
+								{
+									backColor = VisLightPurple;
 									textColor = VisWhite;
 								}
-								else
-								{
-									backColor = VisSilver;
-								}
 							}
-							else if (isSelected)
+							else
 							{
-								backColor = VisLightPurple;
-								textColor = VisWhite;
+								backColor = VisGray;
 							}
 							
 							RcDrawButton(tileRec, backColor, borderColor, 1);
@@ -669,7 +700,7 @@ void UpdateAndRenderVisualizerState()
 					{
 						u32 bIndex = tileY * visData->hexData.numColumns;
 						TempPushMark();
-						char* addressStr = TempPrint("%08X", bIndex);
+						char* addressStr = TempPrint("%08X", hexData->addressMin + bIndex);
 						v2 addressStrPos = NewVec2(visData->hexData.viewRec.x - 2, textTop + visData->smallFont.maxExtendUp);
 						addressStrPos.x = (r32)RoundR32(addressStrPos.x);
 						addressStrPos.y = (r32)RoundR32(addressStrPos.y);
@@ -680,9 +711,25 @@ void UpdateAndRenderVisualizerState()
 				}
 				
 				// +==============================+
+				// |      Draw Scroll Gutter      |
+				// +==============================+
+				{
+					RcDrawGradient(hexData->scrollGutterRec, VisGray, VisBlueGray, Dir2_Left);
+					for (u32 rIndex = 0; rIndex < hexData->numRegions; rIndex++)
+					{
+						VisHexDataRegion_t* region = &hexData->regions[rIndex];
+						u32 startRow = (region->address - hexData->addressMin) / hexData->numColumns;
+						u32 endRow = (region->address + region->size - hexData->addressMin) / hexData->numColumns;
+						rec regionRec = hexData->scrollGutterRec;
+						regionRec.y = hexData->scrollGutterRec.y + hexData->scrollGutterRec.height * ((r32)startRow / (r32)hexData->numRows);
+						regionRec.height = hexData->scrollGutterRec.height * ((r32)(endRow - startRow) / (r32)hexData->numRows);
+						RcDrawGradient(regionRec, VisSilver, VisLightGray, Dir2_Left);
+					}
+				}
+				
+				// +==============================+
 				// |        Draw Scrollbar        |
 				// +==============================+
-				RcDrawGradient(hexData->scrollGutterRec, VisSilver, VisLightGray, Dir2_Left);
 				{
 					RcDrawGradient(hexData->scrollBarRec, VisGreen, VisLightGreen, Dir2_Right);
 					RcDrawButton(hexData->scrollBarRec, NewColor(Color_TransparentBlack), VisBlueGray, 1);
@@ -693,7 +740,7 @@ void UpdateAndRenderVisualizerState()
 						{
 							r32 hoverPosY = hexData->viewPos.y;
 							u32 hoverRow = (u32)((hoverPosY - hexData->spacing.height) / (hexData->tileSize.height + hexData->spacing.height));
-							u32 hoverAddress = hoverRow * hexData->numColumns;
+							u32 hoverAddress = hexData->addressMin + hoverRow * hexData->numColumns;
 							v2 strPos = hexData->scrollBarRec.topLeft + NewVec2(0, -visData->smallFont.maxExtendDown);
 							if (strPos.y < visData->smallFont.maxExtendUp)
 							{
@@ -711,7 +758,7 @@ void UpdateAndRenderVisualizerState()
 							r32 hoverPosY = (RenderMousePos.y - hexData->scrollGutterRec.y) / hexData->scrollGutterRec.height;
 							hoverPosY *= hexData->dataSize.height;
 							u32 hoverRow = (u32)((hoverPosY - hexData->spacing.height) / (hexData->tileSize.height + hexData->spacing.height));
-							u32 hoverAddress = hoverRow * hexData->numColumns;
+							u32 hoverAddress = hexData->addressMin + hoverRow * hexData->numColumns;
 							v2 strPos = RenderMousePos + NewVec2(0, -visData->smallFont.maxExtendDown);
 							if (strPos.y < visData->smallFont.maxExtendUp)
 							{
@@ -754,13 +801,14 @@ void UpdateAndRenderVisualizerState()
 					DrawFileInfoItem("Type: \"%s\"", GetVisFileTypeString(visData->fileType));
 					DrawFileInfoItem("Size: %s (%u bytes)", FormattedSizeStr(visData->file.size), visData->file.size);
 					DrawFileInfoItem("");
-					DrawFileInfoItem("Regions Size: %s (%u bytes)", FormattedSizeStr(visData->file.size), visData->file.size);//TODO: change visData->file.size to be a total byte count of all regions
+					DrawFileInfoItem("Address Range: %08X-%08X", hexData->addressMin, hexData->addressMax);
+					DrawFileInfoItem("Regions Size: %s (%u bytes)", FormattedSizeStr(hexData->regionsSize), hexData->regionsSize);
 					DrawFileInfoItem("Regions[%u]:", hexData->numRegions);
 					for (u32 rIndex = 0; rIndex < hexData->numRegions; rIndex++)
 					{
 						VisHexDataRegion_t* regionPntr = &hexData->regions[rIndex];
 						//TODO: change visData->file.size to be a total byte count of all regions
-						DrawFileInfoItem("\t[%u] %08X-%08X %s (%.0f%%)", rIndex, regionPntr->address, regionPntr->address + regionPntr->size, FormattedSizeStr(regionPntr->size), (r32)regionPntr->size / (r32)visData->file.size * 100);
+						DrawFileInfoItem("\t[%u] %08X-%08X %s (%.0f%%)", rIndex, regionPntr->address, regionPntr->address + regionPntr->size, FormattedSizeStr(regionPntr->size), (r32)regionPntr->size / (r32)hexData->regionsSize * 100);
 					}
 				}
 				RcSetViewport(NewRec(Vec2_Zero, RenderScreenSize));
@@ -785,8 +833,8 @@ void UpdateAndRenderVisualizerState()
 						textPos.y += visData->smallFont.lineHeight + 2;                                                                                             \
 					} while(0)
 					
-					DrawSelInfoItem("Hover Pos: %08X", hexData->hoverIndex);
-					DrawSelInfoItem("Selection: %08X-%08X", hexData->selectionStart, hexData->selectionEnd);
+					DrawSelInfoItem("Hover Pos: %08X", hexData->addressMin + hexData->hoverIndex);
+					DrawSelInfoItem("Selection: %08X-%08X", hexData->addressMin + hexData->selectionStart, hexData->addressMin + hexData->selectionEnd);
 					DrawSelInfoItem("Size: %s (%u bytes)", FormattedSizeStr(selectionLength), selectionLength);
 					DrawFileInfoItem("");
 					
