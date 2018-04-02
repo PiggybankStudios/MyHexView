@@ -21,6 +21,7 @@ struct VisHexData_t
 {
 	v2 viewPos;
 	v2 viewPosGoto;
+	v2 interpViewPos;
 	
 	u32 selectionStart;
 	u32 selectionEnd;
@@ -36,6 +37,10 @@ struct VisHexData_t
 	v2 spacing;
 	v2 dataSize;
 	
+	v2 interpTileSize;
+	v2 interpSpacing;
+	v2 interpDataSize;
+	
 	u32 regionsSize;
 	MemoryArena_t* allocArena;
 	u32 numRegions;
@@ -45,6 +50,7 @@ struct VisHexData_t
 	// |           UI Stuff           |
 	// +==============================+
 	rec viewRec;
+	rec interpRec;
 	rec scrollGutterRec;
 	rec addressesRec;
 	rec scrollBarRec;

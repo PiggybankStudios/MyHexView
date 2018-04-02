@@ -508,8 +508,8 @@ void RcDrawHexCharacter(u8 hexValue, v2 bottomLeft, Color_t color, r32 scale = 1
 	v2 charPosLower = charRec.topLeft + NewVec2(charRec.width - lowerCharInfo->width*innerCharScale - 1, charRec.height - 1);
 	// RcDrawCharacter(upperCharIndex, charPosUpper, color, innerCharScale);
 	// RcDrawCharacter(lowerCharIndex, charPosLower, color, innerCharScale);
-	RcDrawCharacter(upperCharIndex, charPosUpper, NewColor(Color_Black), innerCharScale);
-	RcDrawCharacter(lowerCharIndex, charPosLower, NewColor(Color_Black), innerCharScale);
+	RcDrawCharacter(upperCharIndex, charPosUpper, NewColor(Color_White), innerCharScale);
+	RcDrawCharacter(lowerCharIndex, charPosLower, NewColor(Color_White), innerCharScale);
 }
 
 void RcDrawString(const char* string, u32 numCharacters, v2 position, Color_t color, r32 scale = 1.0f, Alignment_t alignment = Alignment_Left)
