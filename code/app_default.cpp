@@ -267,14 +267,25 @@ void UpdateAndRenderDefaultState()
 		u32 memUsage = FontGetMemoryUsage(&app->newFont);
 		RcPrintString(NewVec2(500, 420), NewColor(Color_White), 1.0f, "Memory Usage: %s/%s (%.1f%%)", FormattedSizeStr(memUsage), FormattedSizeStr(mainHeap->size), (r32)memUsage / (r32)mainHeap->size);
 		
-		const char* printStr = "Hello \b\x01\xFF\xFF\x01Georgia\x02\b!\x03\x0C and other people too\x04\nWe are \r\x01\x01\xFF\xFFrendering\x02\r using your font :P";
-		// v2 RcNewDrawNtString(const char* nullTermString, v2 position, Color_t color,
-		// 	Alignment_t alignment = Alignment_Left, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false, FontFlowInfo_t* flowInfo = nullptr)
+		const char* printStr = "(This) is a \b\x01\xFF\xFF\x01(Really) long\x02\b string with stuff like \"quotations\" and [brackets]!\x03\x0C and other things too\x04\nWe are \r\x01\x01\xFF\xFFrendering\x02\r using your font :P";
+		v2 textPos = NewVec2(500, 450);
+		r32 fontMaxExtendUp = FontGetMaxExtendUp(&app->newFont, 32, FontStyle_None, true);
+		r32 maxWidth = RenderMousePos.x - textPos.x;
+		if (maxWidth < 0) { maxWidth = 0; }
+		
 		FontFlowInfo_t flowInfo; ClearStruct(flowInfo);
-		RcNewDrawNtString(printStr, NewVec2(500, 450), NewColor(Color_White), Alignment_Left, 32, FontStyle_None, true, false, &flowInfo);
+		RcNewDrawNtString(printStr, textPos, NewColor(Color_White), Alignment_Left, 32, FontStyle_None, true, false, &flowInfo);
 		RcDrawRectangle(flowInfo.extents, ColorTransparent(NewColor(Color_White), 0.1f));
 		RcDrawRectangle(NewRec(flowInfo.position.x, flowInfo.position.y, flowInfo.extentRight, flowInfo.extentDown), ColorTransparent(NewColor(Color_White), 0.1f));
 		RcDrawLineArrow(flowInfo.endPos + NewVec2(10,20), flowInfo.endPos, 4, 1.0f, NewColor(Color_White));
+		
+		v2 arrowStartPos = textPos + NewVec2(0, -fontMaxExtendUp);
+		v2 arrowEndPos = arrowStartPos + NewVec2(maxWidth, 0);
+		RcDrawLineArrow(arrowStartPos, arrowEndPos, 4, 1, NewColor(Color_White));
+		RcDrawLine(arrowEndPos + NewVec2(0, -100), arrowEndPos + NewVec2(0, 100), 1, NewColor(Color_Red));
+		
+		u32 numCharsFit = FontMeasureStringWidth(printStr, (u32)strlen(printStr), &maxWidth, &app->newFont, 32, FontStyle_None, true, false);
+		RcDrawRectangle(NewRec(arrowStartPos, NewVec2(maxWidth, flowInfo.extentDown)), ColorTransparent(NewColor(Color_White), 0.5f));
 		
 		// FontChar_t fontChar;
 		// v2 printPos = NewVec2(500, 450);

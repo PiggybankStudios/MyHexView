@@ -7,6 +7,153 @@ Description:
 	** of fonts on the screen or for sizing purposes 
 */
 
+//TODO: Add strictStyle, createGlyph and strictSize to styleFlags
+
+//NOTE: If maxWidth is not 0 then the strLength pntr will be written to with the number of characters that fit on the line
+u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr, NewFont_t* fontPntr,
+	r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false)
+{
+	Assert(strPntr != nullptr);
+	Assert(strLength > 0);
+	Assert(fontPntr != nullptr);
+	
+	FontStyleFlags_t currentStyle = styleFlags;
+	r32 currentSize = fontSize;
+	r32 maxWidth = 0;
+	if (maxWidthPntr != nullptr)
+	{
+		maxWidth = *maxWidthPntr;
+		*maxWidthPntr = 0;
+	}
+	
+	DEBUG_PrintLine("maxWidth: %f", maxWidth);
+	u32 breakPoint = 0;
+	r32 xPos = 0;
+	r32 lastRenderWidth = 0;
+	bool wasRenderable = false;
+	for (u32 cIndex = 0; cIndex < strLength; cIndex++)
+	{
+		char nextChar = strPntr[cIndex];
+		u32 numCharsLeft = strLength - (cIndex+1);
+		
+		FontChar_t fontChar;
+		r32 charWidth = 0;
+		r32 charAdvance = 0;
+		bool isRenderable = false;
+		if (nextChar == '\t')
+		{
+			if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle, strictStyle, createGlyph))
+			{
+				charWidth = (fontChar.info->size.width - fontChar.info->origin.x) * TAB_WIDTH;
+				charAdvance = fontChar.info->advanceX * TAB_WIDTH;
+			}
+		}
+		else if (nextChar == ' ')
+		{
+			if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle, strictStyle, createGlyph))
+			{
+				charWidth = fontChar.info->size.width - fontChar.info->origin.x;
+				charAdvance = fontChar.info->advanceX;
+			}
+		}
+		else if (nextChar == '\n')
+		{
+			//Handled more below
+		}
+		else if (nextChar == '\b')
+		{
+			currentStyle = (FontStyleFlags_t)(currentStyle ^ FontStyle_Bold);
+		}
+		else if (nextChar == '\r')
+		{
+			currentStyle = (FontStyleFlags_t)(currentStyle ^ FontStyle_Italic);
+		}
+		else if (nextChar == '\x01' && numCharsLeft >= 3)
+		{
+			//NOTE: Color doesn't matter for size
+			cIndex += 3;
+		}
+		else if (nextChar == '\x02')
+		{
+			//NOTE: Color doesn't matter for size
+		}
+		else if (nextChar == '\x03' && numCharsLeft >= 1)
+		{
+			currentSize = (r32)((u8)strPntr[cIndex+1]);
+			cIndex += 1;
+		}
+		else if (nextChar == '\x04')
+		{
+			currentSize = fontSize;
+		}
+		else
+		{
+			if (FontGetChar(fontPntr, &fontChar, nextChar, currentSize, currentStyle, strictStyle, createGlyph))
+			{
+				if (!IsCharClassAlphaNumeric(nextChar) && IsCharClassBeginningCharacter(nextChar))
+				{
+					breakPoint = cIndex;
+					if (maxWidthPntr != nullptr) { *maxWidthPntr = lastRenderWidth; }
+				}
+				isRenderable = true;
+				charWidth = fontChar.info->size.width - fontChar.info->origin.x;
+				charAdvance = fontChar.info->advanceX;
+			}
+		}
+		
+		r32 renderWidth = xPos + charWidth;
+		
+		if (isRenderable)
+		{
+			if (maxWidthPntr != nullptr && renderWidth > maxWidth)
+			{
+				DEBUG_PrintLine("%f > %f", renderWidth, maxWidth);
+				if (breakPoint == 0)
+				{
+					if (cIndex > 0)
+					{
+						breakPoint = cIndex;
+						*maxWidthPntr = lastRenderWidth;
+					}
+					else
+					{
+						breakPoint = 1;
+						*maxWidthPntr = renderWidth;
+					}
+				}
+				break;
+			}
+			else if (!IsCharClassAlphaNumeric(nextChar) && !IsCharClassBeginningCharacter(nextChar))
+			{
+				breakPoint = cIndex+1;
+				if (maxWidthPntr != nullptr) { *maxWidthPntr = renderWidth; }
+			}
+			else if (cIndex == strLength-1) //end of the string
+			{
+				breakPoint = cIndex+1; //All the characters fit
+				if (maxWidthPntr != nullptr) { *maxWidthPntr = renderWidth; }
+			}
+		}
+		else
+		{
+			breakPoint = cIndex+1;
+			if (wasRenderable && maxWidthPntr != nullptr)
+			{
+				*maxWidthPntr = lastRenderWidth;
+			}
+			if (nextChar == '\n') { break; }
+		}
+		
+		
+		xPos += charAdvance;
+		lastRenderWidth = renderWidth;
+		wasRenderable = isRenderable;
+	}
+	
+	// if (breakPoint == 0) { breakPoint = 1; }
+	return breakPoint;
+}
+
 //Returns the end position of the text
 v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2 position, Color_t color, NewFont_t* fontPntr,
 	Alignment_t alignment = Alignment_Left, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false, FontFlowInfo_t* flowInfo = nullptr)

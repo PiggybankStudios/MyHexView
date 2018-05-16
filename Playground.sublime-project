@@ -922,6 +922,7 @@
 			"u32 FindModuleClasses(BoundedStrList_t* classNameList, PyObject* pyModule)",
 			"u32 FindNextFormatChunk(const Font_t* font, const char* string, u32 numCharacters, r32 maxWidth, bool preserveWords)",
 			"u32 FontGetMemoryUsage(NewFont_t* fontPntr)",
+			"u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr, NewFont_t* fontPntr,\n\tr32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false)",
 			"u32 GetAlgGroupStr(MemoryArena_t* arenaPntr, const AlgGroup_t* group, char** strOut)",
 			"u32 GetAlgTermStr(MemoryArena_t* arenaPntr, const AlgTerm_t* term, char** strOut, bool standalone = true)",
 			"u32 GetColorByIndex(u32 index)",
