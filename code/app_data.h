@@ -25,6 +25,7 @@ struct AppData_t
 	RenderContext_t renderContext;
 	Shader_t defaultShader;
 	Font_t defaultFont;
+	NewFont_t newFont;
 	Texture_t testTexture;
 	
 	PyObject* pyPlaygroundModule;

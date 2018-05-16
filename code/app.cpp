@@ -102,9 +102,12 @@ v2 RenderMouseStartRight = Vec2_Zero;
 // +--------------------------------------------------------------+
 // |                   Application Source Files                   |
 // +--------------------------------------------------------------+
+#include "app_texture.cpp"
+#include "app_font.cpp"
 #include "app_loadingFunctions.cpp"
 #include "app_fontHelpers.cpp"
 #include "app_renderContext.cpp"
+#include "app_fontFlow.cpp"
 #include "app_pythonFunctions.cpp"
 #include "app_pythonPlugin.cpp"
 #include "app_algebra.cpp"
@@ -122,10 +125,28 @@ void AppLoadContent(bool firstLoad)
 	{
 		DestroyShader(&app->defaultShader);
 		DestroyFont(&app->defaultFont);
+		DestroyNewFont(&app->newFont);
 	}
 	
 	app->defaultShader = LoadShader(SHADERS_FOLDER "simple-vertex.glsl", SHADERS_FOLDER "simple-fragment.glsl");
-	app->defaultFont   = LoadFont(FONTS_FOLDER "consolab.ttf", 24, 256, 256, ' ', 96);
+	app->defaultFont   = LoadFont(FONTS_FOLDER "georgiab.ttf", 24, 256, 256, ' ', 96);
+	
+	CreateGameFont(&app->newFont, mainHeap);
+	
+	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiab.ttf", FontStyle_Bold);
+	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiai.ttf", FontStyle_Italic);
+	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiaz.ttf", FontStyle_BoldItalic);
+	FontLoadFile(&app->newFont, FONTS_FOLDER "georgia.ttf", FontStyle_None);
+	
+	FontBake(&app->newFont, 12);
+	FontBake(&app->newFont, 24);
+	FontBake(&app->newFont, 32);
+	FontBake(&app->newFont, 32, FontStyle_Bold);
+	FontBake(&app->newFont, 32, FontStyle_Italic);
+	FontBake(&app->newFont, 32, FontStyle_BoldItalic);
+	
+	FontDropFiles(&app->newFont);
+	
 }
 
 // +--------------------------------------------------------------+
@@ -192,7 +213,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	// | Initialize Starting AppState |
 	// +==============================+
-	app->appState = AppState_Visualizer;
+	app->appState = AppState_Default;
 	app->newAppState = app->appState;
 	DEBUG_PrintLine("[Initializing AppState_%s]", GetAppStateStr(app->appState));
 	switch (app->appState)

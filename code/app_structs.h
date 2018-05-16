@@ -69,6 +69,100 @@ struct Font_t
 	FontCharInfo_t chars[256];
 };
 
+typedef enum
+{
+	FontStyle_None   = 0x00,
+	
+	FontStyle_Bold   = 0x01,
+	FontStyle_Italic = 0x02,
+	
+	FontStyle_BoldItalic = FontStyle_Bold|FontStyle_Italic,
+} FontStyleFlags_t;
+
+struct NewFontCharInfo_t
+{
+	union
+	{
+		reci bakeRec;
+		struct
+		{
+			v2i bakePos;
+			v2i bakeSize;
+		};
+	};
+	v2 size;
+	v2 origin;
+	r32 advanceX;
+};
+
+struct FontFile_t
+{
+	FontStyleFlags_t styleFlags;
+	u32 fileLength;
+	u8* fileData;
+	stbtt_fontinfo stbInfo;
+};
+
+struct FontBake_t
+{
+	u8 firstChar;
+	u8 numChars;
+	r32 size; //in pixels
+	FontStyleFlags_t styleFlags;
+	NewFontCharInfo_t* charInfos;
+	r32 maxExtendUp;
+	r32 maxExtendDown;
+	r32 lineHeight;
+	Texture_t texture;
+};
+
+struct FontGlyph_t
+{
+	u8 c;
+	r32 size; //in pixels
+	FontStyleFlags_t styleFlags;
+	NewFontCharInfo_t charInfo;
+	Texture_t texture;
+};
+
+struct NewFont_t
+{
+	MemoryArena_t* allocArena;
+	
+	u32 numFiles;
+	FontFile_t* files;
+	
+	u32 numBakes;
+	FontBake_t* bakes;
+	
+	u32 numGlyphs;
+	u32 maxGlyphs;
+	FontGlyph_t* glyphs;
+};
+
+struct FontFlowInfo_t
+{
+	//Passed arguments
+	const char* strPntr;
+	u32 strLength;
+	v2 position;
+	NewFont_t* fontPntr;
+	Alignment_t alignment;
+	r32 fontSize;
+	FontStyleFlags_t styleFlags;
+	bool strictStyle;
+	bool createGlyph;
+	
+	//Results
+	rec extents;
+	v2 endPos;
+	u32 numLines;
+	u32 numRenderables;
+	r32 extentRight;
+	r32 extentDown;
+	v2 totalSize;
+};
+
 struct Shader_t
 {
 	GLuint vertId;

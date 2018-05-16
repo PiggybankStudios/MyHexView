@@ -18,7 +18,7 @@ set LibDirectory=..\..\..\lib
 set SourceDirectory=..\code
 set DataDirectory=..\data
 
-set CompilePlatform=1
+set CompilePlatform=0
 set CompileApplication=1
 set DebugBuild=1
 set CopyToDataDirectory=1
@@ -87,6 +87,8 @@ if "%CompileApplication%"=="1" (
 		echo [Application Build Failed! %ERRORLEVEL%]
 	)
 )
+
+cl /nologo %SourceDirectory%\stb_truetypeTest.cpp /FeTrueTypeTest.exe /I"%LibDirectory%\stb" 
 
 echo[
 

@@ -259,6 +259,39 @@ void UpdateAndRenderDefaultState()
 		}
 		#endif
 		
+		// RcBindTexture(&app->defaultFont.bitmap);
+		// RcDrawTexturedRec(NewRec(500, 500, (r32)app->defaultFont.bitmap.width, (r32)app->defaultFont.bitmap.height), NewColor(Color_White));
+		RcBindTexture(&app->newFont.bakes[1].texture);
+		RcDrawTexturedRec(NewRec(500, 500, (r32)app->newFont.bakes[1].texture.width, (r32)app->newFont.bakes[1].texture.height), NewColor(Color_White));
+		RcPrintString(NewVec2(500, 400), NewColor(Color_White), 1.0f, "NumBakes: %u", app->newFont.numBakes);
+		u32 memUsage = FontGetMemoryUsage(&app->newFont);
+		RcPrintString(NewVec2(500, 420), NewColor(Color_White), 1.0f, "Memory Usage: %s/%s (%.1f%%)", FormattedSizeStr(memUsage), FormattedSizeStr(mainHeap->size), (r32)memUsage / (r32)mainHeap->size);
+		
+		const char* printStr = "Hello \b\x01\xFF\xFF\x01Georgia\x02\b!\x03\x0C and other people too\x04\nWe are \r\x01\x01\xFF\xFFrendering\x02\r using your font :P";
+		// v2 RcNewDrawNtString(const char* nullTermString, v2 position, Color_t color,
+		// 	Alignment_t alignment = Alignment_Left, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false, FontFlowInfo_t* flowInfo = nullptr)
+		FontFlowInfo_t flowInfo; ClearStruct(flowInfo);
+		RcNewDrawNtString(printStr, NewVec2(500, 450), NewColor(Color_White), Alignment_Left, 32, FontStyle_None, true, false, &flowInfo);
+		RcDrawRectangle(flowInfo.extents, ColorTransparent(NewColor(Color_White), 0.1f));
+		RcDrawRectangle(NewRec(flowInfo.position.x, flowInfo.position.y, flowInfo.extentRight, flowInfo.extentDown), ColorTransparent(NewColor(Color_White), 0.1f));
+		RcDrawLineArrow(flowInfo.endPos + NewVec2(10,20), flowInfo.endPos, 4, 1.0f, NewColor(Color_White));
+		
+		// FontChar_t fontChar;
+		// v2 printPos = NewVec2(500, 450);
+		// for (u32 cIndex = 0; printStr[cIndex] != '\0'; cIndex++)
+		// {
+		// 	if (FontGetChar(&app->newFont, &fontChar, printStr[cIndex], 32))
+		// 	{
+		// 		RcBindTexture(fontChar.texture);
+		// 		RcDrawTexturedRec(NewRec(printPos - fontChar.info->origin, fontChar.info->size), NewColor(Color_White), NewRec(fontChar.info->bakeRec));
+		// 		printPos.x += fontChar.info->advanceX;
+		// 	}
+		// 	else
+		// 	{
+		// 		printPos.x += 20;
+		// 	}
+		// }
+		
 		// +==============================+
 		// |     Draw Color Swatches      |
 		// +==============================+
