@@ -136,7 +136,7 @@ void AppLoadContent(bool firstLoad)
 	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiab.ttf", FontStyle_Bold);
 	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiai.ttf", FontStyle_Italic);
 	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiaz.ttf", FontStyle_BoldItalic);
-	FontLoadFile(&app->newFont, FONTS_FOLDER "georgia.ttf", FontStyle_None);
+	FontLoadFile(&app->newFont, FONTS_FOLDER "georgia.ttf",  FontStyle_Default);
 	
 	FontBake(&app->newFont, 12);
 	FontBake(&app->newFont, 24);

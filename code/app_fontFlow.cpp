@@ -7,17 +7,15 @@ Description:
 	** of fonts on the screen or for sizing purposes 
 */
 
-//TODO: Add strictStyle, createGlyph and strictSize to styleFlags
-
-//NOTE: If maxWidth is not 0 then the strLength pntr will be written to with the number of characters that fit on the line
-u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr, NewFont_t* fontPntr,
-	r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false)
+//NOTE: If maxWidth is not nullptr then it will be filled with the actual width of the line that fit into that space
+u32 FontMeasureLineWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr, NewFont_t* fontPntr,
+	r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
 {
 	Assert(strPntr != nullptr);
 	Assert(strLength > 0);
 	Assert(fontPntr != nullptr);
 	
-	FontStyleFlags_t currentStyle = styleFlags;
+	FontStyle_t currentStyle = styleFlags;
 	r32 currentSize = fontSize;
 	r32 maxWidth = 0;
 	if (maxWidthPntr != nullptr)
@@ -26,7 +24,6 @@ u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr
 		*maxWidthPntr = 0;
 	}
 	
-	DEBUG_PrintLine("maxWidth: %f", maxWidth);
 	u32 breakPoint = 0;
 	r32 xPos = 0;
 	r32 lastRenderWidth = 0;
@@ -42,7 +39,7 @@ u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr
 		bool isRenderable = false;
 		if (nextChar == '\t')
 		{
-			if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle, strictStyle, createGlyph))
+			if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle))
 			{
 				charWidth = (fontChar.info->size.width - fontChar.info->origin.x) * TAB_WIDTH;
 				charAdvance = fontChar.info->advanceX * TAB_WIDTH;
@@ -50,7 +47,7 @@ u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr
 		}
 		else if (nextChar == ' ')
 		{
-			if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle, strictStyle, createGlyph))
+			if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle))
 			{
 				charWidth = fontChar.info->size.width - fontChar.info->origin.x;
 				charAdvance = fontChar.info->advanceX;
@@ -62,11 +59,11 @@ u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr
 		}
 		else if (nextChar == '\b')
 		{
-			currentStyle = (FontStyleFlags_t)(currentStyle ^ FontStyle_Bold);
+			currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Bold);
 		}
 		else if (nextChar == '\r')
 		{
-			currentStyle = (FontStyleFlags_t)(currentStyle ^ FontStyle_Italic);
+			currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Italic);
 		}
 		else if (nextChar == '\x01' && numCharsLeft >= 3)
 		{
@@ -88,7 +85,7 @@ u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr
 		}
 		else
 		{
-			if (FontGetChar(fontPntr, &fontChar, nextChar, currentSize, currentStyle, strictStyle, createGlyph))
+			if (FontGetChar(fontPntr, &fontChar, nextChar, currentSize, currentStyle))
 			{
 				if (!IsCharClassAlphaNumeric(nextChar) && IsCharClassBeginningCharacter(nextChar))
 				{
@@ -105,9 +102,8 @@ u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr
 		
 		if (isRenderable)
 		{
-			if (maxWidthPntr != nullptr && renderWidth > maxWidth)
+			if (maxWidthPntr != nullptr && maxWidth != 0 && renderWidth > maxWidth)
 			{
-				DEBUG_PrintLine("%f > %f", renderWidth, maxWidth);
 				if (breakPoint == 0)
 				{
 					if (cIndex > 0)
@@ -156,7 +152,7 @@ u32 FontMeasureStringWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr
 
 //Returns the end position of the text
 v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2 position, Color_t color, NewFont_t* fontPntr,
-	Alignment_t alignment = Alignment_Left, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false, FontFlowInfo_t* flowInfo = nullptr)
+	Alignment_t alignment = Alignment_Left, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
 	if (flowInfo != nullptr)
 	{
@@ -168,12 +164,10 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 		flowInfo->alignment = alignment;
 		flowInfo->fontSize = fontSize;
 		flowInfo->styleFlags = styleFlags;
-		flowInfo->strictStyle = strictStyle;
-		flowInfo->createGlyph = createGlyph;
 		
-		r32 lineHeight = FontGetLineHeight(fontPntr, fontSize, styleFlags, strictStyle);
-		r32 maxExtendUp = FontGetMaxExtendUp(fontPntr, fontSize, styleFlags, strictStyle);
-		r32 maxExtendDown = FontGetMaxExtendDown(fontPntr, fontSize, styleFlags, strictStyle);
+		r32 lineHeight = FontGetLineHeight(fontPntr, fontSize, styleFlags);
+		r32 maxExtendUp = FontGetMaxExtendUp(fontPntr, fontSize, styleFlags);
+		r32 maxExtendDown = FontGetMaxExtendDown(fontPntr, fontSize, styleFlags);
 		flowInfo->totalSize = NewVec2(0, lineHeight);
 		flowInfo->extents = NewRec(position.x, position.y - maxExtendUp, 0, lineHeight);
 		flowInfo->endPos = position;
@@ -181,7 +175,7 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 		flowInfo->numRenderables = 0;
 	}
 	
-	FontStyleFlags_t currentStyle = styleFlags;
+	FontStyle_t currentStyle = styleFlags;
 	Color_t currentColor = color;
 	r32 currentSize = fontSize;
 	v2 drawPos = position;
@@ -193,11 +187,11 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 		if (strPntr[cIndex] == '\n')
 		{
 			drawPos.x = position.x;
-			drawPos.y += FontGetLineHeight(fontPntr, currentSize, currentStyle, strictStyle);
+			drawPos.y += FontGetLineHeight(fontPntr, currentSize, currentStyle);
 		}
 		else if (strPntr[cIndex] == '\t')
 		{
-			if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle, strictStyle, createGlyph))
+			if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle))
 			{
 				charTopLeft = drawPos - fontChar.info->origin;
 				charBottomRight = drawPos + (fontChar.info->size - fontChar.info->origin);
@@ -210,11 +204,11 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 		}
 		else if (strPntr[cIndex] == '\b' && (cIndex == 0 || strPntr[cIndex-1] != '\\'))
 		{
-			currentStyle = (FontStyleFlags_t)(currentStyle ^ FontStyle_Bold);
+			currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Bold);
 		}
 		else if (strPntr[cIndex] == '\r' && (cIndex == 0 || strPntr[cIndex-1] != '\\'))
 		{
-			currentStyle = (FontStyleFlags_t)(currentStyle ^ FontStyle_Italic);
+			currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Italic);
 		}
 		else if (strPntr[cIndex] == '\x01' && (cIndex == 0 || strPntr[cIndex-1] != '\\') && cIndex+3 < strLength)
 		{
@@ -236,7 +230,7 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 		{
 			currentSize = fontSize;
 		}
-		else if (FontGetChar(fontPntr, &fontChar, strPntr[cIndex], currentSize, currentStyle, strictStyle, createGlyph))
+		else if (FontGetChar(fontPntr, &fontChar, strPntr[cIndex], currentSize, currentStyle))
 		{
 			if (drawToScreen)
 			{
@@ -281,34 +275,72 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 	return drawPos;
 }
 
-v2 FontMeasureString(NewFont_t* fontPntr, const char* strPntr, u32 strLength, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool stopOnNewLine = false, bool strictStyle = false, bool createGlyph = false)
+v2 FontMeasureString(const char* strPntr, u32 strLength, NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
-	if (stopOnNewLine)
-	{
-		for (u32 cIndex = 0; cIndex < strLength; cIndex++)
-		{
-			if (strPntr[cIndex] == '\r' || strPntr[cIndex] == '\n')
-			{
-				strLength = cIndex;
-			}
-		}
-	}
-	
-	FontFlowInfo_t flowInfo;
-	FontPerformTextFlow(false, strPntr, strLength, Vec2_Zero, NewColor(Color_White), fontPntr, Alignment_Left, fontSize, styleFlags, strictStyle, createGlyph, &flowInfo);
-	return flowInfo.totalSize;
+	if (flowInfo == nullptr) { flowInfo = PushStruct(TempArena, FontFlowInfo_t); }
+	FontPerformTextFlow(false, strPntr, strLength, Vec2_Zero, NewColor(Color_White), fontPntr, Alignment_Left, fontSize, styleFlags, maxWidth, flowInfo);
+	return NewVec2(flowInfo->extentRight, flowInfo->extentDown);
+}
+v2 FontMeasureNtString(const char* nullTermString, NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
+{
+	if (flowInfo == nullptr) { flowInfo = PushStruct(TempArena, FontFlowInfo_t); }
+	FontPerformTextFlow(false, nullTermString, (u32)strlen(nullTermString), Vec2_Zero, NewColor(Color_White), fontPntr, Alignment_Left, fontSize, styleFlags, maxWidth, flowInfo);
+	return NewVec2(flowInfo->extentRight, flowInfo->extentDown);
+}
+
+r32 FontMeasureLineWidth(const char* strPntr, u32 strLength, NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default, r32 maxWidth = 0)
+{
+	r32 result = maxWidth;
+	FontMeasureLineWidth(strPntr, strLength, &result, fontPntr, fontSize, styleFlags);
+	return result;
+}
+r32 FontMeasureNtLineWidth(const char* nullTermString, NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default, r32 maxWidth = 0)
+{
+	r32 result = maxWidth;
+	FontMeasureLineWidth(nullTermString, (u32)strlen(nullTermString), &result, fontPntr, fontSize, styleFlags);
+	return result;
 }
 
 // +--------------------------------------------------------------+
 // |                Render Context Like Functions                 |
 // +--------------------------------------------------------------+
-v2 RcNewDrawString(const char* strPntr, u32 strLength, v2 position, Color_t color,
-	Alignment_t alignment = Alignment_Left, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false, FontFlowInfo_t* flowInfo = nullptr)
+v2 RcNewDrawString(const char* strPntr, u32 strLength, v2 position, Color_t color, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
-	return FontPerformTextFlow(true, strPntr, strLength, position, color, &app->newFont, alignment, fontSize, styleFlags, strictStyle, createGlyph, flowInfo);
+	Assert(renderContext->boundNewFont != nullptr);
+	return FontPerformTextFlow(true, strPntr, strLength, position, color, renderContext->boundNewFont, renderContext->fontAlignment, renderContext->fontSize, renderContext->fontStyle, maxWidth, flowInfo);
 }
-v2 RcNewDrawNtString(const char* nullTermString, v2 position, Color_t color,
-	Alignment_t alignment = Alignment_Left, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false, FontFlowInfo_t* flowInfo = nullptr)
+v2 RcNewDrawNtString(const char* nullTermString, v2 position, Color_t color, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
-	return FontPerformTextFlow(true, nullTermString, (u32)strlen(nullTermString), position, color, &app->newFont, alignment, fontSize, styleFlags, strictStyle, createGlyph, flowInfo);
+	Assert(renderContext->boundNewFont != nullptr);
+	return FontPerformTextFlow(true, nullTermString, (u32)strlen(nullTermString), position, color, renderContext->boundNewFont, renderContext->fontAlignment, renderContext->fontSize, renderContext->fontStyle, maxWidth, flowInfo);
+}
+
+v2 RcMeasureString(const char* strPntr, u32 strLength, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
+{
+	Assert(renderContext->boundNewFont != nullptr);
+	if (flowInfo == nullptr) { flowInfo = PushStruct(TempArena, FontFlowInfo_t); }
+	FontPerformTextFlow(false, strPntr, strLength, Vec2_Zero, NewColor(Color_White), renderContext->boundNewFont, renderContext->fontAlignment, renderContext->fontSize, renderContext->fontStyle, maxWidth, flowInfo);
+	return NewVec2(flowInfo->extentRight, flowInfo->extentDown);
+}
+v2 RcMeasureNtString(const char* nullTermString, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
+{
+	Assert(renderContext->boundNewFont != nullptr);
+	if (flowInfo == nullptr) { flowInfo = PushStruct(TempArena, FontFlowInfo_t); }
+	FontPerformTextFlow(false, nullTermString, (u32)strlen(nullTermString), Vec2_Zero, NewColor(Color_White), renderContext->boundNewFont, renderContext->fontAlignment, renderContext->fontSize, renderContext->fontStyle, maxWidth, flowInfo);
+	return NewVec2(flowInfo->extentRight, flowInfo->extentDown);
+}
+
+r32 RcMeasureLineWidth(const char* strPntr, u32 strLength, r32 maxWidth = 0)
+{
+	Assert(renderContext->boundNewFont != nullptr);
+	r32 result = maxWidth;
+	FontMeasureLineWidth(strPntr, strLength, &result, renderContext->boundNewFont, renderContext->fontSize, renderContext->fontStyle);
+	return result;
+}
+r32 RcMeasureNtLineWidth(const char* nullTermString, r32 maxWidth = 0)
+{
+	Assert(renderContext->boundNewFont != nullptr);
+	r32 result = maxWidth;
+	FontMeasureLineWidth(nullTermString, (u32)strlen(nullTermString), &result, renderContext->boundNewFont, renderContext->fontSize, renderContext->fontStyle);
+	return result;
 }

@@ -18,11 +18,15 @@ struct RenderContext_t
 	
 	const Shader_t* boundShader;
 	const Font_t* boundFont;
+	NewFont_t* boundNewFont;
 	const Texture_t* boundTexture;
 	const Texture_t* boundAlphaTexture;
 	const VertexBuffer_t* boundBuffer;
 	const FrameBuffer_t* boundFrameBuffer;
 	
+	r32 fontSize;
+	FontStyle_t fontStyle;
+	Alignment_t fontAlignment;
 	mat4 worldMatrix;
 	mat4 viewMatrix;
 	mat4 projectionMatrix;

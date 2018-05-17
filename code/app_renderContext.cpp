@@ -117,6 +117,26 @@ void RcBindFont(const Font_t* fontPntr)
 	renderContext->boundFont = fontPntr;
 }
 
+void RcBindNewFont(NewFont_t* fontPntr)
+{
+	renderContext->boundNewFont = fontPntr;
+}
+
+void RcSetFontSize(r32 fontSize)
+{
+	renderContext->fontSize = fontSize;
+}
+
+void RcSetFontStyle(FontStyle_t fontStyle)
+{
+	renderContext->fontStyle = fontStyle;
+}
+
+void RcSetFontAlignment(Alignment_t alignment)
+{
+	renderContext->fontAlignment = alignment;
+}
+
 void RcBindTexture(const Texture_t* texturePntr)
 {
 	renderContext->boundTexture = texturePntr;

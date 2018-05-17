@@ -72,7 +72,7 @@ bool CreateGameFont(NewFont_t* fontPntr, MemoryArena_t* arenaPntr)
 	return true;
 }
 
-bool FontAddFile(NewFont_t* fontPntr, const void* fileData, u32 fileLength, FontStyleFlags_t styleFlags = FontStyle_None)
+bool FontAddFile(NewFont_t* fontPntr, const void* fileData, u32 fileLength, FontStyle_t styleFlags = FontStyle_Default)
 {
 	Assert(fontPntr != nullptr);
 	Assert(fontPntr->allocArena != nullptr);
@@ -127,7 +127,7 @@ bool FontAddFile(NewFont_t* fontPntr, const void* fileData, u32 fileLength, Font
 	return true;
 }
 
-bool FontLoadFile(NewFont_t* fontPntr, const char* filePath, FontStyleFlags_t styleFlags = FontStyle_None)
+bool FontLoadFile(NewFont_t* fontPntr, const char* filePath, FontStyle_t styleFlags = FontStyle_Default)
 {
 	Assert(filePath != nullptr);
 	
@@ -138,7 +138,7 @@ bool FontLoadFile(NewFont_t* fontPntr, const char* filePath, FontStyleFlags_t st
 	return result;
 }
 
-bool FontBake(NewFont_t* fontPntr, r32 size, FontStyleFlags_t styleFlags = FontStyle_None, u8 firstChar = 0x20, u8 numChars = 96)
+bool FontBake(NewFont_t* fontPntr, r32 size, FontStyle_t styleFlags = FontStyle_Default, u8 firstChar = 0x20, u8 numChars = 96)
 {
 	Assert(fontPntr != nullptr);
 	Assert(fontPntr->allocArena != nullptr);
@@ -312,25 +312,53 @@ u32 FontGetMemoryUsage(NewFont_t* fontPntr)
 	return memoryUsage;
 }
 
-FontBake_t* FontGetBakeFor(NewFont_t* fontPntr, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false)
+// TODO: This should be doing a best match if the font doesn't match exactly
+FontBake_t* FontGetBakeFor(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default, char* neededChar = nullptr)
 {
 	Assert(fontPntr != nullptr);
 	
+	FontBake_t* bestMatch = nullptr;
 	for (u32 bIndex = 0; bIndex < fontPntr->numBakes; bIndex++)
 	{
 		Assert(fontPntr->bakes != nullptr);
 		FontBake_t* bakePntr = &fontPntr->bakes[bIndex];
-		if ((fontSize == 0 || bakePntr->size == fontSize) && (bakePntr->styleFlags == styleFlags || !strictStyle))
+		if (neededChar == nullptr || ((u8)*neededChar >= bakePntr->firstChar && (u8)*neededChar - bakePntr->firstChar < bakePntr->numChars))
 		{
-			return bakePntr;
+			u8 newStyleDiff = FlagsDiffU8((bakePntr->styleFlags & FontStyle_BakeMask), (styleFlags & FontStyle_BakeMask));
+			if (bakePntr->size == fontSize && newStyleDiff == 0)
+			{
+				return bakePntr;
+			}
+			else if ((fontSize == 0 || bakePntr->size == fontSize || !IsFlagSet(styleFlags, FontStyle_StrictSize)) &&
+				(bakePntr->styleFlags == styleFlags || !IsFlagSet(styleFlags, FontStyle_StrictStyle)))
+			{
+				if (bestMatch != nullptr)
+				{
+					r32 newSizeDiff = AbsR32(fontSize - bakePntr->size);
+					r32 oldSizeDiff = AbsR32(fontSize - bestMatch->size);
+					u8 oldStyleDiff = FlagsDiffU8((bestMatch->styleFlags & FontStyle_BakeMask), (styleFlags & FontStyle_BakeMask));
+					if (newSizeDiff < oldSizeDiff)
+					{
+						bestMatch = bakePntr;
+					}
+					else if (newSizeDiff == oldSizeDiff && newStyleDiff < oldStyleDiff)
+					{
+						bestMatch = bakePntr;
+					}
+				}
+				else
+				{
+					bestMatch = bakePntr;
+				}
+			}
 		}
 	}
 	
-	return nullptr;
+	return bestMatch;
 }
-r32 FontGetLineHeight(NewFont_t* fontPntr, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false)
+r32 FontGetLineHeight(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
 {
-	FontBake_t* fontBake = FontGetBakeFor(fontPntr, fontSize, styleFlags, strictStyle);
+	FontBake_t* fontBake = FontGetBakeFor(fontPntr, fontSize, styleFlags);
 	if (fontBake != nullptr)
 	{
 		return fontBake->lineHeight;
@@ -340,9 +368,9 @@ r32 FontGetLineHeight(NewFont_t* fontPntr, r32 fontSize = 0, FontStyleFlags_t st
 		return fontSize; //This is often correct
 	}
 }
-r32 FontGetMaxExtendUp(NewFont_t* fontPntr, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false)
+r32 FontGetMaxExtendUp(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
 {
-	FontBake_t* fontBake = FontGetBakeFor(fontPntr, fontSize, styleFlags, strictStyle);
+	FontBake_t* fontBake = FontGetBakeFor(fontPntr, fontSize, styleFlags);
 	if (fontBake != nullptr)
 	{
 		return fontBake->maxExtendUp;
@@ -352,9 +380,9 @@ r32 FontGetMaxExtendUp(NewFont_t* fontPntr, r32 fontSize = 0, FontStyleFlags_t s
 		return fontSize * (3/4); //NOTE: This is just a random guess
 	}
 }
-r32 FontGetMaxExtendDown(NewFont_t* fontPntr, r32 fontSize = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false)
+r32 FontGetMaxExtendDown(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
 {
-	FontBake_t* fontBake = FontGetBakeFor(fontPntr, fontSize, styleFlags, strictStyle);
+	FontBake_t* fontBake = FontGetBakeFor(fontPntr, fontSize, styleFlags);
 	if (fontBake != nullptr)
 	{
 		return fontBake->maxExtendDown;
@@ -372,30 +400,25 @@ struct FontChar_t
 	NewFontCharInfo_t* info;
 };
 
-//TODO: Should we add a strictSize option that will allow finding the closest font size?
-bool FontGetChar(NewFont_t* fontPntr, FontChar_t* fontCharOut, char character, r32 size = 0, FontStyleFlags_t styleFlags = FontStyle_None, bool strictStyle = false, bool createGlyph = false)
+//NOTE: fontCharOut can be nullptr
+bool FontGetChar(NewFont_t* fontPntr, FontChar_t* fontCharOut, char character, r32 size = 0, FontStyle_t styleFlags = FontStyle_Default)
 {
 	Assert(fontPntr != nullptr);
 	
-	for (u32 bIndex = 0; bIndex < fontPntr->numBakes; bIndex++)
+	FontBake_t* bakePntr = FontGetBakeFor(fontPntr, size, styleFlags, &character);
+	if (bakePntr != nullptr)
 	{
-		Assert(fontPntr->bakes != nullptr);
-		FontBake_t* bakePntr = &fontPntr->bakes[bIndex];
-		if ((size == 0 || bakePntr->size == size) && (bakePntr->styleFlags == styleFlags || !strictStyle) &&
-			(u8)character >= bakePntr->firstChar && (u8)character - bakePntr->firstChar < bakePntr->numChars)
+		if (fontCharOut != nullptr)
 		{
-			if (fontCharOut != nullptr)
-			{
-				ClearPointer(fontCharOut);
-				fontCharOut->baked = true;
-				fontCharOut->texture = &bakePntr->texture;
-				fontCharOut->info = &bakePntr->charInfos[(u8)character - bakePntr->firstChar];
-			}
-			return true;
+			ClearPointer(fontCharOut);
+			fontCharOut->baked = true;
+			fontCharOut->texture = &bakePntr->texture;
+			fontCharOut->info = &bakePntr->charInfos[(u8)character - bakePntr->firstChar];
 		}
+		return true;
 	}
 	
-	if (createGlyph)
+	if (IsFlagSet(styleFlags, FontStyle_CreateGlyphs))
 	{
 		Assert(false); //TODO: Not yet supported!
 	}

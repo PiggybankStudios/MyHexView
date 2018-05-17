@@ -1,7 +1,7 @@
 /*
 File:   app_structs.h
-Author: Taylor Robbins
-Date:   03\03\2018
+Author:Taylor Robbins
+Date:   03\3\2018
 */
 
 #ifndef _APP_STRUCTS_H
@@ -71,13 +71,31 @@ struct Font_t
 
 typedef enum
 {
-	FontStyle_None   = 0x00,
+	FontStyle_Default = 0x00,
 	
-	FontStyle_Bold   = 0x01,
-	FontStyle_Italic = 0x02,
+	FontStyle_Bold         = 0x01,
+	FontStyle_Italic       = 0x02,
+	FontStyle_StrictStyle  = 0x04,
+	FontStyle_StrictSize   = 0x08,
+	FontStyle_CreateGlyphs = 0x10,
+	
+	FontStyle_BakeMask = FontStyle_Bold|FontStyle_Italic,
 	
 	FontStyle_BoldItalic = FontStyle_Bold|FontStyle_Italic,
-} FontStyleFlags_t;
+	FontStyle_StrictSizeStyle = FontStyle_StrictSize|FontStyle_StrictStyle,
+	
+	FontStyle_BoldStrictSize = FontStyle_Bold|FontStyle_StrictSize,
+	FontStyle_BoldStrictStyle = FontStyle_Bold|FontStyle_StrictStyle,
+	FontStyle_BoldStrictSizeStyle = FontStyle_Bold|FontStyle_StrictSize|FontStyle_StrictStyle,
+	
+	FontStyle_ItalicStrictSize = FontStyle_Italic|FontStyle_StrictSize,
+	FontStyle_ItalicStrictStyle = FontStyle_Italic|FontStyle_StrictStyle,
+	FontStyle_ItalicStrictSizeStyle = FontStyle_Italic|FontStyle_StrictSize|FontStyle_StrictStyle,
+	
+	FontStyle_BoldItalicStrictSize = FontStyle_Bold|FontStyle_Italic|FontStyle_StrictSize,
+	FontStyle_BoldItalicStrictStyle = FontStyle_Bold|FontStyle_Italic|FontStyle_StrictStyle,
+	FontStyle_BoldItalicStrictSizeStyle = FontStyle_Bold|FontStyle_Italic|FontStyle_StrictSize|FontStyle_StrictStyle,
+} FontStyle_t;
 
 struct NewFontCharInfo_t
 {
@@ -97,7 +115,7 @@ struct NewFontCharInfo_t
 
 struct FontFile_t
 {
-	FontStyleFlags_t styleFlags;
+	FontStyle_t styleFlags;
 	u32 fileLength;
 	u8* fileData;
 	stbtt_fontinfo stbInfo;
@@ -108,7 +126,7 @@ struct FontBake_t
 	u8 firstChar;
 	u8 numChars;
 	r32 size; //in pixels
-	FontStyleFlags_t styleFlags;
+	FontStyle_t styleFlags;
 	NewFontCharInfo_t* charInfos;
 	r32 maxExtendUp;
 	r32 maxExtendDown;
@@ -120,7 +138,7 @@ struct FontGlyph_t
 {
 	u8 c;
 	r32 size; //in pixels
-	FontStyleFlags_t styleFlags;
+	FontStyle_t styleFlags;
 	NewFontCharInfo_t charInfo;
 	Texture_t texture;
 };
@@ -149,7 +167,7 @@ struct FontFlowInfo_t
 	NewFont_t* fontPntr;
 	Alignment_t alignment;
 	r32 fontSize;
-	FontStyleFlags_t styleFlags;
+	FontStyle_t styleFlags;
 	bool strictStyle;
 	bool createGlyph;
 	
