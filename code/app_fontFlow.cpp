@@ -175,6 +175,8 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 		flowInfo->numRenderables = 0;
 	}
 	
+	r32 underlineThickness = 1;
+	v2 underlineOffset = NewVec2(0, 1);
 	FontStyle_t currentStyle = styleFlags;
 	Color_t currentColor = color;
 	r32 currentSize = fontSize;
@@ -196,6 +198,7 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 			drawPos.x -= lineWidth / 2;
 		}
 		
+		v2 underlineStart = drawPos;
 		for (u32 cIndex = 0; cIndex < chunkLength; cIndex++)
 		{
 			u32 numCharsLeft = chunkLength - (cIndex+1);
@@ -220,31 +223,53 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 					//TODO: Can't render a tab because no space character available!
 				}
 			}
-			else if (nextChar == '\b')
+			else if (nextChar == '\b') //Bold
 			{
 				currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Bold);
 			}
-			else if (nextChar == '\r')
+			else if (nextChar == '\r') //Italic
 			{
 				currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Italic);
 			}
-			else if (nextChar == '\x01' && numCharsLeft >= 3)
+			else if (nextChar == '\a') //Underline
 			{
+				if (IsFlagSet(currentStyle, FontStyle_Underline) && underlineStart != drawPos)
+				{
+					RcDrawLine(underlineStart + underlineOffset, drawPos + underlineOffset, underlineThickness, currentColor);
+				}
+				else
+				{
+					underlineStart = drawPos;
+				}
+				currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Underline);
+			}
+			else if (nextChar == '\x01' && numCharsLeft >= 3) //Set Color
+			{
+				if (IsFlagSet(currentStyle, FontStyle_Underline) && underlineStart != drawPos)
+				{
+					RcDrawLine(underlineStart + underlineOffset, drawPos + underlineOffset, underlineThickness, currentColor);
+					underlineStart = drawPos;
+				}
 				currentColor.red = (u8)(chunkPntr[cIndex+1]);
 				currentColor.green = (u8)(chunkPntr[cIndex+2]);
 				currentColor.blue = (u8)(chunkPntr[cIndex+3]);
 				cIndex += 3;
 			}
-			else if (nextChar == '\x02')
+			else if (nextChar == '\x02') //Default Color
 			{
+				if (IsFlagSet(currentStyle, FontStyle_Underline) && underlineStart != drawPos)
+				{
+					RcDrawLine(underlineStart + underlineOffset, drawPos + underlineOffset, underlineThickness, currentColor);
+					underlineStart = drawPos;
+				}
 				currentColor = color;
 			}
-			else if (nextChar == '\x03' && numCharsLeft >= 1)
+			else if (nextChar == '\x03' && numCharsLeft >= 1) //Set Size
 			{
 				currentSize = (r32)((u8)chunkPntr[cIndex+1]);
 				cIndex += 1;
 			}
-			else if (nextChar == '\x04')
+			else if (nextChar == '\x04') //Default Size
 			{
 				currentSize = fontSize;
 			}
@@ -283,11 +308,18 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 			}
 		}
 		
+		if (IsFlagSet(currentStyle, FontStyle_Underline) && underlineStart != drawPos)
+		{
+			RcDrawLine(underlineStart + underlineOffset, drawPos + underlineOffset, underlineThickness, currentColor);
+		}
+		
 		chunkStart += chunkLength;
 		if (chunkStart < strLength)
 		{
+			//NOTE: We intentionally use fontSize and fontStyle not currentSize and currentStyle so the lines
+			//      accommadate the default font height at all times
 			drawPos.x = position.x;
-			drawPos.y += FontGetLineHeight(fontPntr, currentSize, currentStyle);
+			drawPos.y += FontGetLineHeight(fontPntr, fontSize, styleFlags);
 		}
 	}
 	

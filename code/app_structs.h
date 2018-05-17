@@ -75,9 +75,10 @@ typedef enum
 	
 	FontStyle_Bold         = 0x01,
 	FontStyle_Italic       = 0x02,
-	FontStyle_StrictStyle  = 0x04,
-	FontStyle_StrictSize   = 0x08,
-	FontStyle_CreateGlyphs = 0x10,
+	FontStyle_Underline    = 0x04,
+	FontStyle_StrictStyle  = 0x08,
+	FontStyle_StrictSize   = 0x10,
+	FontStyle_CreateGlyphs = 0x20,
 	
 	FontStyle_BakeMask = FontStyle_Bold|FontStyle_Italic,
 	

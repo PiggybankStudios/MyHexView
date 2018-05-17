@@ -365,6 +365,7 @@
 			"FontStyle_StrictSize",
 			"FontStyle_StrictSizeStyle",
 			"FontStyle_StrictStyle",
+			"FontStyle_Underline",
 			"GLEW_OK",
 			"GLFW_ALPHA_BITS",
 			"GLFW_ARROW_CURSOR",
