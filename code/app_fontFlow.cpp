@@ -180,88 +180,114 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 	r32 currentSize = fontSize;
 	v2 drawPos = position;
 	FontChar_t fontChar;
-	for (u32 cIndex = 0; cIndex < strLength; cIndex++)
+	u32 chunkStart = 0;
+	while (chunkStart < strLength)
 	{
-		v2 charTopLeft = drawPos;
-		v2 charBottomRight = drawPos;
-		if (strPntr[cIndex] == '\n')
+		const char* chunkPntr = &strPntr[chunkStart];
+		r32 lineWidth = maxWidth;
+		u32 chunkLength = FontMeasureLineWidth(chunkPntr, strLength - chunkStart, &lineWidth, fontPntr, currentSize, currentStyle);
+		DEBUG_PrintLine("Got chunk %u-%u/%u", chunkStart, chunkStart + chunkLength, strLength);
+		if (alignment == Alignment_Right)
 		{
-			drawPos.x = position.x;
-			drawPos.y += FontGetLineHeight(fontPntr, currentSize, currentStyle);
+			drawPos.x -= lineWidth;
 		}
-		else if (strPntr[cIndex] == '\t')
+		else if (alignment == Alignment_Center)
 		{
-			if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle))
+			drawPos.x -= lineWidth / 2;
+		}
+		
+		for (u32 cIndex = 0; cIndex < chunkLength; cIndex++)
+		{
+			u32 numCharsLeft = chunkLength - (cIndex+1);
+			char nextChar = chunkPntr[cIndex];
+			v2 charTopLeft = drawPos;
+			v2 charBottomRight = drawPos;
+			if (nextChar == '\n')
 			{
+				Assert(cIndex == chunkLength-1);
+				break;
+			}
+			else if (nextChar == '\t')
+			{
+				if (FontGetChar(fontPntr, &fontChar, ' ', currentSize, currentStyle))
+				{
+					charTopLeft = drawPos - fontChar.info->origin;
+					charBottomRight = drawPos + (fontChar.info->size - fontChar.info->origin);
+					drawPos.x += fontChar.info->advanceX * TAB_WIDTH;
+				}
+				else
+				{
+					//TODO: Can't render a tab because no space character available!
+				}
+			}
+			else if (nextChar == '\b')
+			{
+				currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Bold);
+			}
+			else if (nextChar == '\r')
+			{
+				currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Italic);
+			}
+			else if (nextChar == '\x01' && numCharsLeft >= 3)
+			{
+				currentColor.red = (u8)(chunkPntr[cIndex+1]);
+				currentColor.green = (u8)(chunkPntr[cIndex+2]);
+				currentColor.blue = (u8)(chunkPntr[cIndex+3]);
+				cIndex += 3;
+			}
+			else if (nextChar == '\x02')
+			{
+				currentColor = color;
+			}
+			else if (nextChar == '\x03' && numCharsLeft >= 1)
+			{
+				currentSize = (r32)((u8)chunkPntr[cIndex+1]);
+				cIndex += 1;
+			}
+			else if (nextChar == '\x04')
+			{
+				currentSize = fontSize;
+			}
+			else if (FontGetChar(fontPntr, &fontChar, nextChar, currentSize, currentStyle))
+			{
+				if (drawToScreen)
+				{
+					RcBindTexture(fontChar.texture);
+					RcDrawTexturedRec(NewRec(drawPos - fontChar.info->origin, fontChar.info->size), currentColor, NewRec(fontChar.info->bakeRec));
+				}
+				
 				charTopLeft = drawPos - fontChar.info->origin;
-				charBottomRight = drawPos + (fontChar.info->size - fontChar.info->origin);
-				drawPos.x += fontChar.info->advanceX * TAB_WIDTH;
+				charBottomRight = charTopLeft + fontChar.info->size;
+				drawPos.x += fontChar.info->advanceX;
+				if (flowInfo != nullptr) { flowInfo->numRenderables++; }
 			}
 			else
 			{
-				//TODO: Can't render a tab because no space character available!
-			}
-		}
-		else if (strPntr[cIndex] == '\b' && (cIndex == 0 || strPntr[cIndex-1] != '\\'))
-		{
-			currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Bold);
-		}
-		else if (strPntr[cIndex] == '\r' && (cIndex == 0 || strPntr[cIndex-1] != '\\'))
-		{
-			currentStyle = (FontStyle_t)(currentStyle ^ FontStyle_Italic);
-		}
-		else if (strPntr[cIndex] == '\x01' && (cIndex == 0 || strPntr[cIndex-1] != '\\') && cIndex+3 < strLength)
-		{
-			currentColor.red = (u8)(strPntr[cIndex+1]);
-			currentColor.green = (u8)(strPntr[cIndex+2]);
-			currentColor.blue = (u8)(strPntr[cIndex+3]);
-			cIndex += 3;
-		}
-		else if (strPntr[cIndex] == '\x02' && (cIndex == 0 || strPntr[cIndex-1] != '\\'))
-		{
-			currentColor = color;
-		}
-		else if (strPntr[cIndex] == '\x03' && (cIndex == 0 || strPntr[cIndex-1] != '\\') && cIndex+1 < strLength)
-		{
-			currentSize = (r32)((u8)strPntr[cIndex+1]);
-			cIndex += 1;
-		}
-		else if (strPntr[cIndex] == '\x04' && (cIndex == 0 || strPntr[cIndex-1] != '\\'))
-		{
-			currentSize = fontSize;
-		}
-		else if (FontGetChar(fontPntr, &fontChar, strPntr[cIndex], currentSize, currentStyle))
-		{
-			if (drawToScreen)
-			{
-				RcBindTexture(fontChar.texture);
-				RcDrawTexturedRec(NewRec(drawPos - fontChar.info->origin, fontChar.info->size), currentColor, NewRec(fontChar.info->bakeRec));
+				//TODO: Should we somehow render an invalid character?
 			}
 			
-			charTopLeft = drawPos - fontChar.info->origin;
-			charBottomRight = charTopLeft + fontChar.info->size;
-			drawPos.x += fontChar.info->advanceX;
-			if (flowInfo != nullptr) { flowInfo->numRenderables++; }
-		}
-		else
-		{
-			//TODO: Should we somehow render an invalid character?
+			if (flowInfo != nullptr)
+			{
+				if (charTopLeft.x < flowInfo->extents.x)
+				{
+					flowInfo->extents.width += flowInfo->extents.x - charTopLeft.x;
+					flowInfo->extents.x = charTopLeft.x;
+				}
+				if (charTopLeft.y < flowInfo->extents.y)
+				{
+					flowInfo->extents.height += flowInfo->extents.y - charTopLeft.y;
+					flowInfo->extents.y = charTopLeft.y;
+				}
+				if (charBottomRight.x - flowInfo->extents.x > flowInfo->extents.width) { flowInfo->extents.width = charBottomRight.x - flowInfo->extents.x; }
+				if (charBottomRight.y - flowInfo->extents.y > flowInfo->extents.height) { flowInfo->extents.height = charBottomRight.y - flowInfo->extents.y; }
+			}
 		}
 		
-		if (flowInfo != nullptr)
+		chunkStart += chunkLength;
+		if (chunkStart < strLength)
 		{
-			if (charTopLeft.x < flowInfo->extents.x)
-			{
-				flowInfo->extents.width += flowInfo->extents.x - charTopLeft.x;
-				flowInfo->extents.x = charTopLeft.x;
-			}
-			if (charTopLeft.y < flowInfo->extents.y)
-			{
-				flowInfo->extents.height += flowInfo->extents.y - charTopLeft.y;
-				flowInfo->extents.y = charTopLeft.y;
-			}
-			if (charBottomRight.x - flowInfo->extents.x > flowInfo->extents.width) { flowInfo->extents.width = charBottomRight.x - flowInfo->extents.x; }
-			if (charBottomRight.y - flowInfo->extents.y > flowInfo->extents.height) { flowInfo->extents.height = charBottomRight.y - flowInfo->extents.y; }
+			drawPos.x = position.x;
+			drawPos.y += FontGetLineHeight(fontPntr, currentSize, currentStyle);
 		}
 	}
 	
