@@ -154,6 +154,9 @@ u32 FontMeasureLineWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr, 
 v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2 position, Color_t color, NewFont_t* fontPntr,
 	Alignment_t alignment = Alignment_Left, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
+	r32 lineHeight = FontGetLineHeight(fontPntr, fontSize, styleFlags);
+	r32 maxExtendUp = FontGetMaxExtendUp(fontPntr, fontSize, styleFlags);
+	r32 maxExtendDown = FontGetMaxExtendDown(fontPntr, fontSize, styleFlags);
 	if (flowInfo != nullptr)
 	{
 		ClearPointer(flowInfo);
@@ -165,9 +168,6 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 		flowInfo->fontSize = fontSize;
 		flowInfo->styleFlags = styleFlags;
 		
-		r32 lineHeight = FontGetLineHeight(fontPntr, fontSize, styleFlags);
-		r32 maxExtendUp = FontGetMaxExtendUp(fontPntr, fontSize, styleFlags);
-		r32 maxExtendDown = FontGetMaxExtendDown(fontPntr, fontSize, styleFlags);
 		flowInfo->totalSize = NewVec2(0, lineHeight);
 		flowInfo->extents = NewRec(position.x, position.y - maxExtendUp, 0, lineHeight);
 		flowInfo->endPos = position;
@@ -278,7 +278,25 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 				if (drawToScreen)
 				{
 					RcBindTexture(fontChar.texture);
-					RcDrawTexturedRec(NewRec(drawPos - fontChar.info->origin, fontChar.info->size), currentColor, NewRec(fontChar.info->bakeRec));
+					rec drawRec = NewRec(drawPos - fontChar.info->origin, fontChar.info->size);
+					Color_t drawColor = currentColor;
+					if (IsFlagSet(currentStyle, FontStyle_Bold))
+					{
+						drawRec.y += maxExtendDown/2 * SinR32((r32)((platform->programTime + cIndex*30)%800) / 800 * 2*Pi32);
+					}
+					if (IsFlagSet(currentStyle, FontStyle_Italic))
+					{
+						r32 scale = 1.0f + 0.1f*SinR32((r32)((platform->programTime + cIndex*30)%800) / 800 * 2*Pi32);
+						// drawRec.size = drawRec.size * scale;
+						drawRec = RecInflateX(drawRec, drawRec.size.x * (scale - 1.0f));
+						drawRec = RecInflateY(drawRec, drawRec.size.y * (scale - 1.0f));
+					}
+					if (!IsFlagSet(currentStyle, FontStyle_Italic))
+					{
+						r32 hue = 180 + 180*SinR32((r32)((platform->programTime + cIndex*0)%4000) / 4000 * 2*Pi32);
+						drawColor = ColorFromHSV((u16)RoundR32(hue), 0.7f, 1.0f);
+					}
+					RcDrawTexturedRec(drawRec, drawColor, NewRec(fontChar.info->bakeRec));
 				}
 				
 				charTopLeft = drawPos - fontChar.info->origin;
@@ -308,18 +326,21 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 			}
 		}
 		
-		if (IsFlagSet(currentStyle, FontStyle_Underline) && underlineStart != drawPos)
+		if (drawToScreen)
 		{
-			RcDrawLine(underlineStart + underlineOffset, drawPos + underlineOffset, underlineThickness, currentColor);
+			if (IsFlagSet(currentStyle, FontStyle_Underline) && underlineStart != drawPos)
+			{
+				RcDrawLine(underlineStart + underlineOffset, drawPos + underlineOffset, underlineThickness, currentColor);
+			}
 		}
 		
 		chunkStart += chunkLength;
 		if (chunkStart < strLength)
 		{
-			//NOTE: We intentionally use fontSize and fontStyle not currentSize and currentStyle so the lines
+			//NOTE: We intentionally use lineHeight not currentSize and currentStyle so the lines
 			//      accommadate the default font height at all times
 			drawPos.x = position.x;
-			drawPos.y += FontGetLineHeight(fontPntr, fontSize, styleFlags);
+			drawPos.y += lineHeight;
 		}
 	}
 	
