@@ -267,7 +267,7 @@ void UpdateAndRenderDefaultState()
 		u32 memUsage = FontGetMemoryUsage(&app->newFont);
 		RcPrintString(NewVec2(500, 420), NewColor(Color_White), 1.0f, "Memory Usage: %s/%s (%.1f%%)", FormattedSizeStr(memUsage), FormattedSizeStr(mainHeap->size), (r32)memUsage / (r32)mainHeap->size);
 		
-		const char* printStr = "(This) is a \b\x01\xFF\xFF\x01\areally long\a\x02\b string with stuff like\t\t\"quotations\" and [brackets]!\x03\x18 and \aother\a things too\x04 \x03\x0CPeanuts\x04\n\nWe are \r\x01\x01\xFF\xFFrendering\x02\r using your font :P";
+		const char* printStr = "(This) is a \b\x01\xFF\xFF\x01\areally long\a\x02\b \v\x41string\v\x40 with stuff like\t\t\v\x21\"quotations\"\v\x20 and [brackets]!\x03\x18 and \aother\a things too\x04 \x03\x0CPeanuts\x04\n\nWe are \r\x01\x01\xFF\xFFrendering\x02\r using \v\x61\v\x71your\v\x60 font :P";
 		v2 textPos = NewVec2(500, 450);
 		// r32 FontGetMaxExtendUp(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
 		r32 fontMaxExtendUp = FontGetMaxExtendUp(&app->newFont, 32, FontStyle_Default);
@@ -281,7 +281,7 @@ void UpdateAndRenderDefaultState()
 		
 		FontFlowInfo_t flowInfo; ClearStruct(flowInfo);
 		RcNewDrawNtString(printStr, textPos, NewColor(Color_White), maxWidth, &flowInfo);
-		// RcDrawRectangle(flowInfo.extents, ColorTransparent(NewColor(Color_White), 0.1f));
+		RcDrawRectangle(flowInfo.extents, ColorTransparent(NewColor(Color_White), 0.1f));
 		// RcDrawRectangle(NewRec(flowInfo.position.x, flowInfo.position.y, flowInfo.extentRight, flowInfo.extentDown), ColorTransparent(NewColor(Color_White), 0.1f));
 		// RcDrawLineArrow(flowInfo.endPos + NewVec2(10,20), flowInfo.endPos, 4, 1.0f, NewColor(Color_White));
 		

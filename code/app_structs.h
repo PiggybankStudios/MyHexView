@@ -71,31 +71,31 @@ struct Font_t
 
 typedef enum
 {
-	FontStyle_Default = 0x00,
+	FontStyle_Default = 0x0000,
 	
-	FontStyle_Bold         = 0x01,
-	FontStyle_Italic       = 0x02,
-	FontStyle_Underline    = 0x04,
-	FontStyle_StrictStyle  = 0x08,
-	FontStyle_StrictSize   = 0x10,
-	FontStyle_CreateGlyphs = 0x20,
+	FontStyle_Bold         = 0x0001,
+	FontStyle_Italic       = 0x0002,
+	FontStyle_Underline    = 0x0004,
+	FontStyle_Wave         = 0x0008, //0x1
+	FontStyle_Bubble       = 0x0010, //0x2
+	FontStyle_Bounce       = 0x0020, //0x3
+	FontStyle_Jitter       = 0x0040, //0x4
+	FontStyle_Wobble       = 0x0080, //0x5
+	FontStyle_Faded        = 0x0100, //0x6
+	FontStyle_Rainbow      = 0x0200, //0x7
+	FontStyle_Emboss       = 0x0400, //0x8
 	
-	FontStyle_BakeMask = FontStyle_Bold|FontStyle_Italic,
+	FontStyle_CreateGlyphs = 0x2000,
+	FontStyle_StrictStyle  = 0x4000,
+	FontStyle_StrictSize   = 0x8000,
 	
 	FontStyle_BoldItalic = FontStyle_Bold|FontStyle_Italic,
+	FontStyle_BoldUnderline = FontStyle_Bold|FontStyle_Underline,
+	FontStyle_ItalicUnderline = FontStyle_Italic|FontStyle_Underline,
+	FontStyle_BoldItalicUnderline = FontStyle_Bold|FontStyle_Italic|FontStyle_Underline,
+	
+	FontStyle_BakeMask = FontStyle_Bold|FontStyle_Italic,
 	FontStyle_StrictSizeStyle = FontStyle_StrictSize|FontStyle_StrictStyle,
-	
-	FontStyle_BoldStrictSize = FontStyle_Bold|FontStyle_StrictSize,
-	FontStyle_BoldStrictStyle = FontStyle_Bold|FontStyle_StrictStyle,
-	FontStyle_BoldStrictSizeStyle = FontStyle_Bold|FontStyle_StrictSize|FontStyle_StrictStyle,
-	
-	FontStyle_ItalicStrictSize = FontStyle_Italic|FontStyle_StrictSize,
-	FontStyle_ItalicStrictStyle = FontStyle_Italic|FontStyle_StrictStyle,
-	FontStyle_ItalicStrictSizeStyle = FontStyle_Italic|FontStyle_StrictSize|FontStyle_StrictStyle,
-	
-	FontStyle_BoldItalicStrictSize = FontStyle_Bold|FontStyle_Italic|FontStyle_StrictSize,
-	FontStyle_BoldItalicStrictStyle = FontStyle_Bold|FontStyle_Italic|FontStyle_StrictStyle,
-	FontStyle_BoldItalicStrictSizeStyle = FontStyle_Bold|FontStyle_Italic|FontStyle_StrictSize|FontStyle_StrictStyle,
 } FontStyle_t;
 
 struct NewFontCharInfo_t
@@ -116,7 +116,7 @@ struct NewFontCharInfo_t
 
 struct FontFile_t
 {
-	FontStyle_t styleFlags;
+	u16 styleFlags;
 	u32 fileLength;
 	u8* fileData;
 	stbtt_fontinfo stbInfo;
@@ -127,7 +127,7 @@ struct FontBake_t
 	u8 firstChar;
 	u8 numChars;
 	r32 size; //in pixels
-	FontStyle_t styleFlags;
+	u16 styleFlags;
 	NewFontCharInfo_t* charInfos;
 	r32 maxExtendUp;
 	r32 maxExtendDown;
@@ -139,7 +139,7 @@ struct FontGlyph_t
 {
 	u8 c;
 	r32 size; //in pixels
-	FontStyle_t styleFlags;
+	u16 styleFlags;
 	NewFontCharInfo_t charInfo;
 	Texture_t texture;
 };
@@ -168,9 +168,7 @@ struct FontFlowInfo_t
 	NewFont_t* fontPntr;
 	Alignment_t alignment;
 	r32 fontSize;
-	FontStyle_t styleFlags;
-	bool strictStyle;
-	bool createGlyph;
+	u16 styleFlags;
 	
 	//Results
 	rec extents;

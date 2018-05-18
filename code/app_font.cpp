@@ -72,7 +72,7 @@ bool CreateGameFont(NewFont_t* fontPntr, MemoryArena_t* arenaPntr)
 	return true;
 }
 
-bool FontAddFile(NewFont_t* fontPntr, const void* fileData, u32 fileLength, FontStyle_t styleFlags = FontStyle_Default)
+bool FontAddFile(NewFont_t* fontPntr, const void* fileData, u32 fileLength, u16 styleFlags = FontStyle_Default)
 {
 	Assert(fontPntr != nullptr);
 	Assert(fontPntr->allocArena != nullptr);
@@ -127,7 +127,7 @@ bool FontAddFile(NewFont_t* fontPntr, const void* fileData, u32 fileLength, Font
 	return true;
 }
 
-bool FontLoadFile(NewFont_t* fontPntr, const char* filePath, FontStyle_t styleFlags = FontStyle_Default)
+bool FontLoadFile(NewFont_t* fontPntr, const char* filePath, u16 styleFlags = FontStyle_Default)
 {
 	Assert(filePath != nullptr);
 	
@@ -138,7 +138,7 @@ bool FontLoadFile(NewFont_t* fontPntr, const char* filePath, FontStyle_t styleFl
 	return result;
 }
 
-bool FontBake(NewFont_t* fontPntr, r32 size, FontStyle_t styleFlags = FontStyle_Default, u8 firstChar = 0x20, u8 numChars = 96)
+bool FontBake(NewFont_t* fontPntr, r32 size, u16 styleFlags = FontStyle_Default, u8 firstChar = 0x20, u8 numChars = 96)
 {
 	Assert(fontPntr != nullptr);
 	Assert(fontPntr->allocArena != nullptr);
@@ -313,7 +313,7 @@ u32 FontGetMemoryUsage(NewFont_t* fontPntr)
 }
 
 // TODO: This should be doing a best match if the font doesn't match exactly
-FontBake_t* FontGetBakeFor(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default, char* neededChar = nullptr)
+FontBake_t* FontGetBakeFor(NewFont_t* fontPntr, r32 fontSize = 0, u16 styleFlags = FontStyle_Default, char* neededChar = nullptr)
 {
 	Assert(fontPntr != nullptr);
 	
@@ -356,7 +356,7 @@ FontBake_t* FontGetBakeFor(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t st
 	
 	return bestMatch;
 }
-r32 FontGetLineHeight(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
+r32 FontGetLineHeight(NewFont_t* fontPntr, r32 fontSize = 0, u16 styleFlags = FontStyle_Default)
 {
 	FontBake_t* fontBake = FontGetBakeFor(fontPntr, fontSize, styleFlags);
 	if (fontBake != nullptr)
@@ -368,7 +368,7 @@ r32 FontGetLineHeight(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFl
 		return fontSize; //This is often correct
 	}
 }
-r32 FontGetMaxExtendUp(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
+r32 FontGetMaxExtendUp(NewFont_t* fontPntr, r32 fontSize = 0, u16 styleFlags = FontStyle_Default)
 {
 	FontBake_t* fontBake = FontGetBakeFor(fontPntr, fontSize, styleFlags);
 	if (fontBake != nullptr)
@@ -380,7 +380,7 @@ r32 FontGetMaxExtendUp(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleF
 		return fontSize * (3/4); //NOTE: This is just a random guess
 	}
 }
-r32 FontGetMaxExtendDown(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
+r32 FontGetMaxExtendDown(NewFont_t* fontPntr, r32 fontSize = 0, u16 styleFlags = FontStyle_Default)
 {
 	FontBake_t* fontBake = FontGetBakeFor(fontPntr, fontSize, styleFlags);
 	if (fontBake != nullptr)
@@ -401,7 +401,7 @@ struct FontChar_t
 };
 
 //NOTE: fontCharOut can be nullptr
-bool FontGetChar(NewFont_t* fontPntr, FontChar_t* fontCharOut, char character, r32 size = 0, FontStyle_t styleFlags = FontStyle_Default)
+bool FontGetChar(NewFont_t* fontPntr, FontChar_t* fontCharOut, char character, r32 size = 0, u16 styleFlags = FontStyle_Default)
 {
 	Assert(fontPntr != nullptr);
 	

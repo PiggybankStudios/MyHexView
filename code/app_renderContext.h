@@ -25,7 +25,7 @@ struct RenderContext_t
 	const FrameBuffer_t* boundFrameBuffer;
 	
 	r32 fontSize;
-	FontStyle_t fontStyle;
+	u16 fontStyle;
 	Alignment_t fontAlignment;
 	mat4 worldMatrix;
 	mat4 viewMatrix;

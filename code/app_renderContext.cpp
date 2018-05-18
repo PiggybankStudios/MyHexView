@@ -127,7 +127,7 @@ void RcSetFontSize(r32 fontSize)
 	renderContext->fontSize = fontSize;
 }
 
-void RcSetFontStyle(FontStyle_t fontStyle)
+void RcSetFontStyle(u16 fontStyle)
 {
 	renderContext->fontStyle = fontStyle;
 }
