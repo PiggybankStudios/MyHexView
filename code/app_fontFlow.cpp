@@ -158,6 +158,7 @@ u32 FontMeasureLineWidth(const char* strPntr, u32 strLength, r32* maxWidthPntr, 
 v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2 position, Color_t color, NewFont_t* fontPntr,
 	Alignment_t alignment = Alignment_Left, r32 fontSize = 0, u16 styleFlags = FontStyle_Default, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
+	StartTimeBlock("FontPerformTextFlow");
 	r32 lineHeight = FontGetLineHeight(fontPntr, fontSize, styleFlags);
 	r32 maxExtendUp = FontGetMaxExtendUp(fontPntr, fontSize, styleFlags);
 	r32 maxExtendDown = FontGetMaxExtendDown(fontPntr, fontSize, styleFlags);
@@ -366,6 +367,13 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 						drawRec.y += maxExtendDown/2 * SinR32((r32)((platform->programTime + cIndex*30)%800) / 800 * 2*Pi32);
 					}
 					// +==============================+
+					// |       FontStyle_Bounce       |
+					// +==============================+
+					if (IsFlagSet(currentStyle, FontStyle_Bounce))
+					{
+						drawRec.y -= maxExtendDown/2 * AbsR32(SinR32((r32)((platform->programTime)%1600) / 1600 * 2*Pi32));
+					}
+					// +==============================+
 					// |       FontStyle_Bubble       |
 					// +==============================+
 					if (IsFlagSet(currentStyle, FontStyle_Bubble))
@@ -452,6 +460,7 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 		flowInfo->extentRight = flowInfo->extents.x + flowInfo->extents.width - position.x;
 		flowInfo->extentDown = flowInfo->extents.y + flowInfo->extents.height - position.y;
 	}
+	EndTimeBlock();
 	return drawPos;
 }
 
@@ -495,6 +504,19 @@ v2 RcNewDrawNtString(const char* nullTermString, v2 position, Color_t color, r32
 	return FontPerformTextFlow(true, nullTermString, (u32)strlen(nullTermString), position, color, renderContext->boundNewFont, renderContext->fontAlignment, renderContext->fontSize, renderContext->fontStyle, maxWidth, flowInfo);
 }
 
+void RcNewPrintStringFull(v2 position, Color_t color, r32 maxWidth, FontFlowInfo_t* flowInfo, const char* formatString, ...)
+{
+	char printBuffer[256] = {};
+	va_list args;
+	
+	va_start(args, formatString);
+	u32 length = (u32)vsnprintf(printBuffer, ArrayCount(printBuffer)-1, formatString, args);
+	va_end(args);
+	
+	RcNewDrawString(printBuffer, length, position, color, maxWidth, flowInfo);
+}
+#define RcNewPrintString(position, color, formatString, ...) RcNewPrintStringFull(position, color, 0, nullptr, formatString, ##__VA_ARGS__)
+
 v2 RcMeasureString(const char* strPntr, u32 strLength, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
 	Assert(renderContext->boundNewFont != nullptr);
@@ -523,4 +545,20 @@ r32 RcMeasureNtLineWidth(const char* nullTermString, r32 maxWidth = 0)
 	r32 result = maxWidth;
 	FontMeasureLineWidth(nullTermString, (u32)strlen(nullTermString), &result, renderContext->boundNewFont, renderContext->fontSize, renderContext->fontStyle);
 	return result;
+}
+
+r32 RcGetLineHeight()
+{
+	Assert(renderContext->boundNewFont != nullptr);
+	return FontGetLineHeight(renderContext->boundNewFont, renderContext->fontSize, renderContext->fontStyle);
+}
+r32 RcGetMaxExtendUp()
+{
+	Assert(renderContext->boundNewFont != nullptr);
+	return FontGetMaxExtendUp(renderContext->boundNewFont, renderContext->fontSize, renderContext->fontStyle);
+}
+r32 RcGetMaxExtendDown()
+{
+	Assert(renderContext->boundNewFont != nullptr);
+	return FontGetMaxExtendDown(renderContext->boundNewFont, renderContext->fontSize, renderContext->fontStyle);
 }

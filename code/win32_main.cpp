@@ -268,6 +268,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		platformInfo.CopyFromClipboard   = PLT_CopyFromClipboard;
 		platformInfo.CreateNewWindow     = Win32_CreateNewWindow;
 		platformInfo.GetAbsolutePath     = Win32_GetAbsolutePath;
+		platformInfo.FrameFlip           = Win32_FrameFlip;
 	}
 	
 	// +==============================+
@@ -481,12 +482,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
 			platformInfo.localTime.second       = localTime.wSecond;
 			platformInfo.localTime.millisecond  = localTime.wMilliseconds;
 		}
+		platformInfo.window = window;
 		
 		// +==============================+
 		// |      Application Update      |
 		// +==============================+
 		application.Update(&platformInfo, &appMemory, AppInput_, &appOutput);
-		glfwSwapBuffers(window);
+		
 		
 		// +==============================+
 		// |       Handle AppOutput       |

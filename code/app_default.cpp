@@ -71,6 +71,75 @@ void UpdateAndRenderDefaultState()
 		}
 		
 		// +==============================+
+		// |       Rec Packing Test       |
+		// +==============================+
+		StartTimeBlock("Rect Packing");
+		if (ButtonDown(Button_Control) && ButtonDown(Button_P))
+		{
+			if (defData->testPackRecs != nullptr)
+			{
+				ArenaPop(mainHeap, defData->testPackRecs);
+				defData->testPackRecs = nullptr;
+			}
+			
+			defData->testPackBin = NewRec(RenderScreenSize - NewVec2(512 + 20), NewVec2(512));
+			defData->numTestPackRecs = 100;
+			defData->testPackRecs = PushArray(mainHeap, rec, defData->numTestPackRecs);
+			for (u32 rIndex = 0; rIndex < defData->numTestPackRecs; rIndex++)
+			{
+				defData->testPackRecs[rIndex] = NewRec(0, 0, (r32)RandU32(1, 100), (r32)RandU32(1, 100));
+				defData->testPackRecs[rIndex].topLeft = defData->testPackBin.topLeft - defData->testPackRecs[rIndex].size;
+			}
+			
+			TempPushMark();
+			{
+				stbrp_context stbContext;
+				i32 numNodes = (i32)defData->testPackBin.width;
+				stbrp_node* stbNodes = PushArray(TempArena, stbrp_node, numNodes);
+				stbrp_init_target(&stbContext, (i32)defData->testPackBin.width, (i32)defData->testPackBin.height, stbNodes, numNodes);
+				
+				TempPushMark();
+				{
+					stbrp_rect* stbRecs = PushArray(TempArena, stbrp_rect, defData->numTestPackRecs);
+					for (u32 rIndex = 0; rIndex < defData->numTestPackRecs; rIndex++)
+					{
+						stbRecs[rIndex].id = (i32)rIndex;
+						stbRecs[rIndex].w = (stbrp_coord)defData->testPackRecs[rIndex].width;
+						stbRecs[rIndex].h = (stbrp_coord)defData->testPackRecs[rIndex].height;
+					}
+					
+					stbrp_pack_rects(&stbContext, stbRecs, (i32)defData->numTestPackRecs);
+					
+					u32 numUnpacked = 0;
+					r32 unpackLineupPos = 0;
+					for (u32 rIndex = 0; rIndex < defData->numTestPackRecs; rIndex++)
+					{
+						stbrp_rect* stbRec = &stbRecs[rIndex];
+						Assert(stbRec->id >= 0 && (u32)stbRec->id < defData->numTestPackRecs);
+						rec* ourRec = &defData->testPackRecs[stbRec->id];
+						if (stbRec->was_packed)
+						{
+							ourRec->x = defData->testPackBin.x + (r32)stbRec->x;
+							ourRec->y = defData->testPackBin.y + (r32)stbRec->y;
+						}
+						else
+						{
+							ourRec->x = defData->testPackBin.x;
+							ourRec->y = defData->testPackBin.y - ourRec->height - unpackLineupPos;
+							numUnpacked++;
+							unpackLineupPos += ourRec->height;
+						}
+					}
+					
+					DEBUG_PrintLine("Failed to pack %u rectangles", numUnpacked);
+				}
+				TempPopMark();
+			}
+			TempPopMark();
+		}
+		EndTimeBlock();
+		
+		// +==============================+
 		// |     Refresh Algebra Test     |
 		// +==============================+
 		if (ButtonPressed(Button_A))
@@ -242,6 +311,20 @@ void UpdateAndRenderDefaultState()
 		}
 		
 		// +==============================+
+		// |       Draw Packed Recs       |
+		// +==============================+
+		if (defData->testPackRecs != nullptr)
+		{
+			StartTimeBlock("Rect Rendering");
+			for (u32 rIndex = 0; rIndex < defData->numTestPackRecs; rIndex++)
+			{
+				RcDrawButton(defData->testPackRecs[rIndex], ColorTransparent(NewColor(Color_Red), 0.1f), NewColor(Color_Red), 2);
+			}
+			RcDrawButton(RecInflate(defData->testPackBin, 2), NewColor(Color_TransparentBlack), NewColor(Color_Yellow), 2);
+			EndTimeBlock();
+		}
+		
+		// +==============================+
 		// |        Draw Textures         |
 		// +==============================+
 		#if 0
@@ -259,55 +342,69 @@ void UpdateAndRenderDefaultState()
 		}
 		#endif
 		
-		// RcBindTexture(&app->defaultFont.bitmap);
-		// RcDrawTexturedRec(NewRec(500, 500, (r32)app->defaultFont.bitmap.width, (r32)app->defaultFont.bitmap.height), NewColor(Color_White));
-		// RcBindTexture(&app->newFont.bakes[1].texture);
-		// RcDrawTexturedRec(NewRec(500, 500, (r32)app->newFont.bakes[1].texture.width, (r32)app->newFont.bakes[1].texture.height), NewColor(Color_White));
-		RcPrintString(NewVec2(500, 400), NewColor(Color_White), 1.0f, "NumBakes: %u", app->newFont.numBakes);
-		u32 memUsage = FontGetMemoryUsage(&app->newFont);
-		RcPrintString(NewVec2(500, 420), NewColor(Color_White), 1.0f, "Memory Usage: %s/%s (%.1f%%)", FormattedSizeStr(memUsage), FormattedSizeStr(mainHeap->size), (r32)memUsage / (r32)mainHeap->size);
-		
-		const char* printStr = "(This) is a \b\x01\xFF\xFF\x01\areally long\a\x02\b \v\x41string\v\x40 with stuff like\t\t\v\x21\"quotations\"\v\x20 and [brackets]!\x03\x18 and \aother\a things too\x04 \x03\x0CPeanuts\x04\n\nWe are \r\x01\x01\xFF\xFFrendering\x02\r using \v\x61\v\x71your\v\x60 font :P";
-		v2 textPos = NewVec2(500, 450);
-		// r32 FontGetMaxExtendUp(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
-		r32 fontMaxExtendUp = FontGetMaxExtendUp(&app->newFont, 32, FontStyle_Default);
-		r32 maxWidth = RenderMousePos.x - textPos.x;
-		if (maxWidth < 0) { maxWidth = 0; }
-		RcBindNewFont(&app->newFont);
-		RcSetFontAlignment(Alignment_Left);
-		// RcSetFontAlignment(Alignment_Center); maxWidth *= 2;
-		RcSetFontSize(32);
-		RcSetFontStyle(FontStyle_Default);
-		
-		FontFlowInfo_t flowInfo; ClearStruct(flowInfo);
-		RcNewDrawNtString(printStr, textPos, NewColor(Color_White), maxWidth, &flowInfo);
-		RcDrawRectangle(flowInfo.extents, ColorTransparent(NewColor(Color_White), 0.1f));
-		// RcDrawRectangle(NewRec(flowInfo.position.x, flowInfo.position.y, flowInfo.extentRight, flowInfo.extentDown), ColorTransparent(NewColor(Color_White), 0.1f));
-		// RcDrawLineArrow(flowInfo.endPos + NewVec2(10,20), flowInfo.endPos, 4, 1.0f, NewColor(Color_White));
-		
-		v2 arrowStartPos = textPos + NewVec2(0, -fontMaxExtendUp);
-		v2 arrowEndPos = arrowStartPos + NewVec2(maxWidth, 0);
-		// RcDrawLineArrow(arrowStartPos, arrowEndPos, 4, 1, NewColor(Color_White));
-		RcDrawLine(arrowEndPos + NewVec2(0, -1000), arrowEndPos + NewVec2(0, 1000), 1, NewColor(Color_Red));
-		
-		u32 numCharsFit = FontMeasureLineWidth(printStr, (u32)strlen(printStr), &maxWidth, &app->newFont, 32, FontStyle_Default);
-		// RcDrawRectangle(NewRec(flowInfo.position, NewVec2(maxWidth, flowInfo.extentDown)), ColorTransparent(NewColor(Color_White), 0.5f));
-		
-		// FontChar_t fontChar;
-		// v2 printPos = NewVec2(500, 450);
-		// for (u32 cIndex = 0; printStr[cIndex] != '\0'; cIndex++)
-		// {
-		// 	if (FontGetChar(&app->newFont, &fontChar, printStr[cIndex], 32))
-		// 	{
-		// 		RcBindTexture(fontChar.texture);
-		// 		RcDrawTexturedRec(NewRec(printPos - fontChar.info->origin, fontChar.info->size), NewColor(Color_White), NewRec(fontChar.info->bakeRec));
-		// 		printPos.x += fontChar.info->advanceX;
-		// 	}
-		// 	else
-		// 	{
-		// 		printPos.x += 20;
-		// 	}
-		// }
+		// +==============================+
+		// |   New Font Rendering Tests   |
+		// +==============================+
+		// StartTimeBlock("New Font Test");
+		{
+			// RcBindTexture(&app->defaultFont.bitmap);
+			// RcDrawTexturedRec(NewRec(500, 500, (r32)app->defaultFont.bitmap.width, (r32)app->defaultFont.bitmap.height), NewColor(Color_White));
+			// RcBindTexture(&app->newFont.bakes[1].texture);
+			// RcDrawTexturedRec(NewRec(500, 500, (r32)app->newFont.bakes[1].texture.width, (r32)app->newFont.bakes[1].texture.height), NewColor(Color_White));
+			RcPrintString(NewVec2(500, 400), NewColor(Color_White), 1.0f, "NumBakes: %u", app->newFont.numBakes);
+			u32 memUsage = FontGetMemoryUsage(&app->newFont);
+			RcPrintString(NewVec2(500, 420), NewColor(Color_White), 1.0f, "Memory Usage: %s/%s (%.1f%%)", FormattedSizeStr(memUsage), FormattedSizeStr(mainHeap->size), (r32)memUsage / (r32)mainHeap->size);
+			
+			FontBake_t* fontBake = FontGetBakeFor(&app->newFont, 32, FontStyle_Default, nullptr);
+			if (fontBake != nullptr)
+			{
+				RcBindTexture(&fontBake->texture);
+				RcDrawTexturedRec(NewRec(100, 100, (r32)fontBake->texture.width, (r32)fontBake->texture.height), NewColor(Color_White));
+			}
+			
+			const char* printStr = "(This) is a \b\x01\xFF\xFF\x01\areally long\a\x02\b \v\x41string\v\x40 with \v\x31stuff\v\x30 like\t\t\v\x21\"quotations\"\v\x20 and [brackets]!\x03\x18 and \aother\a things too\x04 \x03\x0CPeanuts\x04\n\nWe are \r\x01\x01\xFF\xFFrendering\x02\r using \v\x61\v\x71your\v\x60 font :P";
+			v2 textPos = NewVec2(500, 450);
+			// r32 FontGetMaxExtendUp(NewFont_t* fontPntr, r32 fontSize = 0, FontStyle_t styleFlags = FontStyle_Default)
+			r32 fontMaxExtendUp = FontGetMaxExtendUp(&app->newFont, 32, FontStyle_Default);
+			r32 maxWidth = RenderMousePos.x - textPos.x;
+			if (maxWidth < 0) { maxWidth = 0; }
+			RcBindNewFont(&app->newFont);
+			RcSetFontAlignment(Alignment_Left);
+			// RcSetFontAlignment(Alignment_Center); maxWidth *= 2;
+			RcSetFontSize(32);
+			RcSetFontStyle(FontStyle_Default);
+			
+			FontFlowInfo_t flowInfo; ClearStruct(flowInfo);
+			RcNewDrawNtString(printStr, textPos, NewColor(Color_White), maxWidth, &flowInfo);
+			RcDrawRectangle(flowInfo.extents, ColorTransparent(NewColor(Color_White), 0.1f));
+			// RcDrawRectangle(NewRec(flowInfo.position.x, flowInfo.position.y, flowInfo.extentRight, flowInfo.extentDown), ColorTransparent(NewColor(Color_White), 0.1f));
+			// RcDrawLineArrow(flowInfo.endPos + NewVec2(10,20), flowInfo.endPos, 4, 1.0f, NewColor(Color_White));
+			
+			v2 arrowStartPos = textPos + NewVec2(0, -fontMaxExtendUp);
+			v2 arrowEndPos = arrowStartPos + NewVec2(maxWidth, 0);
+			// RcDrawLineArrow(arrowStartPos, arrowEndPos, 4, 1, NewColor(Color_White));
+			RcDrawLine(arrowEndPos + NewVec2(0, -1000), arrowEndPos + NewVec2(0, 1000), 1, NewColor(Color_Red));
+			
+			u32 numCharsFit = FontMeasureLineWidth(printStr, (u32)strlen(printStr), &maxWidth, &app->newFont, 32, FontStyle_Default);
+			// RcDrawRectangle(NewRec(flowInfo.position, NewVec2(maxWidth, flowInfo.extentDown)), ColorTransparent(NewColor(Color_White), 0.5f));
+			
+			// FontChar_t fontChar;
+			// v2 printPos = NewVec2(500, 450);
+			// for (u32 cIndex = 0; printStr[cIndex] != '\0'; cIndex++)
+			// {
+			// 	if (FontGetChar(&app->newFont, &fontChar, printStr[cIndex], 32))
+			// 	{
+			// 		RcBindTexture(fontChar.texture);
+			// 		RcDrawTexturedRec(NewRec(printPos - fontChar.info->origin, fontChar.info->size), NewColor(Color_White), NewRec(fontChar.info->bakeRec));
+			// 		printPos.x += fontChar.info->advanceX;
+			// 	}
+			// 	else
+			// 	{
+			// 		printPos.x += 20;
+			// 	}
+			// }
+		}
+		// EndTimeBlock();
 		
 		// +==============================+
 		// |     Draw Color Swatches      |

@@ -59,3 +59,11 @@ GetAbsolutePath_DEFINITION(Win32_GetAbsolutePath)
 	return result;
 }
 
+// +==============================+
+// |       Win32_FrameFlip        |
+// +==============================+
+// void FrameFlip()
+FrameFlip_DEFINITION(Win32_FrameFlip)
+{
+	glfwSwapBuffers(PlatformInfo_->window);
+}

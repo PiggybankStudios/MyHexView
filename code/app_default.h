@@ -27,6 +27,10 @@ struct DefaultData_t
 	v2 cubicEnd;
 	
 	AlgGroup_t algGroup;
+	
+	rec testPackBin;
+	u32 numTestPackRecs;
+	rec* testPackRecs;
 };
 
 #endif //  _APP_DEFAULT_H

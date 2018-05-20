@@ -20,6 +20,8 @@ Description:
 #define EXPORT __declspec(dllexport)
 #define IMPORT __declspec(dllimport)
 
+#define PLAT_GetClockCycles() __rdtsc()
+
 #elif OSX_COMPILATION
 
 #define EXPORT extern "C" __attribute__((visibility("default")))
@@ -62,6 +64,7 @@ Description:
 
 #define CreateNewWindow_DEFINITION(functionName)   void functionName()
 #define GetAbsolutePath_DEFINITION(functionName)   char* functionName(MemoryArena_t* arenaPntr, const char* relativePath)
+#define FrameFlip_DEFINITION(functionName)         void functionName()
 
 typedef DebugWrite_DEFINITION(DebugWrite_f);
 typedef DebugWriteLine_DEFINITION(DebugWriteLine_f);
@@ -85,6 +88,7 @@ typedef CopyFromClipboard_DEFINITION(CopyFromClipboard_f);
 
 typedef CreateNewWindow_DEFINITION(CreateNewWindow_f);
 typedef GetAbsolutePath_DEFINITION(GetAbsolutePath_f);
+typedef FrameFlip_DEFINITION(FrameFlip_f);
 
 // +--------------------------------------------------------------+
 // |               Application Resource Structures                |
@@ -122,6 +126,7 @@ struct PlatformInfo_t
 	
 	CreateNewWindow_f* CreateNewWindow;
 	GetAbsolutePath_f* GetAbsolutePath;
+	FrameFlip_f*       FrameFlip;
 	
 	r64 timeDelta;
 	u64 programTime;

@@ -11,6 +11,8 @@ Date:   03\02\2018
 #define TAB_WIDTH 4
 #define MAX_PLUGINS_IN_MODULE 32
 #define MAX_PLUGIN_NAME_LENGTH 128
+#define MAX_TIME_BLOCK_DEPTH 16
+#define MAX_TIMED_BLOCKS 128
 
 #define FONTS_FOLDER    "Resources/Fonts/"
 #define MUSIC_FOLDER    "Resources/Music/"

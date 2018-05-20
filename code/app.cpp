@@ -14,6 +14,8 @@ Description:
 #include "app_version.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define STB_RECT_PACK_IMPLEMENTATION
+#include "stb_rect_pack.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
@@ -102,6 +104,7 @@ v2 RenderMouseStartRight = Vec2_Zero;
 // +--------------------------------------------------------------+
 // |                   Application Source Files                   |
 // +--------------------------------------------------------------+
+#include "app_performance.cpp"
 #include "app_texture.cpp"
 #include "app_font.cpp"
 #include "app_loadingFunctions.cpp"
@@ -132,21 +135,26 @@ void AppLoadContent(bool firstLoad)
 	app->defaultFont   = LoadFont(FONTS_FOLDER "georgiab.ttf", 24, 256, 256, ' ', 96);
 	
 	CreateGameFont(&app->newFont, mainHeap);
-	
 	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiab.ttf", FontStyle_Bold);
 	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiai.ttf", FontStyle_Italic);
 	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiaz.ttf", FontStyle_BoldItalic);
 	FontLoadFile(&app->newFont, FONTS_FOLDER "georgia.ttf",  FontStyle_Default);
-	
 	FontBake(&app->newFont, 12);
 	FontBake(&app->newFont, 24);
 	FontBake(&app->newFont, 32);
 	FontBake(&app->newFont, 32, FontStyle_Bold);
 	FontBake(&app->newFont, 32, FontStyle_Italic);
 	FontBake(&app->newFont, 32, FontStyle_BoldItalic);
-	
 	FontDropFiles(&app->newFont);
 	
+	CreateGameFont(&app->debugFont, mainHeap);
+	FontLoadFile(&app->debugFont, FONTS_FOLDER "consola.ttf", FontStyle_Default);
+	FontBake(&app->debugFont, 12);
+	FontBake(&app->debugFont, 16);
+	FontBake(&app->debugFont, 18);
+	FontBake(&app->debugFont, 20);
+	FontBake(&app->debugFont, 24);
+	FontDropFiles(&app->debugFont);
 }
 
 // +--------------------------------------------------------------+
@@ -234,6 +242,8 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 // void App_Update(const PlatformInfo_t* PlatformInfo, const AppMemory_t* AppMemory, const AppInput_t* AppInput, AppOutput_t* AppOutput)
 EXPORT AppUpdate_DEFINITION(App_Update)
 {
+	StartTimeBlock("AppUpdate");
+	
 	platform = PlatformInfo;
 	input = AppInput;
 	appOutput = AppOutput;
@@ -258,6 +268,12 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		DEBUG_WriteLine("Reloading app content");
 		AppLoadContent(false);
 	}
+	#if DEBUG
+	if (ButtonPressed(Button_F11))
+	{
+		app->showDebugMenu = !app->showDebugMenu;
+	}
+	#endif
 	
 	#if USE_PYTHON
 	// +==============================+
@@ -330,7 +346,88 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		}
 	}
 	
+	// +--------------------------------------------------------------+
+	// |                     Render Debug Overlay                     |
+	// +--------------------------------------------------------------+
+	#if DEBUG
+	if (app->showDebugMenu)
+	{
+		StartTimeBlock("Debug Overlay");
+		// +==============================+
+		// |      Render Time Blocks      |
+		// +==============================+
+		TimedBlockInfo_t* appUpdateBlock = GetTimedBlockInfoByName("AppUpdate");
+		if (appUpdateBlock != nullptr)
+		{
+			rec appUpdateRec = NewRec(10, 10, 20, RenderScreenSize.height-20);
+			
+			RcDrawButton(RecInflate(appUpdateRec, 1), NewColor(Color_LightGrey), NewColor(Color_White));
+			
+			r32 blockOffset = 0;
+			r32 keyOffset = 0;
+			u32 bIndex = 0;
+			RcBindNewFont(&app->debugFont);
+			RcSetFontSize(16);
+			RcSetFontAlignment(Alignment_Left);
+			RcSetFontStyle(FontStyle_Default);
+			
+			while (TimedBlockInfo_t* blockInfo = GetTimedBlockInfoByParent("AppUpdate", bIndex++))
+			{
+				r32 percent = (r32)blockInfo->counterElapsed / (r32)appUpdateBlock->counterElapsed;
+				rec partRec = appUpdateRec;
+				partRec.y += blockOffset;
+				partRec.height *= percent;
+				Color_t partColor = NewColor(GetColorByIndex(bIndex));
+				RcDrawRectangle(partRec, partColor);
+				// if (partRec.height >= RcGetLineHeight() || IsInsideRec(partRec, RenderMousePos))
+				{
+					rec keyColorRec = NewRec(appUpdateRec.topLeft + appUpdateRec.size, NewVec2(10));
+					keyColorRec.x += 5;
+					keyColorRec.y -= keyColorRec.height + 20 + keyOffset;
+					v2 textPos = keyColorRec.topLeft + NewVec2(keyColorRec.width + 2, keyColorRec.height/2 - RcGetLineHeight()/2 + RcGetMaxExtendUp());
+					RcDrawButton(keyColorRec, partColor, NewColor(Color_White));
+					if (blockInfo->numCalls > 1)
+					{
+						RcNewPrintString(textPos, NewColor(Color_White), "%s x %u: %.1f%% %u avg", blockInfo->blockName, blockInfo->numCalls, percent*100, blockInfo->counterElapsed / blockInfo->numCalls);
+					}
+					else
+					{
+						RcNewPrintString(textPos, NewColor(Color_White), "%s: %.1f%% %u", blockInfo->blockName, percent*100, blockInfo->counterElapsed);
+					}
+					keyOffset += RcGetLineHeight();
+				}
+				blockOffset += partRec.height;
+			}
+			
+			v2 lastTextPos = appUpdateRec.topLeft + appUpdateRec.size;
+			lastTextPos.x += 5;
+			lastTextPos.y -= 10 + 20 + keyOffset;
+			RcNewPrintString(lastTextPos, NewColor(Color_White), "Total: %u", appUpdateBlock->counterElapsed);
+		}
+		EndTimeBlock();
+	}
+	#endif
+	
 	TempPopMark();
+	
+	if (ButtonDown(Button_CapsLock))
+	{
+		StartTimeBlock("Frame Flip");
+		platform->FrameFlip();
+		EndTimeBlock();
+		
+		EndTimeBlock();
+	}
+	else
+	{
+		EndTimeBlock();
+		
+		platform->FrameFlip();
+	}
+	
+	static u8 countdown = 1;
+	if (--countdown == 0) { countdown = 10; SaveTimeBlocks(); }
+	else { ClearTimeBlocks(); }
 }
 
 // +--------------------------------------------------------------+
@@ -353,7 +450,7 @@ EXPORT AppReloading_DEFINITION(App_Reloading)
 	RenderMouseStartLeft = Vec2_Zero;
 	RenderMouseStartRight = Vec2_Zero;
 	
-	//TODO: Deallocate stuff that might change
+	app->lastNumTimedBlockInfos = 0;
 }
 
 // +--------------------------------------------------------------+
