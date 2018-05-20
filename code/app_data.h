@@ -57,6 +57,12 @@ struct AppData_t
 	u32 numModules;
 	u32 maxModules;
 	PythonPluginModule_t* modules;
+	
+	bool polygonFinished;
+	Polygon_t testPolygon;
+	u32 testNumTriangles;
+	Triangle_t* testTriangles;
+	VertexBuffer_t trianglesBuffer;
 };
 
 #endif //  _APP_DATA_H

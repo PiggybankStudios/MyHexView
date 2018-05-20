@@ -212,6 +212,7 @@ struct Shader_t
 
 struct VertexBuffer_t
 {
+	bool filled;
 	GLuint id;
 	
 	u32 numVertices;
@@ -243,6 +244,22 @@ struct FrameBuffer_t
 	const Texture_t* renderTexture;
 };
 
+union Triangle_t
+{
+	v2 verts[3];
+	struct
+	{
+		v2 p0;
+		v2 p1;
+		v2 p2;
+	};
+};
+
+struct Polygon_t
+{
+	u32 numVerts;
+	v2* verts;
+};
 
 
 // +--------------------------------------------------------------+

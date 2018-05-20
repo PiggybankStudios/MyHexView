@@ -285,6 +285,9 @@ void RcBegin(const Shader_t* startShader, const Font_t* startFont, rec viewport)
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GEQUAL, 0.1f);
 	
+	glDisable(GL_CULL_FACE);
+	// glCullFace(GL_FRONT);
+	
 	RcBindShader(startShader);
 	RcBindFont(startFont);
 	RcBindTexture(&renderContext->dotTexture);
@@ -317,6 +320,11 @@ void RcClearDepthBuffer(r32 clearDepth)
 {
 	glClearDepth(clearDepth);
 	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void RcDrawBufferTriangles()
+{
+	glDrawArrays(GL_TRIANGLES, 0, renderContext->boundBuffer->numVertices);
 }
 
 void RcDrawTexturedRec(rec rectangle, Color_t color)

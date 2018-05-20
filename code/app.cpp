@@ -105,6 +105,7 @@ v2 RenderMouseStartRight = Vec2_Zero;
 // |                   Application Source Files                   |
 // +--------------------------------------------------------------+
 #include "app_performance.cpp"
+#include "app_triangulation.cpp"
 #include "app_texture.cpp"
 #include "app_font.cpp"
 #include "app_loadingFunctions.cpp"
@@ -371,7 +372,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 			RcSetFontAlignment(Alignment_Left);
 			RcSetFontStyle(FontStyle_Default);
 			
-			while (TimedBlockInfo_t* blockInfo = GetTimedBlockInfoByParent("AppUpdate", bIndex++))
+			while (TimedBlockInfo_t* blockInfo = GetTimedBlockInfoByParent("AppUpdate", bIndex))
 			{
 				r32 percent = (r32)blockInfo->counterElapsed / (r32)appUpdateBlock->counterElapsed;
 				rec partRec = appUpdateRec;
@@ -397,6 +398,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 					keyOffset += RcGetLineHeight();
 				}
 				blockOffset += partRec.height;
+				bIndex++;
 			}
 			
 			v2 lastTextPos = appUpdateRec.topLeft + appUpdateRec.size;

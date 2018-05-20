@@ -9,13 +9,30 @@ Description:
 VertexBuffer_t CreateVertexBuffer(const Vertex_t* vertices, u32 numVertices)
 {
 	VertexBuffer_t result = {};
-	result.numVertices = numVertices;
 	
-	glGenBuffers(1, &result.id);
-	glBindBuffer(GL_ARRAY_BUFFER, result.id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex_t) * numVertices, vertices, GL_STATIC_DRAW);
+	if (numVertices > 0)
+	{
+		result.numVertices = numVertices;
+		result.filled = true;
+		
+		glGenBuffers(1, &result.id);
+		glBindBuffer(GL_ARRAY_BUFFER, result.id);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex_t) * numVertices, vertices, GL_STATIC_DRAW);
+	}
 	
 	return result;
+}
+
+void DestroyVertexBuffer(VertexBuffer_t* vertexBuffer)
+{
+	if (vertexBuffer->filled)
+	{
+		glDeleteBuffers(1, &vertexBuffer->id);
+	}
+	
+	vertexBuffer->id = 0;
+	vertexBuffer->filled = false;
+	vertexBuffer->numVertices = 0;
 }
 
 FrameBuffer_t CreateFrameBuffer(const Texture_t* texture)
