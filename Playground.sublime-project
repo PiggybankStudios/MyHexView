@@ -716,6 +716,7 @@
 			"bool FontAddFile(NewFont_t* fontPntr, const void* fileData, u32 fileLength, u16 styleFlags = FontStyle_Default)",
 			"bool FontBake(NewFont_t* fontPntr, r32 size, u16 styleFlags = FontStyle_Default, u8 firstChar = 0x20, u8 numChars = 96)",
 			"bool FontGetChar(NewFont_t* fontPntr, FontChar_t* fontCharOut, char character, r32 size = 0, u16 styleFlags = FontStyle_Default)",
+			"bool FontGetGlyph(Texture_t* textureOut, NewFont_t* fontPntr, r32 fontSize, i32 codepoint, u16 styleFlags = FontStyle_Default)",
 			"bool FontLoadFile(NewFont_t* fontPntr, const char* filePath, u16 styleFlags = FontStyle_Default)",
 			"bool GetFileTime(const char* filePath, FileTime_t* fileTimeOut)",
 			"bool IsClassValidPlugin(PyObject* pyClass)",

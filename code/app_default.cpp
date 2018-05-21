@@ -140,6 +140,19 @@ void UpdateAndRenderDefaultState()
 		EndTimeBlock();
 		
 		// +==============================+
+		// |     Glyph Rendering Test     |
+		// +==============================+
+		if (ButtonPressed(Button_G))
+		{
+			if (app->glyphFilled)
+			{
+				DestroyTexture(&app->glyphTexture);
+				app->glyphFilled = false;
+			}
+			app->glyphFilled = FontGetGlyph(&app->glyphTexture, &app->japaneseFont, 128, 0x958b, FontStyle_Default);
+		}
+		
+		// +==============================+
 		// |     Refresh Algebra Test     |
 		// +==============================+
 		if (ButtonPressed(Button_A))
@@ -443,6 +456,16 @@ void UpdateAndRenderDefaultState()
 			}
 			RcDrawButton(RecInflate(defData->testPackBin, 2), NewColor(Color_TransparentBlack), NewColor(Color_Yellow), 2);
 			EndTimeBlock();
+		}
+		
+		// +==============================+
+		// |          Draw Glyph          |
+		// +==============================+
+		if (app->glyphFilled)
+		{
+			rec glyphRec = NewRec(RenderScreenSize.width/2, 10, (r32)app->glyphTexture.width, (r32)app->glyphTexture.height);
+			RcBindTexture(&app->glyphTexture);
+			RcDrawTexturedRec(glyphRec, NewColor(Color_White));
 		}
 		
 		// +==============================+

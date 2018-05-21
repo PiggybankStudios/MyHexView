@@ -156,6 +156,9 @@ void AppLoadContent(bool firstLoad)
 	FontBake(&app->debugFont, 20);
 	FontBake(&app->debugFont, 24);
 	FontDropFiles(&app->debugFont);
+	
+	CreateGameFont(&app->japaneseFont, mainHeap);
+	FontLoadFile(&app->japaneseFont, FONTS_FOLDER "yumin.ttf", FontStyle_Default);
 }
 
 // +--------------------------------------------------------------+

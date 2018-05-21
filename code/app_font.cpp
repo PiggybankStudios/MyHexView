@@ -231,7 +231,7 @@ bool FontBake(NewFont_t* fontPntr, r32 size, u16 styleFlags = FontStyle_Default,
 		}
 		TempPopMark();
 			
-		//Conver the grayscale bitmap to a 32 bit color bitmap
+		//Convert the grayscale bitmap to a 32 bit color bitmap
 		//NOTE: We reuse the same bitmap buffer by moving backwards
 		for (u32 bIndex = bitmapWidth*bitmapHeight; bIndex > 0; bIndex--)
 		{
@@ -310,6 +310,61 @@ u32 FontGetMemoryUsage(NewFont_t* fontPntr)
 	memoryUsage += fontPntr->numGlyphs * sizeof(FontGlyph_t);
 	
 	return memoryUsage;
+}
+
+bool FontGetGlyph(Texture_t* textureOut, NewFont_t* fontPntr, r32 fontSize, i32 codepoint, u16 styleFlags = FontStyle_Default)
+{
+	Assert(fontPntr != nullptr);
+	Assert(textureOut != nullptr);
+	
+	Texture_t result = {};
+	
+	FontFile_t* fontFilePntr = nullptr;
+	for (u32 fIndex = 0; fIndex < fontPntr->numFiles; fIndex++)
+	{
+		if ((fontPntr->files[fIndex].styleFlags & FontStyle_BakeMask) == (styleFlags & FontStyle_BakeMask))
+		{
+			fontFilePntr = &fontPntr->files[fIndex];
+			break;
+		}
+	}
+	if (fontFilePntr == nullptr) { DEBUG_WriteLine("No font files"); return false; }
+	
+	r32 scale = stbtt_ScaleForPixelHeight(&fontFilePntr->stbInfo, fontSize);
+	DEBUG_PrintLine("Scale: %f", scale);
+	
+	i32 bboxLeft, bboxTop, bboxRight, bboxBottom;
+	stbtt_GetCodepointBitmapBox(&fontFilePntr->stbInfo, codepoint, scale, scale, &bboxLeft, &bboxTop, &bboxRight, &bboxBottom);
+	DEBUG_PrintLine("%d %d %d %d", bboxLeft, bboxTop, bboxRight, bboxBottom);
+	
+	if (bboxLeft >= bboxRight) { DEBUG_WriteLine("No width"); return false; }
+	if (bboxTop >= bboxBottom) { DEBUG_WriteLine("No height"); return false; }
+	
+	result.width = bboxRight - bboxLeft;
+	result.height = bboxBottom - bboxTop;
+	
+	TempPushMark();
+	u8* bitmapData = PushArray(TempArena, u8, result.width * result.height * 4);
+	stbtt_MakeCodepointBitmap(&fontFilePntr->stbInfo, bitmapData, result.width, result.height, result.width, scale, scale, codepoint);
+		
+	//Convert the grayscale bitmap to a 32 bit color bitmap
+	//NOTE: We reuse the same bitmap buffer by moving backwards
+	for (u32 bIndex = result.width*result.height; bIndex > 0; bIndex--)
+	{
+		u32* pixelPntr = (u32*)(&bitmapData[(bIndex-1) * sizeof(u32)]);
+		u8* grayscalePntr = &bitmapData[(bIndex-1) * sizeof(u8)];
+		Assert((u8*)pixelPntr >= grayscalePntr);
+		Assert((u8*)pixelPntr < bitmapData + (result.width * result.height * 4));
+		
+		*pixelPntr = (*grayscalePntr << 24) | 0x00FFFFFF;
+	}
+	
+	result = CreateTexture(bitmapData, result.width, result.height, false, false);
+		
+	TempPopMark();
+	
+	*textureOut = result;
+	return true;
 }
 
 // TODO: This should be doing a best match if the font doesn't match exactly

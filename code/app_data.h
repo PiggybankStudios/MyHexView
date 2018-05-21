@@ -49,6 +49,7 @@ struct AppData_t
 	Font_t defaultFont;
 	NewFont_t newFont;
 	NewFont_t debugFont;
+	NewFont_t japaneseFont;
 	Texture_t testTexture;
 	
 	PyObject* pyPlaygroundModule;
@@ -63,6 +64,9 @@ struct AppData_t
 	u32 testNumTriangles;
 	Triangle_t* testTriangles;
 	VertexBuffer_t trianglesBuffer;
+	
+	bool glyphFilled;
+	Texture_t glyphTexture;
 };
 
 #endif //  _APP_DATA_H
