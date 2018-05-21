@@ -14,6 +14,17 @@ bool IsTriangleClockwise(const Triangle_t& triangle)
 {
 	return IsTriangleClockwise(triangle.p0, triangle.p1, triangle.p2);
 }
+bool IsInsideTriangle(v2 test, v2 p0, v2 p1, v2 p2)
+{
+	v2 perp0 = Vec2PerpRight(p1 - p0);
+	v2 perp1 = Vec2PerpRight(p2 - p1);
+	v2 perp2 = Vec2PerpRight(p0 - p2);
+	return (
+		SignR32(Vec2Dot(p2 - p0, perp0)) == SignR32(Vec2Dot(test - p0, perp0)) &&
+		SignR32(Vec2Dot(p0 - p1, perp1)) == SignR32(Vec2Dot(test - p1, perp1)) &&
+		SignR32(Vec2Dot(p1 - p2, perp2)) == SignR32(Vec2Dot(test - p2, perp2))
+	);
+}
 
 Triangle_t* TriangulatePolygonEars(MemoryArena_t* arenaPntr, const Polygon_t* polygon, u32* numTrianglesOut = nullptr)
 {
@@ -59,20 +70,26 @@ Triangle_t* TriangulatePolygonEars(MemoryArena_t* arenaPntr, const Polygon_t* po
 			v2 vert2 = tempPolygon.verts[(vIndex + 2) % tempPolygon.numVerts];
 			if (!IsTriangleClockwise(vert0, vert1, vert2)) { continue; }
 			
-			v2 cutNorm = vert2 - vert0;
-			r32 cutLength = Vec2Length(cutNorm);
-			cutNorm = cutNorm / cutLength;
-			v2 linePerp = Vec2PerpLeft(cutNorm);
-			r32 vert1Dot = Vec2Dot(vert1 - vert0, linePerp);
+			// v2 cutNorm = vert2 - vert0;
+			// r32 cutLength = Vec2Length(cutNorm);
+			// cutNorm = cutNorm / cutLength;
+			// v2 linePerp = Vec2PerpLeft(cutNorm);
+			// r32 vert1Dot = Vec2Dot(vert1 - vert0, linePerp);
 			
 			bool isEar = true;
 			for (u32 vIndex2 = 0; vIndex2 < tempPolygon.numVerts; vIndex2++)
 			{
 				if (vIndex2 < vIndex || vIndex2 > vIndex+2)
 				{
-					r32 cutPos = Vec2Dot(tempPolygon.verts[vIndex2] - vert0, cutNorm);
-					r32 newVertDot = Vec2Dot(tempPolygon.verts[vIndex2] - vert0, linePerp);
-					if (SignR32(newVertDot) == SignR32(vert1Dot) && AbsR32(newVertDot) <= AbsR32(vert1Dot) && cutPos <= cutLength && cutPos >= 0)
+					// r32 cutPos = Vec2Dot(tempPolygon.verts[vIndex2] - vert0, cutNorm);
+					// r32 newVertDot = Vec2Dot(tempPolygon.verts[vIndex2] - vert0, linePerp);
+					// if (SignR32(newVertDot) == SignR32(vert1Dot) && AbsR32(newVertDot) <= AbsR32(vert1Dot) && cutPos <= cutLength && cutPos >= 0)
+					// {
+					// 	isEar = false;
+					// 	break;
+					// }
+					
+					if (IsInsideTriangle(tempPolygon.verts[vIndex2], vert0, vert1, vert2))
 					{
 						isEar = false;
 						break;

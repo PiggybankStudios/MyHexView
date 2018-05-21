@@ -254,8 +254,9 @@ void UpdateAndRenderDefaultState()
 		// +==============================+
 		// |     Trianglulate Polygon     |
 		// +==============================+
-		if (closedPolygonLoop)// || ButtonReleased(MouseButton_Right))
+		if (closedPolygonLoop || ButtonDown(Button_T))// || ButtonReleased(MouseButton_Right))
 		{
+			StartTimeBlock("Triangulation");
 			if (app->testPolygon.numVerts >= 3)
 			{
 				if (app->testTriangles != nullptr)
@@ -295,6 +296,7 @@ void UpdateAndRenderDefaultState()
 					TempPopMark();
 				}
 			}
+			EndTimeBlock();
 			
 			app->polygonFinished = true;
 		}
