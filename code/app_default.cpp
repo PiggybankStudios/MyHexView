@@ -254,9 +254,8 @@ void UpdateAndRenderDefaultState()
 		// +==============================+
 		// |     Trianglulate Polygon     |
 		// +==============================+
-		if (closedPolygonLoop || ButtonDown(Button_T))// || ButtonReleased(MouseButton_Right))
+		if (closedPolygonLoop)
 		{
-			StartTimeBlock("Triangulation");
 			if (app->testPolygon.numVerts >= 3)
 			{
 				if (app->testTriangles != nullptr)
@@ -296,7 +295,6 @@ void UpdateAndRenderDefaultState()
 					TempPopMark();
 				}
 			}
-			EndTimeBlock();
 			
 			app->polygonFinished = true;
 		}
@@ -306,6 +304,19 @@ void UpdateAndRenderDefaultState()
 			app->testPolygon.verts = nullptr;
 			app->testPolygon.numVerts = 0;
 		}
+		
+		if (ButtonDown(Button_T) && app->polygonFinished)
+		{
+			for (u32 times = 0; times < 100; times++)
+			{
+				TempPushMark();
+				StartTimeBlock("Triangulation");
+				TriangulatePolygonEars(TempArena, &app->testPolygon, nullptr);
+				EndTimeBlock();
+				TempPopMark();
+			}
+		}
+		
 		
 		#if 0
 		const char* scriptPath = SCRIPTS_FOLDER "test.py";

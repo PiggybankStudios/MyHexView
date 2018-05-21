@@ -70,25 +70,11 @@ Triangle_t* TriangulatePolygonEars(MemoryArena_t* arenaPntr, const Polygon_t* po
 			v2 vert2 = tempPolygon.verts[(vIndex + 2) % tempPolygon.numVerts];
 			if (!IsTriangleClockwise(vert0, vert1, vert2)) { continue; }
 			
-			// v2 cutNorm = vert2 - vert0;
-			// r32 cutLength = Vec2Length(cutNorm);
-			// cutNorm = cutNorm / cutLength;
-			// v2 linePerp = Vec2PerpLeft(cutNorm);
-			// r32 vert1Dot = Vec2Dot(vert1 - vert0, linePerp);
-			
 			bool isEar = true;
 			for (u32 vIndex2 = 0; vIndex2 < tempPolygon.numVerts; vIndex2++)
 			{
 				if (vIndex2 < vIndex || vIndex2 > vIndex+2)
 				{
-					// r32 cutPos = Vec2Dot(tempPolygon.verts[vIndex2] - vert0, cutNorm);
-					// r32 newVertDot = Vec2Dot(tempPolygon.verts[vIndex2] - vert0, linePerp);
-					// if (SignR32(newVertDot) == SignR32(vert1Dot) && AbsR32(newVertDot) <= AbsR32(vert1Dot) && cutPos <= cutLength && cutPos >= 0)
-					// {
-					// 	isEar = false;
-					// 	break;
-					// }
-					
 					if (IsInsideTriangle(tempPolygon.verts[vIndex2], vert0, vert1, vert2))
 					{
 						isEar = false;

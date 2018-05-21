@@ -389,11 +389,11 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 					RcDrawButton(keyColorRec, partColor, NewColor(Color_White));
 					if (blockInfo->numCalls > 1)
 					{
-						RcNewPrintString(textPos, NewColor(Color_White), "%s x %u: %.1f%% %u avg", blockInfo->blockName, blockInfo->numCalls, percent*100, blockInfo->counterElapsed / blockInfo->numCalls);
+						RcNewPrintString(textPos, NewColor(Color_White), "%s x %u: %.1f%% %lu avg", blockInfo->blockName, blockInfo->numCalls, percent*100, blockInfo->counterElapsed / blockInfo->numCalls);
 					}
 					else
 					{
-						RcNewPrintString(textPos, NewColor(Color_White), "%s: %.1f%% %u", blockInfo->blockName, percent*100, blockInfo->counterElapsed);
+						RcNewPrintString(textPos, NewColor(Color_White), "%s: %.1f%% %lu", blockInfo->blockName, percent*100, blockInfo->counterElapsed);
 					}
 					keyOffset += RcGetLineHeight();
 				}
@@ -404,7 +404,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 			v2 lastTextPos = appUpdateRec.topLeft + appUpdateRec.size;
 			lastTextPos.x += 5;
 			lastTextPos.y -= 10 + 20 + keyOffset;
-			RcNewPrintString(lastTextPos, NewColor(Color_White), "Total: %u", appUpdateBlock->counterElapsed);
+			RcNewPrintString(lastTextPos, NewColor(Color_White), "Total: %lu", appUpdateBlock->counterElapsed);
 		}
 		EndTimeBlock();
 	}
@@ -412,7 +412,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	
 	TempPopMark();
 	
-	if (ButtonDown(Button_CapsLock))
+	if (ButtonDown(Button_Space))
 	{
 		StartTimeBlock("Frame Flip");
 		platform->FrameFlip();
