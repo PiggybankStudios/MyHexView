@@ -157,7 +157,7 @@ void AppLoadContent(bool firstLoad)
 	FontBake(&app->debugFont, 24);
 	FontDropFiles(&app->debugFont);
 	
-	CreateGameFont(&app->japaneseFont, mainHeap);
+	CreateGameFont(&app->japaneseFont, &app->stdArena);
 	FontLoadFile(&app->japaneseFont, FONTS_FOLDER "yumin.ttf", FontStyle_Default);
 }
 
@@ -205,6 +205,8 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 		InitializeMemoryArenaHeap(&app->mainHeap, (void*)(app + 1), mainHeapSize);
 		
 		InitializeMemoryArenaTemp(&app->tempArena, AppMemory->transientPntr, AppMemory->transientSize, TRANSIENT_MAX_NUMBER_MARKS);
+		
+		InitializeMemoryArenaStdHeap(&app->stdArena);
 		
 		DEBUG_PrintLine("Main Heap:  %u bytes", mainHeapSize);
 		DEBUG_PrintLine("Temp Arena: %u bytes", AppMemory->transientSize);

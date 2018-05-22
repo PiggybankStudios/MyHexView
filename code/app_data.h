@@ -20,6 +20,7 @@ struct AppData_t
 {
 	MemoryArena_t mainHeap;
 	MemoryArena_t tempArena;
+	MemoryArena_t stdArena;
 	u32 appInitTempHighWaterMark;
 	
 	#if DEBUG
