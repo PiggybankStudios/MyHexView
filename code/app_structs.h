@@ -15,6 +15,7 @@ typedef enum
 	AppState_None = 0x00,
 	AppState_Default,
 	AppState_Visualizer,
+	AppState_GameOfLife,
 } AppState_t;
 
 typedef enum

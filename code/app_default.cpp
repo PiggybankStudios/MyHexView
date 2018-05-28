@@ -42,7 +42,23 @@ void StartDefaultState(AppState_t fromState)
 // +--------------------------------------------------------------+
 void DeinitializeDefaultState()
 {
-	//TODO: Deallocate stuff
+	if (defData->testPolygon.verts != nullptr)
+	{
+		ArenaPop(mainHeap, &defData->testPolygon.verts);
+	}
+	if (defData->testTriangles != nullptr)
+	{
+		ArenaPop(mainHeap, defData->testTriangles);
+	}
+	if (defData->testPackRecs != nullptr)
+	{
+		ArenaPop(mainHeap, defData->testPackRecs);
+	}
+	
+	DestroyAlgGroup(&defData->algGroup);
+	DestroyTexture(&defData->testTexture);
+	DestroyTexture(&defData->circuitTexture);
+	DestroyTexture(&defData->missingTexture);
 	
 	ClearPointer(defData);
 }
@@ -216,9 +232,9 @@ void UpdateAndRenderDefaultState()
 		// +==============================+
 		bool canPlaceVerticeHere = true;
 		StartTimeBlock("Polygon Intersection");
-		if (app->testPolygon.numVerts > 1)
+		if (defData->testPolygon.numVerts > 1)
 		{
-			for (u32 vIndex = 0; vIndex+1 < app->testPolygon.numVerts; vIndex++)
+			for (u32 vIndex = 0; vIndex+1 < defData->testPolygon.numVerts; vIndex++)
 			{
 				//TODO: Find a line intersection test function that I wrote?
 			}
@@ -231,35 +247,35 @@ void UpdateAndRenderDefaultState()
 		bool closedPolygonLoop = false;
 		if (ButtonReleased(MouseButton_Left))// && input->mouseMaxDist[MouseButton_Left] < 5)
 		{
-			if (app->testPolygon.numVerts == 0 || app->polygonFinished)
+			if (defData->testPolygon.numVerts == 0 || defData->polygonFinished)
 			{
-				if (app->testPolygon.verts != nullptr)
+				if (defData->testPolygon.verts != nullptr)
 				{
-					ArenaPop(mainHeap, &app->testPolygon.verts);
-					app->testPolygon.verts = nullptr;
-					app->testPolygon.numVerts = 0;
+					ArenaPop(mainHeap, &defData->testPolygon.verts);
+					defData->testPolygon.verts = nullptr;
+					defData->testPolygon.numVerts = 0;
 				}
 				
-				app->testPolygon.numVerts = 1;
-				app->testPolygon.verts = PushArray(mainHeap, v2, 1);
-				app->testPolygon.verts[0] = RenderMousePos;
-				app->polygonFinished = false;
+				defData->testPolygon.numVerts = 1;
+				defData->testPolygon.verts = PushArray(mainHeap, v2, 1);
+				defData->testPolygon.verts[0] = RenderMousePos;
+				defData->polygonFinished = false;
 			}
 			else
 			{
-				Assert(app->testPolygon.verts != nullptr);
-				if (app->testPolygon.numVerts >= 3 && Vec2Length(RenderMousePos - app->testPolygon.verts[0]) < 10)
+				Assert(defData->testPolygon.verts != nullptr);
+				if (defData->testPolygon.numVerts >= 3 && Vec2Length(RenderMousePos - defData->testPolygon.verts[0]) < 10)
 				{
 					closedPolygonLoop = true;
 				}
 				else
 				{
-					v2* newVerts = PushArray(mainHeap, v2, app->testPolygon.numVerts+1);
-					memcpy(newVerts, app->testPolygon.verts, app->testPolygon.numVerts * sizeof(v2));
-					ArenaPop(mainHeap, app->testPolygon.verts);
-					app->testPolygon.verts = newVerts;
-					app->testPolygon.verts[app->testPolygon.numVerts] = RenderMousePos;
-					app->testPolygon.numVerts++;
+					v2* newVerts = PushArray(mainHeap, v2, defData->testPolygon.numVerts+1);
+					memcpy(newVerts, defData->testPolygon.verts, defData->testPolygon.numVerts * sizeof(v2));
+					ArenaPop(mainHeap, defData->testPolygon.verts);
+					defData->testPolygon.verts = newVerts;
+					defData->testPolygon.verts[defData->testPolygon.numVerts] = RenderMousePos;
+					defData->testPolygon.numVerts++;
 				}
 			}
 		}
@@ -269,138 +285,65 @@ void UpdateAndRenderDefaultState()
 		// +==============================+
 		if (closedPolygonLoop)
 		{
-			if (app->testPolygon.numVerts >= 3)
+			if (defData->testPolygon.numVerts >= 3)
 			{
-				if (app->testTriangles != nullptr)
+				if (defData->testTriangles != nullptr)
 				{
-					ArenaPop(mainHeap, app->testTriangles);
-					app->testTriangles = nullptr;
-					app->testNumTriangles = 0;
-					DestroyVertexBuffer(&app->trianglesBuffer);
+					ArenaPop(mainHeap, defData->testTriangles);
+					defData->testTriangles = nullptr;
+					defData->testNumTriangles = 0;
+					DestroyVertexBuffer(&defData->trianglesBuffer);
 				}
 				
-				app->testTriangles = TriangulatePolygonEars(mainHeap, &app->testPolygon, &app->testNumTriangles);
-				Assert(app->testTriangles != nullptr || app->testNumTriangles == 0);
+				defData->testTriangles = TriangulatePolygonEars(mainHeap, &defData->testPolygon, &defData->testNumTriangles);
+				Assert(defData->testTriangles != nullptr || defData->testNumTriangles == 0);
 				
-				if (app->testTriangles != nullptr && app->testNumTriangles > 0)
+				if (defData->testTriangles != nullptr && defData->testNumTriangles > 0)
 				{
 					TempPushMark();
-					Vertex_t* triangleVerts = PushArray(TempArena, Vertex_t, app->testNumTriangles * 3);
-					for (u32 tIndex = 0; tIndex < app->testNumTriangles; tIndex++)
+					Vertex_t* triangleVerts = PushArray(TempArena, Vertex_t, defData->testNumTriangles * 3);
+					for (u32 tIndex = 0; tIndex < defData->testNumTriangles; tIndex++)
 					{
 						
-						triangleVerts[tIndex*3 + 0].position = NewVec3(app->testTriangles[tIndex].p0, 0);
+						triangleVerts[tIndex*3 + 0].position = NewVec3(defData->testTriangles[tIndex].p0, 0);
 						triangleVerts[tIndex*3 + 0].color = NewVec4(NewColor(GetColorByIndex(tIndex)));
 						triangleVerts[tIndex*3 + 0].color.a = 1.0f;
 						triangleVerts[tIndex*3 + 0].texCoord = Vec2_Zero;
 						
-						triangleVerts[tIndex*3 + 1].position = NewVec3(app->testTriangles[tIndex].p1, 0);
+						triangleVerts[tIndex*3 + 1].position = NewVec3(defData->testTriangles[tIndex].p1, 0);
 						triangleVerts[tIndex*3 + 1].color = NewVec4(NewColor(GetColorByIndex(tIndex)));
 						triangleVerts[tIndex*3 + 1].color.a = 1.0f;
 						triangleVerts[tIndex*3 + 1].texCoord = Vec2_Zero;
 						
-						triangleVerts[tIndex*3 + 2].position = NewVec3(app->testTriangles[tIndex].p2, 0);
+						triangleVerts[tIndex*3 + 2].position = NewVec3(defData->testTriangles[tIndex].p2, 0);
 						triangleVerts[tIndex*3 + 2].color = NewVec4(NewColor(GetColorByIndex(tIndex)));
 						triangleVerts[tIndex*3 + 2].color.a = 1.0f;
 						triangleVerts[tIndex*3 + 2].texCoord = Vec2_Zero;
 					}
-					app->trianglesBuffer = CreateVertexBuffer(triangleVerts, app->testNumTriangles * 3);
+					defData->trianglesBuffer = CreateVertexBuffer(triangleVerts, defData->testNumTriangles * 3);
 					TempPopMark();
 				}
 			}
 			
-			app->polygonFinished = true;
+			defData->polygonFinished = true;
 		}
-		if (ButtonReleased(MouseButton_Right) && app->testPolygon.verts != nullptr)
+		if (ButtonReleased(MouseButton_Right) && defData->testPolygon.verts != nullptr)
 		{
-			ArenaPop(mainHeap, &app->testPolygon.verts);
-			app->testPolygon.verts = nullptr;
-			app->testPolygon.numVerts = 0;
+			ArenaPop(mainHeap, &defData->testPolygon.verts);
+			defData->testPolygon.verts = nullptr;
+			defData->testPolygon.numVerts = 0;
 		}
 		
-		if (ButtonDown(Button_T) && app->polygonFinished)
+		if (ButtonDown(Button_T) && defData->polygonFinished)
 		{
 			for (u32 times = 0; times < 100; times++)
 			{
 				TempPushMark();
 				StartTimeBlock("Triangulation");
-				TriangulatePolygonEars(TempArena, &app->testPolygon, nullptr);
+				TriangulatePolygonEars(TempArena, &defData->testPolygon, nullptr);
 				EndTimeBlock();
 				TempPopMark();
 			}
-		}
-		
-		
-		#if 0
-		const char* scriptPath = SCRIPTS_FOLDER "test.py";
-		if (ButtonPressed(Button_Enter))
-		{
-			DEBUG_PrintLine("Running python script \"%s\"", scriptPath);
-			FileInfo_t scriptFile = platform->ReadEntireFile(scriptPath);
-			if (scriptFile.content != nullptr)
-			{
-				PyRun_SimpleString((const char*)scriptFile.content);
-				
-				platform->FreeFileMemory(&scriptFile);
-			}
-			else
-			{
-				DEBUG_WriteLine("Could not open file");
-			}
-		}
-		#endif
-		
-		// +--------------------------------------------------------------+
-		// |                  Load Python Modules Hotkey                  |
-		// +--------------------------------------------------------------+
-		#if 0
-		bool fileModified = false;
-		FileTime_t newFileTime = {};
-		if (defData->pluginModule.loaded && platform->GetFileTime(defData->pluginModule.filePath, &newFileTime))
-		{
-			if (platform->CompareFileTimes(&newFileTime, &defData->pluginModule.fileWriteTime) != 0)
-			{
-				DEBUG_PrintLine("\"%s\" was modified", defData->pluginModule.filePath);
-				fileModified = true;
-			}
-		}
-		if (ButtonPressed(Button_Backspace) || fileModified)
-		{
-			if (LoadPythonPluginModule(mainHeap, &defData->pluginModule, SCRIPTS_FOLDER "myModule.py"))
-			{
-				DEBUG_PrintLine("Module loaded successfully. %u plugins found", defData->pluginModule.numPlugins);
-			}
-			else
-			{
-				DEBUG_WriteLine("Module was not loaded successfully");
-			}
-		}
-		#endif
-		
-		// +--------------------------------------------------------------+
-		// |                 Call Python Plugin Functions                 |
-		// +--------------------------------------------------------------+
-		// +==============================+
-		// |         MousePressed         |
-		// +==============================+
-		if (ButtonPressed(MouseButton_Left))
-		{
-			AllPlugins_MousePressed(RenderMousePos);
-		}
-		// +==============================+
-		// |        ButtonPressed         |
-		// +==============================+
-		for (u32 bIndex = Button_A; bIndex < Buttons_NumButtons; bIndex++)
-		{
-			Buttons_t button = (Buttons_t)bIndex;
-			if (ButtonPressed(button))
-			{
-				AllPlugins_ButtonPressed(GetButtonName(button));
-			}
-		}
-		if (ButtonDown(Button_Control) && ButtonPressed(Button_R))
-		{
-			RunCommand("AwesomePlugin");
 		}
 	}
 	
@@ -557,26 +500,26 @@ void UpdateAndRenderDefaultState()
 		// |     Draw Test Triangles      |
 		// +==============================+
 		RcSetDepth(1.0f);
-		if (app->trianglesBuffer.filled && app->polygonFinished)
+		if (defData->trianglesBuffer.filled && defData->polygonFinished)
 		{
-			RcNewPrintString(NewVec2(100, 100), NewColor(Color_White), "%u verts", app->trianglesBuffer.numVertices);
+			RcNewPrintString(NewVec2(100, 100), NewColor(Color_White), "%u verts", defData->trianglesBuffer.numVertices);
 			RcBindTexture(&renderContext->dotTexture);
 			RcSetSourceRectangle(NewRec(0, 0, 1, 1));
 			RcSetColor(NewColor(Color_White));
 			RcSetWorldMatrix(Matrix4_Identity);
-			RcBindBuffer(&app->trianglesBuffer);
+			RcBindBuffer(&defData->trianglesBuffer);
 			RcDrawBufferTriangles();
 		}
-		else if (app->testNumTriangles > 0 && app->testTriangles != nullptr)
+		else if (defData->testNumTriangles > 0 && defData->testTriangles != nullptr)
 		{
-			for (u32 tIndex = 0; tIndex < app->testNumTriangles; tIndex++)
+			for (u32 tIndex = 0; tIndex < defData->testNumTriangles; tIndex++)
 			{
 				r32 offsetX = 0;//SinR32((r32)((platform->programTime + tIndex*291)%1000) / 1000.f * 2*Pi32) * 2;
 				r32 offsetY = 0;//CosR32((r32)((platform->programTime + tIndex*291)%1000) / 1000.f * 2*Pi32) * 2;
 				v2 offset = NewVec2(offsetX, offsetY);
-				RcDrawLine(app->testTriangles[tIndex].p0+offset, app->testTriangles[tIndex].p1+offset, 1, NewColor(GetColorByIndex(tIndex)));
-				RcDrawLine(app->testTriangles[tIndex].p1+offset, app->testTriangles[tIndex].p2+offset, 1, NewColor(GetColorByIndex(tIndex)));
-				RcDrawLine(app->testTriangles[tIndex].p2+offset, app->testTriangles[tIndex].p0+offset, 1, NewColor(GetColorByIndex(tIndex)));
+				RcDrawLine(defData->testTriangles[tIndex].p0+offset, defData->testTriangles[tIndex].p1+offset, 1, NewColor(GetColorByIndex(tIndex)));
+				RcDrawLine(defData->testTriangles[tIndex].p1+offset, defData->testTriangles[tIndex].p2+offset, 1, NewColor(GetColorByIndex(tIndex)));
+				RcDrawLine(defData->testTriangles[tIndex].p2+offset, defData->testTriangles[tIndex].p0+offset, 1, NewColor(GetColorByIndex(tIndex)));
 			}
 		}
 		
@@ -584,28 +527,28 @@ void UpdateAndRenderDefaultState()
 		// |         Draw Polygon         |
 		// +==============================+
 		RcSetDepth(0.0f);
-		if (app->testPolygon.numVerts > 0 && app->testPolygon.verts != nullptr)
+		if (defData->testPolygon.numVerts > 0 && defData->testPolygon.verts != nullptr)
 		{
-			for (u32 vIndex = 0; vIndex < app->testPolygon.numVerts; vIndex++)
+			for (u32 vIndex = 0; vIndex < defData->testPolygon.numVerts; vIndex++)
 			{
-				v2 p0 = app->testPolygon.verts[vIndex];
+				v2 p0 = defData->testPolygon.verts[vIndex];
 				v2 p1 = Vec2_Zero;
-				if (vIndex+1 < app->testPolygon.numVerts)
+				if (vIndex+1 < defData->testPolygon.numVerts)
 				{
-					p1 = app->testPolygon.verts[vIndex+1];
+					p1 = defData->testPolygon.verts[vIndex+1];
 				}
-				else if (!app->polygonFinished)
+				else if (!defData->polygonFinished)
 				{
 					p1 = RenderMousePos;
 				}
 				else
 				{
-					p1 = app->testPolygon.verts[0];
+					p1 = defData->testPolygon.verts[0];
 				}
 				
 				Color_t vertColor = NewColor(Color_Yellow);
 				r32 vertRadius = 3;
-				if (vIndex == 0 && app->testPolygon.numVerts >= 3 && Vec2Length(RenderMousePos - app->testPolygon.verts[0]) < 10)
+				if (vIndex == 0 && defData->testPolygon.numVerts >= 3 && Vec2Length(RenderMousePos - defData->testPolygon.verts[0]) < 10)
 				{
 					vertColor = NewColor(Color_OrangeRed);
 					vertRadius = 10;

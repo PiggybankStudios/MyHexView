@@ -39,6 +39,7 @@ struct AppData_t
 	//AppState Data Structures
 	DefaultData_t defaultData;
 	VisData_t visualizerData;
+	LifeData_t lifeData;
 	
 	AppState_t appState;
 	AppState_t newAppState;
@@ -52,19 +53,6 @@ struct AppData_t
 	NewFont_t debugFont;
 	NewFont_t japaneseFont;
 	Texture_t testTexture;
-	
-	PyObject* pyPlaygroundModule;
-	PyObject* pyPlaygroundClass;
-	
-	u32 numModules;
-	u32 maxModules;
-	PythonPluginModule_t* modules;
-	
-	bool polygonFinished;
-	Polygon_t testPolygon;
-	u32 testNumTriangles;
-	Triangle_t* testTriangles;
-	VertexBuffer_t trianglesBuffer;
 	
 	bool glyphFilled;
 	Texture_t glyphTexture;

@@ -205,21 +205,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	}
 	
 	// +==============================+
-	// |      Initialize Python       |
-	// +==============================+
-	{
-		DEBUG_WriteLine("Initializing Python");
-		wchar_t* program = Py_DecodeLocale(argv0, NULL);
-		if (program == nullptr)
-		{
-			HandleError("Cannot decode locale of argv!");
-		}
-		Py_SetProgramName(program);
-		Py_Initialize();
-		PyMem_RawFree(program);
-	}
-	
-	// +==============================+
 	// |      Register Callbacks      |
 	// +==============================+
 	{
@@ -385,10 +370,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
 						memset(appMemory.permanantPntr, 0x00, appMemory.permanantSize);
 						memset(appMemory.transientPntr, 0x00, appMemory.transientSize);
 						
-						DEBUG_WriteLine("Resetting python interpreter");
-						Py_FinalizeEx();
-						Py_Initialize();
-						
 						//TODO: Find a way to reset the opengl context or
 						//		maybe re-open the window altogether
 						
@@ -510,7 +491,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	
 	application.Closing(&platformInfo, &appMemory);
 	glfwTerminate();
-	Py_FinalizeEx();
 	
 	DEBUG_WriteLine("Goodbye World!");
 	return 0;

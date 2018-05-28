@@ -35,11 +35,11 @@ if "%DebugBuild%"=="1" (
 
 set Definitions=-DWINDOWS_COMPILATION -DPROJECT_NAME=\"%ProjectName%\"
 set IgnoredWarnings=/wd4201 /wd4100 /wd4189 /wd4996 /wd4127 /wd4505 /wd4101 /wd4702 /wd4458 /wd4324
-set IncludeDirectories=/I"%LibDirectory%\mylib" /I"%LibDirectory%\glew-2.0.0\include" /I"%LibDirectory%\glfw-3.2.1\include" /I"%LibDirectory%\stb" /I"%LibDirectory%\Python-3.6.4\Include" /I"%LibDirectory%\Python-3.6.4\PC"
+set IncludeDirectories=/I"%LibDirectory%\mylib" /I"%LibDirectory%\glew-2.0.0\include" /I"%LibDirectory%\glfw-3.2.1\include" /I"%LibDirectory%\stb"
 set CompilerFlags=/FC /Zi /EHsc /nologo /GS- /Gm- -GR- /EHa- /Fm /Od /Oi /WX /W4 %DebugDependantFlags% %Definitions% %IgnoredWarnings% %IncludeDirectories%
 
 set LibraryDirectories=/LIBPATH:"%LibDirectory%\Python-3.6.4\PCbuild\amd64" %DebugDependantPaths%
-set Libraries=gdi32.lib User32.lib Shell32.lib opengl32.lib glfw3.lib Shlwapi.lib Advapi32.lib python36_d.lib %DebugDependantLibraries%
+set Libraries=gdi32.lib User32.lib Shell32.lib opengl32.lib glfw3.lib Shlwapi.lib Advapi32.lib %DebugDependantLibraries%
 set LinkerFlags=-incremental:no %LibraryDirectories% %Libraries%
 
 set AppExports=/EXPORT:App_GetVersion /EXPORT:App_Initialize /EXPORT:App_Reloading /EXPORT:App_Reloaded /EXPORT:App_Update /EXPORT:App_Closing

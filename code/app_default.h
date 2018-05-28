@@ -31,6 +31,12 @@ struct DefaultData_t
 	rec testPackBin;
 	u32 numTestPackRecs;
 	rec* testPackRecs;
+	
+	bool polygonFinished;
+	Polygon_t testPolygon;
+	u32 testNumTriangles;
+	Triangle_t* testTriangles;
+	VertexBuffer_t trianglesBuffer;
 };
 
 #endif //  _APP_DEFAULT_H

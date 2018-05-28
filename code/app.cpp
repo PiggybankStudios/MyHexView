@@ -29,11 +29,11 @@ Description:
 #include "app_defines.h"
 #include "app_structs.h"
 #include "app_renderContext.h"
-#include "app_pythonPlugin.h"
 #include "app_algebra.h"
 
 #include "app_default.h"
 #include "app_visualizer.h"
+#include "app_life.h"
 #include "app_data.h"
 
 // +--------------------------------------------------------------+
@@ -46,6 +46,7 @@ AppOutput_t* appOutput = nullptr;
 AppData_t* app = nullptr;
 DefaultData_t* defData = nullptr;
 VisData_t* visData = nullptr;
+LifeData_t* lifeData = nullptr;
 
 MemoryArena_t* mainHeap = nullptr;
 RenderContext_t* renderContext = nullptr;
@@ -112,13 +113,12 @@ v2 RenderMouseStartRight = Vec2_Zero;
 #include "app_fontHelpers.cpp"
 #include "app_renderContext.cpp"
 #include "app_fontFlow.cpp"
-#include "app_pythonFunctions.cpp"
-#include "app_pythonPlugin.cpp"
 #include "app_algebra.cpp"
 
 #include "app_helpers.cpp"
 #include "app_default.cpp"
 #include "app_visualizer.cpp"
+#include "app_life.cpp"
 
 // +--------------------------------------------------------------+
 // |                    Local Helper Functions                    |
@@ -185,6 +185,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
 	visData = &app->visualizerData;
+	lifeData = &app->lifeData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -227,13 +228,14 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	// | Initialize Starting AppState |
 	// +==============================+
-	app->appState = AppState_Default;
+	app->appState = AppState_GameOfLife;
 	app->newAppState = app->appState;
 	DEBUG_PrintLine("[Initializing AppState_%s]", GetAppStateStr(app->appState));
 	switch (app->appState)
 	{
 		case AppState_Default: InitializeDefaultState(); StartDefaultState(app->appState); break;
 		case AppState_Visualizer: InitializeVisualizerState(); StartVisualizerState(app->appState); break;
+		case AppState_GameOfLife: InitializeLifeState(); StartLifeState(app->appState); break;
 	}
 	
 	DEBUG_WriteLine("Application initialization finished!");
@@ -257,6 +259,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
 	visData = &app->visualizerData;
+	lifeData = &app->lifeData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -308,6 +311,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	{
 		case AppState_Default: UpdateAndRenderDefaultState(); break;
 		case AppState_Visualizer: UpdateAndRenderVisualizerState(); break;
+		case AppState_GameOfLife: UpdateAndRenderLifeState(); break;
 	}
 	
 	// +==============================+
@@ -323,6 +327,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 			{
 				case AppState_Default: DeinitializeDefaultState(); break;
 				case AppState_Visualizer: DeinitializeVisualizerState(); break;
+				case AppState_GameOfLife: DeinitializeLifeState(); break;
 			}
 		}
 		
@@ -337,6 +342,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 			{
 				case AppState_Default: InitializeDefaultState(); break;
 				case AppState_Visualizer: InitializeVisualizerState(); break;
+				case AppState_GameOfLife: InitializeLifeState(); break;
 			}
 		}
 		
@@ -349,6 +355,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		{
 			case AppState_Default: StartDefaultState(oldState); break;
 			case AppState_Visualizer: StartVisualizerState(oldState); break;
+			case AppState_GameOfLife: StartLifeState(oldState); break;
 		}
 	}
 	
@@ -450,6 +457,7 @@ EXPORT AppReloading_DEFINITION(App_Reloading)
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
 	visData = &app->visualizerData;
+	lifeData = &app->lifeData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -473,6 +481,7 @@ EXPORT AppReloaded_DEFINITION(App_Reloaded)
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
 	visData = &app->visualizerData;
+	lifeData = &app->lifeData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -496,6 +505,7 @@ EXPORT AppClosing_DEFINITION(App_Closing)
 	mainHeap = &app->mainHeap;
 	defData = &app->defaultData;
 	visData = &app->visualizerData;
+	lifeData = &app->lifeData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
