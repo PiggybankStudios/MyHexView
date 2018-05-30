@@ -18,7 +18,7 @@ set LibDirectory=..\..\..\lib
 set SourceDirectory=..\code
 set DataDirectory=..\data
 
-set CompilePlatform=0
+set CompilePlatform=1
 set CompileApplication=1
 set DebugBuild=1
 set CopyToDataDirectory=1

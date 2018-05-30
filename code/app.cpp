@@ -220,10 +220,6 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	InitializeRenderContext();
 	AppLoadContent(true);
-	#if USE_PYTHON
-	AddPythonFunctions();
-	LoadPlaygroundPythonModule();
-	#endif
 	
 	// +==============================+
 	// | Initialize Starting AppState |
@@ -282,26 +278,6 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	{
 		app->showDebugMenu = !app->showDebugMenu;
 	}
-	#endif
-	
-	#if USE_PYTHON
-	// +==============================+
-	// |  Restart Python Interpreter  |
-	// +==============================+
-	if (ButtonPressed(Button_F6))
-	{
-		DEBUG_WriteLine("Restarting python interpreter");
-		UnloadAllPythonModules();
-		Py_FinalizeEx();
-		Py_Initialize();
-		AddPythonFunctions();
-		LoadPlaygroundPythonModule();
-	}
-	
-	// +==============================+
-	// |     Load Python Modules      |
-	// +==============================+
-	UpdatePythonModuleLoader();
 	#endif
 	
 	// +==============================+

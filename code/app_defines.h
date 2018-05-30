@@ -25,8 +25,6 @@ Date:   03\02\2018
 #define MISSING_SPRITE_PATH  SPRITES_FOLDER "missing.png"
 #define MISSING_TEXTURE_PATH TEXTURES_FOLDER "missing.jpg"
 
-#define USE_PYTHON false
-
 #define VisLightSeaGreen NewColor(0xFF1ABC9C)
 #define VisLightGreen    NewColor(0xFF2ECC71)
 #define VisLightBlue     NewColor(0xFF3498DB)
