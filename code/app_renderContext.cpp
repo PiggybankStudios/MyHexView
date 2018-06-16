@@ -40,6 +40,8 @@ void InitializeRenderContext()
 	renderContext->depth = 1.0f;
 	renderContext->circleRadius = 0.0f;
 	renderContext->circleInnerRadius = 0.0f;
+	renderContext->vigRadius = 0.0f;
+	renderContext->vigSmoothness = 0.0f;
 	renderContext->color = NewColor(Color_White);
 	renderContext->secondaryColor = NewColor(Color_White);
 }
@@ -98,6 +100,7 @@ void RcUpdateShader()
 	glUniform4f(renderContext->boundShader->locations.sourceRectangle, renderContext->sourceRectangle.x, renderContext->sourceRectangle.y, renderContext->sourceRectangle.width, renderContext->sourceRectangle.height);
 	glUniform1f(renderContext->boundShader->locations.circleRadius, renderContext->circleRadius);
 	glUniform1f(renderContext->boundShader->locations.circleInnerRadius, renderContext->circleInnerRadius);
+	glUniform2f(renderContext->boundShader->locations.vignette, renderContext->vigRadius, renderContext->vigSmoothness);
 	
 	v4 colorVec = NewVec4(renderContext->color);
 	glUniform4f(renderContext->boundShader->locations.diffuseColor, colorVec.r, colorVec.g, colorVec.b, colorVec.a);
@@ -269,6 +272,19 @@ void RcSetCircleRadius(r32 radius, r32 innerRadius = 0.0f)
 	glUniform1f(renderContext->boundShader->locations.circleInnerRadius, innerRadius);
 }
 
+void RcEnableVignette(r32 radius, r32 smoothness)
+{
+	renderContext->vigRadius = radius;
+	renderContext->vigSmoothness = smoothness;
+	
+	glUniform2f(renderContext->boundShader->locations.vignette, radius, smoothness);
+}
+
+void RcDisableVignette()
+{
+	RcEnableVignette(0, 0);
+}
+
 void RcSetDepth(r32 depth)
 {
 	renderContext->depth = depth;
@@ -304,6 +320,7 @@ void RcBegin(const Shader_t* startShader, const Font_t* startFont, rec viewport)
 	RcSetSourceRectangle(NewRec(0, 0, 1, 1));
 	RcSetGradientEnabled(false);
 	RcSetCircleRadius(0.0f, 0.0f);
+	RcDisableVignette();
 	RcSetDepth(1.0f);
 }
 

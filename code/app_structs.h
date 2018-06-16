@@ -208,6 +208,7 @@ struct Shader_t
 		GLint textureSize;
 		GLint circleRadius;
 		GLint circleInnerRadius;
+		GLint vignette;
 	} locations;
 };
 

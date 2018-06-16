@@ -214,7 +214,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	}
 	
 	TempPushMark();
-	
+	 
 	// +==============================+
 	// |      Initialize Things       |
 	// +==============================+
@@ -224,7 +224,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	// | Initialize Starting AppState |
 	// +==============================+
-	app->appState = AppState_GameOfLife;
+	app->appState = AppState_Default;
 	app->newAppState = app->appState;
 	DEBUG_PrintLine("[Initializing AppState_%s]", GetAppStateStr(app->appState));
 	switch (app->appState)

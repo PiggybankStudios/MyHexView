@@ -8,12 +8,19 @@ uniform bool DoGrayscaleGradient;
 uniform bool UseAlphaTexture;
 uniform float CircleRadius;
 uniform float CircleInnerRadius;
+uniform vec2 Vignette;
 
 in vec4 fColor;
 in vec2 fTexCoord;
 in vec2 fSampleCoord;
 
 out vec4 frag_colour;
+
+float vignette(vec2 uv, float radius, float smoothness)
+{
+	float diff = radius - distance(uv, vec2(0.5, 0.5));
+	return smoothstep(-smoothness, smoothness, diff);
+}
 
 void main()
 {
@@ -49,5 +56,11 @@ void main()
 		{
 			frag_colour.a *= smoothstep(CircleInnerRadius, CircleInnerRadius+smoothDelta, distFromCenter);
 		}
+	}
+	
+	if (Vignette.x > 0)
+	{
+		float vignetteValue = vignette(fTexCoord, Vignette.x, Vignette.y);
+		frag_colour.rgb *= vignetteValue;
 	}
 }

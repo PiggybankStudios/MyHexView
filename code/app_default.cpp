@@ -395,18 +395,32 @@ void UpdateAndRenderDefaultState()
 			StartTimeBlock("Rect Rendering");
 			for (u32 rIndex = 0; rIndex < defData->numTestPackRecs; rIndex++)
 			{
-				RcDrawButton(defData->testPackRecs[rIndex], ColorTransparent(NewColor(Color_Red), 0.1f), NewColor(Color_Red), 2);
+				// RcDrawButton(defData->testPackRecs[rIndex], ColorTransparent(NewColor(Color_Red), 0.1f), NewColor(Color_Red), 2);
+				RcEnableVignette(0.6f, 0.7f);
+				RcDrawRectangle(defData->testPackRecs[rIndex], NewColor(Color_Red));
+				RcDisableVignette();
 			}
 			RcDrawButton(RecInflate(defData->testPackBin, 2), NewColor(Color_TransparentBlack), NewColor(Color_Yellow), 2);
 			EndTimeBlock();
 		}
 		
 		// +==============================+
+		// |   Draw Vignette Rectangle    |
+		// +==============================+
+		#if 1
+		{
+			RcEnableVignette(0.7f, 0.5f);
+			RcDrawRectangle(NewRec(RenderScreenSize.width/2, 0, 200, 200), NewColor(Color_OrangeRed));
+			RcDisableVignette();
+		}
+		#endif
+		
+		// +==============================+
 		// |          Draw Glyph          |
 		// +==============================+
 		if (app->glyphFilled)
 		{
-			rec glyphRec = NewRec(RenderScreenSize.width/2, 10, (r32)app->glyphTexture.width, (r32)app->glyphTexture.height);
+			rec glyphRec = NewRec(RenderScreenSize.width/2 + 10, 10, (r32)app->glyphTexture.width, (r32)app->glyphTexture.height);
 			RcBindTexture(&app->glyphTexture);
 			RcDrawTexturedRec(glyphRec, NewColor(Color_White));
 		}

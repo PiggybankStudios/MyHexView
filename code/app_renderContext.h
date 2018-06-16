@@ -38,6 +38,8 @@ struct RenderContext_t
 	r32 circleInnerRadius;
 	Color_t color;
 	Color_t secondaryColor;
+	r32 vigRadius;
+	r32 vigSmoothness;
 };
 
 

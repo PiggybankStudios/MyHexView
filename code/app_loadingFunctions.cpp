@@ -138,6 +138,7 @@ Shader_t LoadShader(const char* vertShaderFileName, const char* fragShaderFileNa
 	result.locations.textureSize         = glGetUniformLocation(result.programId, "TextureSize");
 	result.locations.circleRadius        = glGetUniformLocation(result.programId, "CircleRadius");
 	result.locations.circleInnerRadius   = glGetUniformLocation(result.programId, "CircleInnerRadius");
+	result.locations.vignette            = glGetUniformLocation(result.programId, "Vignette");
 	
 	glGenVertexArrays(1, &result.vertexArray);
 	glBindVertexArray(result.vertexArray);
