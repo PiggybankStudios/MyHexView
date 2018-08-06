@@ -40,6 +40,7 @@ struct AppData_t
 	DefaultData_t defaultData;
 	VisData_t visualizerData;
 	LifeData_t lifeData;
+	MatherData_t matherData;
 	
 	AppState_t appState;
 	AppState_t newAppState;
