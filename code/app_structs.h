@@ -17,6 +17,7 @@ typedef enum
 	AppState_Visualizer,
 	AppState_GameOfLife,
 	AppState_Mather,
+	AppState_Physics,
 } AppState_t;
 
 typedef enum

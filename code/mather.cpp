@@ -63,7 +63,8 @@ r32 TestFunction1(r32 x)
 	// return AbsR32(SinR32(x) / PowR32(2, (PowR32(x, x) - Pi32/2) / Pi32));
 	// return PowR32(2, 1/x);
 	// return SinR32(SinR32( SinR32( SinR32( SinR32( SinR32( SinR32( SinR32( SinR32( SinR32(x))))))))));
-	return CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(x))))))))));
+	// return CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(2 * CosR32(x))))))))));
+	return 2*PowR32(x, 5) + 32*PowR32(x, 4) + PowR32(x, 3) - 5*PowR32(x, 2) + 2*PowR32(x, 1);
 }
 
 // +--------------------------------------------------------------+

@@ -35,6 +35,7 @@ Description:
 #include "app_visualizer.h"
 #include "app_life.h"
 #include "mather.h"
+#include "app_physics.h"
 #include "app_data.h"
 
 // +--------------------------------------------------------------+
@@ -49,6 +50,7 @@ DefaultData_t* defData = nullptr;
 VisData_t* visData = nullptr;
 LifeData_t* lifeData = nullptr;
 MatherData_t* mather = nullptr;
+PhysicsData_t* phys = nullptr;
 
 MemoryArena_t* mainHeap = nullptr;
 RenderContext_t* renderContext = nullptr;
@@ -122,6 +124,7 @@ v2 RenderMouseStartRight = Vec2_Zero;
 #include "app_visualizer.cpp"
 #include "app_life.cpp"
 #include "mather.cpp"
+#include "app_physics.cpp"
 
 // +--------------------------------------------------------------+
 // |                    Local Helper Functions                    |
@@ -190,6 +193,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	visData = &app->visualizerData;
 	lifeData = &app->lifeData;
 	mather = &app->matherData;
+	phys = &app->physicsData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -228,7 +232,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	// | Initialize Starting AppState |
 	// +==============================+
-	app->appState = AppState_Mather;
+	app->appState = AppState_Physics;
 	app->newAppState = app->appState;
 	DEBUG_PrintLine("[Initializing AppState_%s]", GetAppStateStr(app->appState));
 	switch (app->appState)
@@ -237,6 +241,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 		case AppState_Visualizer: InitializeVisualizerState(); StartVisualizerState(app->appState); break;
 		case AppState_GameOfLife: InitializeLifeState(); StartLifeState(app->appState); break;
 		case AppState_Mather: InitializeMatherState(); StartMatherState(app->appState); break;
+		case AppState_Physics: InitializePhysicsState(); StartPhysicsState(app->appState); break;
 	}
 	
 	DEBUG_WriteLine("Application initialization finished!");
@@ -262,6 +267,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	visData = &app->visualizerData;
 	lifeData = &app->lifeData;
 	mather = &app->matherData;
+	phys = &app->physicsData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -295,6 +301,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		case AppState_Visualizer: UpdateAndRenderVisualizerState(); break;
 		case AppState_GameOfLife: UpdateAndRenderLifeState(); break;
 		case AppState_Mather: UpdateAndRenderMatherState(); break;
+		case AppState_Physics: UpdateAndRenderPhysicsState(); break;
 	}
 	
 	// +==============================+
@@ -312,6 +319,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 				case AppState_Visualizer: DeinitializeVisualizerState(); break;
 				case AppState_GameOfLife: DeinitializeLifeState(); break;
 				case AppState_Mather: DeinitializeMatherState(); break;
+				case AppState_Physics: DeinitializePhysicsState(); break;
 			}
 		}
 		
@@ -328,6 +336,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 				case AppState_Visualizer: InitializeVisualizerState(); break;
 				case AppState_GameOfLife: InitializeLifeState(); break;
 				case AppState_Mather: InitializeMatherState(); break;
+				case AppState_Physics: InitializePhysicsState(); break;
 			}
 		}
 		
@@ -342,6 +351,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 			case AppState_Visualizer: StartVisualizerState(oldState); break;
 			case AppState_GameOfLife: StartLifeState(oldState); break;
 			case AppState_Mather: StartMatherState(oldState); break;
+			case AppState_Physics: StartPhysicsState(oldState); break;
 		}
 	}
 	
@@ -445,6 +455,7 @@ EXPORT AppReloading_DEFINITION(App_Reloading)
 	visData = &app->visualizerData;
 	lifeData = &app->lifeData;
 	mather = &app->matherData;
+	phys = &app->physicsData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -470,6 +481,7 @@ EXPORT AppReloaded_DEFINITION(App_Reloaded)
 	visData = &app->visualizerData;
 	lifeData = &app->lifeData;
 	mather = &app->matherData;
+	phys = &app->physicsData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);
@@ -495,6 +507,7 @@ EXPORT AppClosing_DEFINITION(App_Closing)
 	visData = &app->visualizerData;
 	lifeData = &app->lifeData;
 	mather = &app->matherData;
+	phys = &app->physicsData;
 	TempArena = &app->tempArena;
 	renderContext = &app->renderContext;
 	RenderScreenSize = NewVec2(PlatformInfo->screenSize);

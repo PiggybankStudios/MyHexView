@@ -41,6 +41,7 @@ struct AppData_t
 	VisData_t visualizerData;
 	LifeData_t lifeData;
 	MatherData_t matherData;
+	PhysicsData_t physicsData;
 	
 	AppState_t appState;
 	AppState_t newAppState;
