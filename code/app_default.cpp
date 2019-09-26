@@ -591,7 +591,7 @@ void UpdateAndRenderDefaultState()
 		// +==============================+
 		// |      Draw Cursor Donut       |
 		// +==============================+
-		#if 1
+		#if 0
 		if (input->mouseInsideWindow)
 		{
 			RcDrawDonut(RenderMousePos, 11.0f, 4.0f, NewColor(Color_IvoryBlack));

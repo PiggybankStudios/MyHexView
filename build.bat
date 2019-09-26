@@ -18,7 +18,7 @@ set LibDirectory=..\..\..\lib
 set SourceDirectory=..\code
 set DataDirectory=..\data
 
-set CompilePlatform=0
+set CompilePlatform=1
 set CompileApplication=1
 set DebugBuild=1
 set CopyToDataDirectory=1
@@ -71,7 +71,6 @@ if "%CompilePlatform%"=="1" (
 if "%CompileApplication%"=="1" (
 	echo[
 	
-	
 	python ..\IncrementVersionNumber.py %SourceDirectory%\app_version.h
 	
 	cl /Fe%ProjectName%.dll %CompilerFlags% %IncludeDirectories% %SourceDirectory%\app.cpp /link %LinkerFlags% %AppExports% /DLL /PDB:"%ProjectName%_%TimeString%.pdb"
@@ -88,7 +87,7 @@ if "%CompileApplication%"=="1" (
 	)
 )
 
-cl /nologo %SourceDirectory%\stb_truetypeTest.cpp /FeTrueTypeTest.exe /I"%LibDirectory%\stb" 
+rem cl /nologo %SourceDirectory%\stb_truetypeTest.cpp /FeTrueTypeTest.exe /I"%LibDirectory%\stb" 
 
 echo[
 

@@ -110,8 +110,9 @@ TimedBlockInfo_t* GetTimedBlockInfoByParent(const char* parentName, u32 index = 
 
 #else //!DEBUG
 
-#define BeginTimeBlock(blockName)
+#define StartTimeBlock(blockName)
 #define EndTimeBlock() 0
 #define SaveTimeBlocks()
+#define ClearTimeBlocks()
 
 #endif

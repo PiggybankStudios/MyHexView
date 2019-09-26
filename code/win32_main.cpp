@@ -307,8 +307,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		u32 exeDirectoryLength = GetRunningDirectory(exeDirectory, ArrayCount(exeDirectory));
 		DEBUG_PrintLine("Exe Directory: \"%s\"", exeDirectory);
 		
-		appDllPath = StrCat(TempArena, NtStr(exeDirectory), NtStr(APPLICATION_DLL_NAME));
-		appTempDllPath = StrCat(TempArena, NtStr(exeDirectory), NtStr(APPLICATION_TEMP_DLL_NAME));
+		appDllPath = MyStrCat(TempArena, NtStr(exeDirectory), NtStr(APPLICATION_DLL_NAME));
+		appTempDllPath = MyStrCat(TempArena, NtStr(exeDirectory), NtStr(APPLICATION_TEMP_DLL_NAME));
 		
 		if (PathFileExists(appDllPath) == false)
 		{
@@ -448,20 +448,20 @@ int WINAPI WinMain(HINSTANCE hInstance,
 			
 			platformInfo.systemTime = {};
 			platformInfo.systemTime.year        = systemTime.wYear;
-			platformInfo.systemTime.month       = (systemTime.wMonth-1);
-			platformInfo.systemTime.day         = (systemTime.wDay-1);
-			platformInfo.systemTime.hour        = systemTime.wHour;
-			platformInfo.systemTime.minute      = systemTime.wMinute;
-			platformInfo.systemTime.second      = systemTime.wSecond;
-			platformInfo.systemTime.millisecond = systemTime.wMilliseconds;
+			platformInfo.systemTime.month       = (u8)(systemTime.wMonth-1);
+			platformInfo.systemTime.day         = (u8)(systemTime.wDay-1);
+			platformInfo.systemTime.hour        = (u8)systemTime.wHour;
+			platformInfo.systemTime.minute      = (u8)systemTime.wMinute;
+			platformInfo.systemTime.second      = (u8)systemTime.wSecond;
+			// platformInfo.systemTime.millisecond = systemTime.wMilliseconds;
 			platformInfo.localTime = {};
 			platformInfo.localTime.year         = localTime.wYear;
-			platformInfo.localTime.month        = (localTime.wMonth-1);
-			platformInfo.localTime.day          = (localTime.wDay-1);
-			platformInfo.localTime.hour         = localTime.wHour;
-			platformInfo.localTime.minute       = localTime.wMinute;
-			platformInfo.localTime.second       = localTime.wSecond;
-			platformInfo.localTime.millisecond  = localTime.wMilliseconds;
+			platformInfo.localTime.month        = (u8)(localTime.wMonth-1);
+			platformInfo.localTime.day          = (u8)(localTime.wDay-1);
+			platformInfo.localTime.hour         = (u8)localTime.wHour;
+			platformInfo.localTime.minute       = (u8)localTime.wMinute;
+			platformInfo.localTime.second       = (u8)localTime.wSecond;
+			// platformInfo.localTime.millisecond  = localTime.wMilliseconds;
 		}
 		platformInfo.window = window;
 		

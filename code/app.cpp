@@ -232,7 +232,7 @@ EXPORT AppInitialize_DEFINITION(App_Initialize)
 	// +==============================+
 	// | Initialize Starting AppState |
 	// +==============================+
-	app->appState = AppState_Physics;
+	app->appState = AppState_Default;
 	app->newAppState = app->appState;
 	DEBUG_PrintLine("[Initializing AppState_%s]", GetAppStateStr(app->appState));
 	switch (app->appState)
@@ -463,7 +463,9 @@ EXPORT AppReloading_DEFINITION(App_Reloading)
 	RenderMouseStartLeft = Vec2_Zero;
 	RenderMouseStartRight = Vec2_Zero;
 	
+	#if DEBUG
 	app->lastNumTimedBlockInfos = 0;
+	#endif
 }
 
 // +--------------------------------------------------------------+
