@@ -258,6 +258,9 @@ void DeinitializeVisualizerState()
 // +--------------------------------------------------------------+
 void UpdateAndRenderVisualizerState()
 {
+	u32 numTilesUpdated = 0;
+	u32 numTilesDrawn = 0;
+	
 	// +--------------------------------------------------------------+
 	// |                            Update                            |
 	// +--------------------------------------------------------------+
@@ -461,6 +464,7 @@ void UpdateAndRenderVisualizerState()
 						tileRec.y += (r32)tileY * (tileRec.height + hexData->spacing.height);
 						rec tileHoverRec = tileRec;
 						tileHoverRec.size += hexData->spacing;
+						numTilesUpdated++;
 						
 						u32 bIndex = (tileY*hexData->numColumns) + tileX;
 						
@@ -513,6 +517,7 @@ void UpdateAndRenderVisualizerState()
 						tileRec.y += (r32)tileY * (tileRec.height + hexData->interpSpacing.height);
 						rec tileHoverRec = tileRec;
 						tileHoverRec.size += hexData->interpSpacing;
+						numTilesUpdated++;
 						
 						u32 bIndex = (tileY*hexData->numColumns) + tileX;
 						
@@ -615,7 +620,8 @@ void UpdateAndRenderVisualizerState()
 			{
 				VisHexData_t* hexData = &visData->hexData;
 				
-				RcDrawRectangle(visData->hexData.viewRec, VisSilver);
+				RcDrawRectangle(visData->hexData.viewRec, VisWhite);
+				RcDrawRectangle(visData->hexData.interpRec, VisWhite);
 				
 				RcDrawButton(hexData->structsTabRec, VisLightBlueGray, VisLightGray, 1);
 				RcDrawButton(hexData->structsPlusRec, VisGreen, VisLightGreen, 1);
@@ -658,7 +664,7 @@ void UpdateAndRenderVisualizerState()
 						rec tileRec = baseTileRec;
 						tileRec.x += (r32)tileX * (tileRec.width + hexData->spacing.width);
 						tileRec.y += (r32)tileY * (tileRec.height + hexData->spacing.height);
-						tileRec = RecInflate(tileRec, hexData->spacing/2);
+						tileRec = RecInflate2(tileRec, hexData->spacing/2);
 						
 						u32 bIndex = (tileY*visData->hexData.numColumns) + tileX;
 						u32 byteAddress = hexData->addressMin + bIndex;
@@ -721,7 +727,8 @@ void UpdateAndRenderVisualizerState()
 								backColor = VisGray;
 							}
 							
-							RcDrawButton(tileRec, backColor, borderColor, 1);
+							// RcDrawButton(tileRec, backColor, borderColor, 1);
+							if (backColor.value != VisWhite.value) { RcDrawRectangle(tileRec, backColor); numTilesDrawn++; }
 							RcBindFont(&visData->smallFont);
 							RcDrawString(hexStr, hexStrPos, textColor);
 							TempPopMark();
@@ -783,7 +790,7 @@ void UpdateAndRenderVisualizerState()
 						rec tileRec = interpTileRec;
 						tileRec.x += (r32)tileX * (tileRec.width + hexData->interpSpacing.width);
 						tileRec.y += (r32)tileY * (tileRec.height + hexData->interpSpacing.height);
-						tileRec = RecInflate(tileRec, hexData->interpSpacing/2);
+						tileRec = RecInflate2(tileRec, hexData->interpSpacing/2);
 						
 						u32 bIndex = (tileY*visData->hexData.numColumns) + tileX;
 						u32 byteAddress = hexData->addressMin + bIndex;
@@ -852,7 +859,8 @@ void UpdateAndRenderVisualizerState()
 								backColor = VisGray;
 							}
 							
-							RcDrawButton(tileRec, backColor, borderColor, 1);
+							// RcDrawButton(tileRec, backColor, borderColor, 1);
+							if (backColor.value != VisWhite.value) { RcDrawRectangle(tileRec, backColor); numTilesDrawn++; }
 							RcBindFont(&visData->smallFont);
 							RcDrawString(hexStr, 1, hexStrPos, textColor);
 							TempPopMark();
@@ -909,7 +917,8 @@ void UpdateAndRenderVisualizerState()
 				{
 					r32 textTop = baseTileRec.y;
 					textTop += (r32)tileY * (baseTileRec.height + hexData->spacing.height) + baseTileRec.height/2 - visData->smallFont.lineHeight/2;
-					if (textTop < RenderScreenSize.height && textTop + visData->smallFont.lineHeight > 0)
+					if (textTop >= RenderScreenSize.height) { break; }
+					if (textTop + visData->smallFont.lineHeight > 0)
 					{
 						u32 bIndex = tileY * visData->hexData.numColumns;
 						TempPushMark();
@@ -1013,6 +1022,7 @@ void UpdateAndRenderVisualizerState()
 					DrawFileInfoItem("File: \"%s\"", visData->filePath);
 					DrawFileInfoItem("Type: \"%s\"", GetVisFileTypeString(visData->fileType));
 					DrawFileInfoItem("Size: %s (%u bytes)", FormattedSizeStr(visData->file.size), visData->file.size);
+					DrawFileInfoItem("# Tiles: %u/%u", numTilesUpdated, numTilesDrawn);
 					DrawFileInfoItem("");
 					DrawFileInfoItem("Address Range: %08X-%08X", hexData->addressMin, hexData->addressMax);
 					DrawFileInfoItem("Regions Size: %s (%u bytes)", FormattedSizeStr(hexData->regionsSize), hexData->regionsSize);
@@ -1138,7 +1148,6 @@ void UpdateAndRenderVisualizerState()
 					}
 				}
 				RcSetViewport(NewRec(Vec2_Zero, RenderScreenSize));
-				
 			}
 			else if (visData->fileType == VisFileType_IntelHex)
 			{

@@ -20,7 +20,7 @@ set DataDirectory=..\data
 
 set CompilePlatform=1
 set CompileApplication=1
-set DebugBuild=1
+set DebugBuild=0
 set CopyToDataDirectory=1
 
 if "%DebugBuild%"=="1" (

@@ -351,7 +351,7 @@ char* Win32_GetFileInFolder(MemoryArena_t* arenaPntr, const char* folderPath, u3
 			// Win32_PrintLine("Found file \"%s\"", findData.cFileName);
 			if (fIndex == fileIndex)
 			{
-				result = ArenaString(arenaPntr, NtStr(findData.cFileName));
+				result = ArenaNtString(arenaPntr, findData.cFileName);
 				break;
 			}
 			fIndex++;

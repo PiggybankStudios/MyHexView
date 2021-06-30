@@ -6,25 +6,25 @@ Description:
 	** Holds some functions for handling triangles, polygons, and triangulation of polygons
 */
 
-bool IsTriangleClockwise(v2 p0, v2 p1, v2 p2)
-{
-	return (Vec2Dot(p2 - p0, Vec2PerpRight(p1 - p0)) >= 0);
-}
-bool IsTriangleClockwise(const Triangle_t& triangle)
-{
-	return IsTriangleClockwise(triangle.p0, triangle.p1, triangle.p2);
-}
-bool IsInsideTriangle(v2 test, v2 p0, v2 p1, v2 p2)
-{
-	v2 perp0 = Vec2PerpRight(p1 - p0);
-	v2 perp1 = Vec2PerpRight(p2 - p1);
-	v2 perp2 = Vec2PerpRight(p0 - p2);
-	return (
-		SignR32(Vec2Dot(p2 - p0, perp0)) == SignR32(Vec2Dot(test - p0, perp0)) &&
-		SignR32(Vec2Dot(p0 - p1, perp1)) == SignR32(Vec2Dot(test - p1, perp1)) &&
-		SignR32(Vec2Dot(p1 - p2, perp2)) == SignR32(Vec2Dot(test - p2, perp2))
-	);
-}
+// bool IsTriangleClockwise(v2 p0, v2 p1, v2 p2)
+// {
+// 	return (Vec2Dot(p2 - p0, Vec2PerpRight(p1 - p0)) >= 0);
+// }
+// bool IsTriangleClockwise(const Triangle_t& triangle)
+// {
+// 	return IsTriangleClockwise(triangle.p0, triangle.p1, triangle.p2);
+// }
+// bool IsInsideTriangle(v2 test, v2 p0, v2 p1, v2 p2)
+// {
+// 	v2 perp0 = Vec2PerpRight(p1 - p0);
+// 	v2 perp1 = Vec2PerpRight(p2 - p1);
+// 	v2 perp2 = Vec2PerpRight(p0 - p2);
+// 	return (
+// 		SignR32(Vec2Dot(p2 - p0, perp0)) == SignR32(Vec2Dot(test - p0, perp0)) &&
+// 		SignR32(Vec2Dot(p0 - p1, perp1)) == SignR32(Vec2Dot(test - p1, perp1)) &&
+// 		SignR32(Vec2Dot(p1 - p2, perp2)) == SignR32(Vec2Dot(test - p2, perp2))
+// 	);
+// }
 
 Triangle_t* TriangulatePolygonEars(MemoryArena_t* arenaPntr, const Polygon_t* polygon, u32* numTrianglesOut = nullptr)
 {
