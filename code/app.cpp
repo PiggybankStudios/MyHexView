@@ -141,18 +141,18 @@ void AppLoadContent(bool firstLoad)
 	app->defaultShader = LoadShader(SHADERS_FOLDER "simple-vertex.glsl", SHADERS_FOLDER "simple-fragment.glsl");
 	app->defaultFont   = LoadFont(FONTS_FOLDER "consolab.ttf", 24, 256, 256, ' ', 96);
 	
-	// CreateGameFont(&app->newFont, mainHeap);
-	// FontLoadFile(&app->newFont, FONTS_FOLDER "georgiab.ttf", FontStyle_Bold);
-	// FontLoadFile(&app->newFont, FONTS_FOLDER "georgiai.ttf", FontStyle_Italic);
-	// FontLoadFile(&app->newFont, FONTS_FOLDER "georgiaz.ttf", FontStyle_BoldItalic);
-	// FontLoadFile(&app->newFont, FONTS_FOLDER "georgia.ttf",  FontStyle_Default);
-	// FontBake(&app->newFont, 12);
-	// FontBake(&app->newFont, 24);
-	// FontBake(&app->newFont, 32);
-	// FontBake(&app->newFont, 32, FontStyle_Bold);
-	// FontBake(&app->newFont, 32, FontStyle_Italic);
-	// FontBake(&app->newFont, 32, FontStyle_BoldItalic);
-	// FontDropFiles(&app->newFont);
+	CreateGameFont(&app->newFont, mainHeap);
+	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiab.ttf", FontStyle_Bold);
+	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiai.ttf", FontStyle_Italic);
+	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiaz.ttf", FontStyle_BoldItalic);
+	FontLoadFile(&app->newFont, FONTS_FOLDER "georgia.ttf",  FontStyle_Default);
+	FontBake(&app->newFont, 12);
+	FontBake(&app->newFont, 24);
+	FontBake(&app->newFont, 32);
+	FontBake(&app->newFont, 32, FontStyle_Bold);
+	FontBake(&app->newFont, 32, FontStyle_Italic);
+	FontBake(&app->newFont, 32, FontStyle_BoldItalic);
+	FontDropFiles(&app->newFont);
 	
 	CreateGameFont(&app->debugFont, mainHeap);
 	FontLoadFile(&app->debugFont, FONTS_FOLDER "consolab.ttf", FontStyle_Default);
@@ -163,8 +163,8 @@ void AppLoadContent(bool firstLoad)
 	FontBake(&app->debugFont, 24);
 	FontDropFiles(&app->debugFont);
 	
-	// CreateGameFont(&app->japaneseFont, &app->stdArena);
-	// FontLoadFile(&app->japaneseFont, FONTS_FOLDER "yumin.ttf", FontStyle_Default);
+	CreateGameFont(&app->japaneseFont, &app->stdArena);
+	FontLoadFile(&app->japaneseFont, FONTS_FOLDER "yumin.ttf", FontStyle_Default);
 }
 
 // +--------------------------------------------------------------+

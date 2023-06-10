@@ -56,6 +56,7 @@ struct AppData_t
 	NewFont_t japaneseFont;
 	
 	bool glyphFilled;
+	u32 glyphIndex;
 	Texture_t glyphTexture;
 };
 

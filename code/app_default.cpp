@@ -155,9 +155,24 @@ void UpdateAndRenderDefaultState()
 			if (app->glyphFilled)
 			{
 				DestroyTexture(&app->glyphTexture);
+			}
+			
+			u32 testCodepoints[] = {
+				0x958b, //open
+				0x9589, //close
+				0x9591, //leisure
+				0x9583, //flash
+				0x95a4, //small side gate
+			};
+			app->glyphIndex = (app->glyphFilled) ? app->glyphIndex+1 : 0;
+			if (app->glyphIndex < ArrayCount(testCodepoints))
+			{
+				app->glyphFilled = FontGetGlyph(&app->glyphTexture, &app->japaneseFont, 128, testCodepoints[app->glyphIndex], FontStyle_Default);
+			}
+			else
+			{
 				app->glyphFilled = false;
 			}
-			app->glyphFilled = FontGetGlyph(&app->glyphTexture, &app->japaneseFont, 128, 0x958b, FontStyle_Default);
 		}
 		
 		// +==============================+
@@ -207,7 +222,7 @@ void UpdateAndRenderDefaultState()
 		// +==============================+
 		// |      Change Quad Curve       |
 		// +==============================+
-		if (false)
+		if (ButtonDown(Button_Control))
 		{
 			if (ButtonDown(MouseButton_Left))
 			{
@@ -237,7 +252,7 @@ void UpdateAndRenderDefaultState()
 		// |     Add Vertices Polygon     |
 		// +==============================+
 		bool closedPolygonLoop = false;
-		if (ButtonReleased(MouseButton_Left))// && input->mouseMaxDist[MouseButton_Left] < 5)
+		if (!ButtonDown(Button_Control) && ButtonReleased(MouseButton_Left))// && input->mouseMaxDist[MouseButton_Left] < 5)
 		{
 			if (defData->testPolygon.numVerts == 0 || defData->polygonFinished)
 			{
