@@ -27,6 +27,14 @@ An incomplete binary file viewer that had some experimental features that I wish
 
 ## Other Things In the Repository (Screenshots)
 
-![Playground](/release/screenshot2.png)
+Playground
+![Default](/release/screenshot2.png)
 
-![Game of Life](/release/screenshot3.png)
+Game of Life
+![Life](/release/screenshot3.png)
+
+Graphing Calculator
+![Mather](/release/screenshot4.png)
+
+Kepler's Laws Test
+![Physics](/release/screenshot5.png)

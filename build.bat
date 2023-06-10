@@ -18,6 +18,7 @@ call "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDe
 set ProjectName=MyHexView
 rem set ProjectName=Playground
 rem set ProjectName=GameOfLife
+rem set ProjectName=KeplerTest
 set LibDirectory=..\..\..\lib
 set SourceDirectory=..\code
 set DataDirectory=..\data
