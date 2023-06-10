@@ -27,6 +27,6 @@ An incomplete binary file viewer that had some experimental features that I wish
 
 ## Other Things In the Repository (Screenshots)
 
-![Playground](/release/screenshot1.png)
+![Playground](/release/screenshot2.png)
 
-![Game of Life](/release/screenshot2.png)
+![Game of Life](/release/screenshot3.png)
