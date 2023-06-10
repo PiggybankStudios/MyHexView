@@ -309,6 +309,7 @@ void UpdateAndRenderVisualizerState()
 		// +==============================+
 		// |        Regenerate UI         |
 		// +==============================+
+		StartTimeBlock("Layout");
 		bool screenSizeChanged = false;
 		if (visData->oldRenderScreenSize != RenderScreenSize)
 		{
@@ -323,6 +324,7 @@ void UpdateAndRenderVisualizerState()
 				VisGenerateUi();
 			}
 		}
+		EndTimeBlock();
 		
 		// +==============================+
 		// |        Raw Hex Update        |
@@ -333,6 +335,7 @@ void UpdateAndRenderVisualizerState()
 			visData->hexData.isHovering = false;
 			
 			bool mouseInsideDataArea = (IsInsideRec(hexData->viewRec, RenderMousePos) || IsInsideRec(hexData->interpRec, RenderMousePos) || IsInsideRec(hexData->scrollGutterRec, RenderMousePos));
+			StartTimeBlock("Input and Misc.");
 			
 			// +==============================+
 			// |     Handle Scroll Wheels     |
@@ -449,11 +452,14 @@ void UpdateAndRenderVisualizerState()
 				hexData->interpViewPos.y = (hexData->interpDataSize.height - hexData->interpRec.height) * (hexData->viewPos.height / (hexData->dataSize.height - hexData->viewRec.height));
 			}
 			
+			EndTimeBlock();
+			
 			// +==============================+
 			// |         Update Tiles         |
 			// +==============================+
 			if (visData->fileOpen)
 			{
+				StartTimeBlock("Update Tiles");
 				rec baseTileRec = NewRec(hexData->viewRec.topLeft + hexData->spacing - hexData->viewPos, hexData->tileSize);
 				u32 startTileY = (u32)((hexData->viewPos.y - hexData->spacing.height) / (baseTileRec.height + hexData->spacing.height));
 				for (u32 tileY = startTileY; tileY < hexData->numRows; tileY++)
@@ -500,6 +506,7 @@ void UpdateAndRenderVisualizerState()
 						break;
 					}
 				}
+				EndTimeBlock();
 			}
 			
 			// +==============================+
@@ -507,6 +514,7 @@ void UpdateAndRenderVisualizerState()
 			// +==============================+
 			if (visData->fileOpen)
 			{
+				StartTimeBlock("Update Interp Tiles");
 				rec baseTileRec = NewRec(visData->hexData.interpRec.topLeft + hexData->interpSpacing - hexData->interpViewPos, hexData->interpTileSize);
 				u32 startTileY = (u32)((hexData->interpViewPos.y - hexData->interpSpacing.height) / (baseTileRec.height + hexData->interpSpacing.height));
 				for (u32 tileY = startTileY; tileY < hexData->numRows; tileY++)
@@ -553,6 +561,7 @@ void UpdateAndRenderVisualizerState()
 						break;
 					}
 				}
+				EndTimeBlock();
 			}
 			
 			// +==============================+
@@ -655,6 +664,7 @@ void UpdateAndRenderVisualizerState()
 				// +==============================+
 				// |          Draw Tiles          |
 				// +==============================+
+				StartTimeBlock("Main Viewport");
 				RcSetViewport(visData->hexData.viewRec);
 				rec baseTileRec = NewRec(visData->hexData.viewRec.topLeft + hexData->spacing - visData->hexData.viewPos, hexData->tileSize);
 				u32 startTileY = (u32)((visData->hexData.viewPos.y - hexData->spacing.height) / (baseTileRec.height + hexData->spacing.height));
@@ -742,10 +752,12 @@ void UpdateAndRenderVisualizerState()
 					}
 				}
 				RcSetViewport(NewRec(Vec2_Zero, RenderScreenSize));
+				EndTimeBlock();
 				
 				// +==============================+
 				// |    Draw Viewport Shadows     |
 				// +==============================+
+				StartTimeBlock("Shadows");
 				Color_t shadowColor1 = ColorTransparent(VisBlueGray, 0.8f);
 				Color_t shadowColor2 = ColorTransparent(VisBlueGray, 0.0f);
 				r32 shadowSize = 10;
@@ -777,10 +789,12 @@ void UpdateAndRenderVisualizerState()
 					gradientRec.y -= gradientRec.height;
 					RcDrawGradient(gradientRec, shadowColor1, shadowColor2, Dir2_Up);
 				}
+				EndTimeBlock();
 				
 				// +==============================+
 				// |  Draw Interpretation Tiles   |
 				// +==============================+
+				StartTimeBlock("Interpretation Grid");
 				RcSetViewport(visData->hexData.interpRec);
 				rec interpTileRec = NewRec(visData->hexData.interpRec.topLeft + hexData->interpSpacing - hexData->interpViewPos, hexData->interpTileSize);
 				u32 interpStartTileY = (u32)((hexData->interpViewPos.y - hexData->interpSpacing.height) / (interpTileRec.height + hexData->interpSpacing.height));
@@ -874,6 +888,7 @@ void UpdateAndRenderVisualizerState()
 					}
 				}
 				RcSetViewport(NewRec(Vec2_Zero, RenderScreenSize));
+				EndTimeBlock();
 				
 				// // +==============================+
 				// // |    Draw Viewport Shadows     |
@@ -913,6 +928,7 @@ void UpdateAndRenderVisualizerState()
 				// +==============================+
 				// |      Draw Row Addresses      |
 				// +==============================+
+				StartTimeBlock("Addresses");
 				// RcDrawRectangle(hexData->addressesRec, NewColor(Color_LightGrey));
 				for (u32 tileY = 0; tileY < hexData->numRows; tileY++)
 				{
@@ -932,10 +948,12 @@ void UpdateAndRenderVisualizerState()
 						TempPopMark();
 					}
 				}
+				EndTimeBlock();
 				
 				// +==============================+
 				// |      Draw Scroll Gutter      |
 				// +==============================+
+				StartTimeBlock("Scrollbar");
 				{
 					RcDrawGradient(hexData->scrollGutterRec, VisGray, VisBlueGray, Dir2_Left);
 					for (u32 rIndex = 0; rIndex < hexData->numRegions; rIndex++)
@@ -996,6 +1014,7 @@ void UpdateAndRenderVisualizerState()
 						}
 					}
 				}
+				EndTimeBlock();
 				
 				RcDrawButton(hexData->fileInfoRec, VisLightBlueGray, VisLightGray, 1);
 				RcDrawButton(hexData->selectionInfoRec, VisLightBlueGray, VisLightGray, 1);
@@ -1003,6 +1022,7 @@ void UpdateAndRenderVisualizerState()
 				// +==============================+
 				// |     Draw File Info View      |
 				// +==============================+
+				StartTimeBlock("File Info");
 				RcBindFont(&visData->smallFont);
 				RcDrawString("File", hexData->fileInfoRec.topLeft + NewVec2(2, 0), VisLightGray);
 				RcSetViewport(hexData->fileInfoRec);
@@ -1036,10 +1056,12 @@ void UpdateAndRenderVisualizerState()
 					}
 				}
 				RcSetViewport(NewRec(Vec2_Zero, RenderScreenSize));
+				EndTimeBlock();
 				
 				// +==============================+
 				// |   Draw Selection Info View   |
 				// +==============================+
+				StartTimeBlock("Selection Info");
 				RcBindFont(&visData->smallFont);
 				RcDrawString("Selection", hexData->selectionInfoRec.topLeft + NewVec2(2, 0), VisLightGray);
 				RcSetViewport(hexData->selectionInfoRec);
@@ -1149,6 +1171,7 @@ void UpdateAndRenderVisualizerState()
 					}
 				}
 				RcSetViewport(NewRec(Vec2_Zero, RenderScreenSize));
+				EndTimeBlock();
 			}
 			else if (visData->fileType == VisFileType_IntelHex)
 			{

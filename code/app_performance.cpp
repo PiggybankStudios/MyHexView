@@ -6,7 +6,7 @@ Description:
 	** Holds functions and related with profiling and tracking the performance of the program 
 */
 
-#if DEBUG
+// #if DEBUG
 
 void StartTimeBlock(const char* blockName)
 {
@@ -108,11 +108,11 @@ TimedBlockInfo_t* GetTimedBlockInfoByParent(const char* parentName, u32 index = 
 	return nullptr;
 }
 
-#else //!DEBUG
+// #else //!DEBUG
 
-#define StartTimeBlock(blockName)
-#define EndTimeBlock() 0
-#define SaveTimeBlocks()
-#define ClearTimeBlocks()
+// #define StartTimeBlock(blockName)
+// #define EndTimeBlock() 0
+// #define SaveTimeBlocks()
+// #define ClearTimeBlocks()
 
-#endif
+// #endif

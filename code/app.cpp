@@ -285,12 +285,12 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		DEBUG_WriteLine("Reloading app content");
 		AppLoadContent(false);
 	}
-	#if DEBUG
+	// #if DEBUG
 	if (ButtonPressed(Button_F11))
 	{
 		app->showDebugMenu = !app->showDebugMenu;
 	}
-	#endif
+	// #endif
 	
 	// +==============================+
 	// |   Update Current AppState    |
@@ -358,7 +358,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 	// +--------------------------------------------------------------+
 	// |                     Render Debug Overlay                     |
 	// +--------------------------------------------------------------+
-	#if DEBUG
+	// #if DEBUG
 	if (app->showDebugMenu)
 	{
 		StartTimeBlock("Debug Overlay");
@@ -416,7 +416,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		}
 		EndTimeBlock();
 	}
-	#endif
+	// #endif
 	
 	TempPopMark();
 	
@@ -463,9 +463,9 @@ EXPORT AppReloading_DEFINITION(App_Reloading)
 	RenderMouseStartLeft = Vec2_Zero;
 	RenderMouseStartRight = Vec2_Zero;
 	
-	#if DEBUG
+	// #if DEBUG
 	app->lastNumTimedBlockInfos = 0;
-	#endif
+	// #endif
 }
 
 // +--------------------------------------------------------------+
@@ -520,10 +520,10 @@ EXPORT AppClosing_DEFINITION(App_Closing)
 	//TODO: Deallocate anything?
 }
 
-#if DEBUG
+// #if DEBUG
 //This function is declared in my_assert.h and needs to be implemented by us for a debug build to compile successfully
 void AssertFailure(const char* function, const char* filename, int lineNumber, const char* expressionStr)
 {
 	DEBUG_PrintLine("Assertion Failure! %s in \"%s\" line %d: (%s) is not true", function, GetFileNamePart(filename), lineNumber, expressionStr);
 }
-#endif
+// #endif

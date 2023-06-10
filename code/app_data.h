@@ -23,7 +23,7 @@ struct AppData_t
 	MemoryArena_t stdArena;
 	u32 appInitTempHighWaterMark;
 	
-	#if DEBUG
+	// #if DEBUG
 	bool showDebugMenu;
 	u32 debugNumTimeBlocks;
 	u64 debugTimeBlocks[MAX_TIME_BLOCK_DEPTH];
@@ -34,7 +34,7 @@ struct AppData_t
 	
 	u32 lastNumTimedBlockInfos;
 	TimedBlockInfo_t lastTimedBlockInfos[MAX_TIMED_BLOCKS];
-	#endif
+	// #endif
 	
 	//AppState Data Structures
 	DefaultData_t defaultData;
