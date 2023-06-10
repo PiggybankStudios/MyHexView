@@ -151,7 +151,7 @@ void AlgGroupAddTerms(AlgGroup_t* group, u32 numTerms, const AlgTerm_t* newTerms
 void AlgGroupRemoveTerm(AlgGroup_t* group, u32 index)
 {
 	Assert(group != nullptr);
-	Assert(index < group->numTerms)
+	Assert(index < group->numTerms);
 	
 	for (u32 tIndex = index; tIndex+1 < group->numTerms; tIndex++)
 	{

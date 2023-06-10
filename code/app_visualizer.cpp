@@ -291,7 +291,8 @@ void UpdateAndRenderVisualizerState()
 			if (visData->file.content != nullptr)
 			{
 				DEBUG_WriteLine("Opened file successfully");
-				CopyStringIntoArray(visData->filePath, input->droppedFiles[0]);
+				MyMemCopy(&visData->filePath[0], input->droppedFiles[0], MinU32(ArrayCount(visData->filePath), MyStrLength32(input->droppedFiles[0])));
+				// CopyStringIntoArray(visData->filePath, input->droppedFiles[0]);
 				visData->fileOpen = true;
 				
 				VisDetermineFileType();
@@ -695,7 +696,7 @@ void UpdateAndRenderVisualizerState()
 							
 							Color_t backColor = VisWhite;
 							Color_t textColor = VisBlueGray;
-							Color_t borderColor = NewColor(Color_TransparentBlack);
+							Color_t borderColor = TransparentBlack;
 							
 							bool isSelected = false;
 							if (bIndex >= visData->hexData.selectionStart && bIndex < visData->hexData.selectionEnd) { isSelected = true; }
@@ -827,7 +828,7 @@ void UpdateAndRenderVisualizerState()
 							
 							Color_t backColor = VisWhite;
 							Color_t textColor = VisBlueGray;
-							Color_t borderColor = NewColor(Color_TransparentBlack);
+							Color_t borderColor = TransparentBlack;
 							
 							bool isSelected = false;
 							if (bIndex >= visData->hexData.selectionStart && bIndex < visData->hexData.selectionEnd) { isSelected = true; }
@@ -954,7 +955,7 @@ void UpdateAndRenderVisualizerState()
 				// +==============================+
 				{
 					RcDrawGradient(hexData->scrollBarRec, VisGreen, VisLightGreen, Dir2_Right);
-					RcDrawButton(hexData->scrollBarRec, NewColor(Color_TransparentBlack), VisBlueGray, 1);
+					RcDrawButton(hexData->scrollBarRec, TransparentBlack, VisBlueGray, 1);
 					
 					if (IsInsideRec(hexData->scrollGutterRec, RenderMousePos) || hexData->draggingScrollbar)
 					{

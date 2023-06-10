@@ -8,9 +8,9 @@ Date:   03\02\2018
 #define _APP_VERSION_H
 
 #define APP_VERSION_MAJOR    1
-#define APP_VERSION_MINOR    0
+#define APP_VERSION_MINOR    1
 
-#define APP_VERSION_BUILD    1575
+#define APP_VERSION_BUILD    1619
 
 #endif //  _APP_VERSION_H
 

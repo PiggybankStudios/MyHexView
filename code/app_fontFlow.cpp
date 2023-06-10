@@ -388,7 +388,7 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 					if (IsFlagSet(currentStyle, FontStyle_Rainbow))
 					{
 						r32 hue = 180 + 180*SinR32((r32)((platform->programTime + cIndex*0)%4000) / 4000 * 2*Pi32);
-						drawColor = ColorFromHSV((u16)RoundR32(hue), 0.7f, 1.0f);
+						drawColor = ColorRGBFromHSV(NewColorHsv((u16)RoundR32(hue), 0.7f, 1.0f));
 					}
 					// +==============================+
 					// |       FontStyle_Jitter       |
@@ -467,13 +467,13 @@ v2 FontPerformTextFlow(bool drawToScreen, const char* strPntr, u32 strLength, v2
 v2 FontMeasureString(const char* strPntr, u32 strLength, NewFont_t* fontPntr, r32 fontSize = 0, u16 styleFlags = FontStyle_Default, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
 	if (flowInfo == nullptr) { flowInfo = PushStruct(TempArena, FontFlowInfo_t); }
-	FontPerformTextFlow(false, strPntr, strLength, Vec2_Zero, NewColor(Color_White), fontPntr, Alignment_Left, fontSize, styleFlags, maxWidth, flowInfo);
+	FontPerformTextFlow(false, strPntr, strLength, Vec2_Zero, White, fontPntr, Alignment_Left, fontSize, styleFlags, maxWidth, flowInfo);
 	return NewVec2(flowInfo->extentRight, flowInfo->extentDown);
 }
 v2 FontMeasureNtString(const char* nullTermString, NewFont_t* fontPntr, r32 fontSize = 0, u16 styleFlags = FontStyle_Default, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
 	if (flowInfo == nullptr) { flowInfo = PushStruct(TempArena, FontFlowInfo_t); }
-	FontPerformTextFlow(false, nullTermString, (u32)strlen(nullTermString), Vec2_Zero, NewColor(Color_White), fontPntr, Alignment_Left, fontSize, styleFlags, maxWidth, flowInfo);
+	FontPerformTextFlow(false, nullTermString, (u32)strlen(nullTermString), Vec2_Zero, White, fontPntr, Alignment_Left, fontSize, styleFlags, maxWidth, flowInfo);
 	return NewVec2(flowInfo->extentRight, flowInfo->extentDown);
 }
 
@@ -521,14 +521,14 @@ v2 RcMeasureString(const char* strPntr, u32 strLength, r32 maxWidth = 0, FontFlo
 {
 	Assert(renderContext->boundNewFont != nullptr);
 	if (flowInfo == nullptr) { flowInfo = PushStruct(TempArena, FontFlowInfo_t); }
-	FontPerformTextFlow(false, strPntr, strLength, Vec2_Zero, NewColor(Color_White), renderContext->boundNewFont, renderContext->fontAlignment, renderContext->fontSize, renderContext->fontStyle, maxWidth, flowInfo);
+	FontPerformTextFlow(false, strPntr, strLength, Vec2_Zero, White, renderContext->boundNewFont, renderContext->fontAlignment, renderContext->fontSize, renderContext->fontStyle, maxWidth, flowInfo);
 	return NewVec2(flowInfo->extentRight, flowInfo->extentDown);
 }
 v2 RcMeasureNtString(const char* nullTermString, r32 maxWidth = 0, FontFlowInfo_t* flowInfo = nullptr)
 {
 	Assert(renderContext->boundNewFont != nullptr);
 	if (flowInfo == nullptr) { flowInfo = PushStruct(TempArena, FontFlowInfo_t); }
-	FontPerformTextFlow(false, nullTermString, (u32)strlen(nullTermString), Vec2_Zero, NewColor(Color_White), renderContext->boundNewFont, renderContext->fontAlignment, renderContext->fontSize, renderContext->fontStyle, maxWidth, flowInfo);
+	FontPerformTextFlow(false, nullTermString, (u32)strlen(nullTermString), Vec2_Zero, White, renderContext->boundNewFont, renderContext->fontAlignment, renderContext->fontSize, renderContext->fontStyle, maxWidth, flowInfo);
 	return NewVec2(flowInfo->extentRight, flowInfo->extentDown);
 }
 

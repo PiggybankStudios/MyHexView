@@ -14,20 +14,20 @@ void InitializeRenderContext()
 	
 	Vertex_t squareVertices[] =
 	{
-		{  {0.0f, 0.0f, 0.0f}, NewVec4(NewColor(Color_White)), {0.0f, 0.0f} },
-		{  {1.0f, 0.0f, 0.0f}, NewVec4(NewColor(Color_White)), {1.0f, 0.0f} },
-		{  {0.0f, 1.0f, 0.0f}, NewVec4(NewColor(Color_White)), {0.0f, 1.0f} },
+		{  {0.0f, 0.0f, 0.0f}, NewVec4FromColor(White), {0.0f, 0.0f} },
+		{  {1.0f, 0.0f, 0.0f}, NewVec4FromColor(White), {1.0f, 0.0f} },
+		{  {0.0f, 1.0f, 0.0f}, NewVec4FromColor(White), {0.0f, 1.0f} },
 		
-		{  {0.0f, 1.0f, 0.0f}, NewVec4(NewColor(Color_White)), {0.0f, 1.0f} },
-		{  {1.0f, 0.0f, 0.0f}, NewVec4(NewColor(Color_White)), {1.0f, 0.0f} },
-		{  {1.0f, 1.0f, 0.0f}, NewVec4(NewColor(Color_White)), {1.0f, 1.0f} },
+		{  {0.0f, 1.0f, 0.0f}, NewVec4FromColor(White), {0.0f, 1.0f} },
+		{  {1.0f, 0.0f, 0.0f}, NewVec4FromColor(White), {1.0f, 0.0f} },
+		{  {1.0f, 1.0f, 0.0f}, NewVec4FromColor(White), {1.0f, 1.0f} },
 	};
 	renderContext->squareBuffer = CreateVertexBuffer(squareVertices, ArrayCount(squareVertices));
 	
 	renderContext->gradientTexture = LoadTexture("Resources/Textures/gradient.png", false, false);
 	renderContext->circleTexture = LoadTexture("Resources/Sprites/circle.png", false, false);
 	
-	Color_t textureData = {Color_White};
+	Color_t textureData = {White};
 	renderContext->dotTexture = CreateTexture((u8*)&textureData, 1, 1);
 	
 	renderContext->viewport = NewRec(0, 0, (r32)RenderScreenSize.x, (r32)RenderScreenSize.y);
@@ -42,8 +42,8 @@ void InitializeRenderContext()
 	renderContext->circleInnerRadius = 0.0f;
 	renderContext->vigRadius = 0.0f;
 	renderContext->vigSmoothness = 0.0f;
-	renderContext->color = NewColor(Color_White);
-	renderContext->secondaryColor = NewColor(Color_White);
+	renderContext->color = White;
+	renderContext->secondaryColor = White;
 }
 
 
@@ -102,9 +102,9 @@ void RcUpdateShader()
 	glUniform1f(renderContext->boundShader->locations.circleInnerRadius, renderContext->circleInnerRadius);
 	glUniform2f(renderContext->boundShader->locations.vignette, renderContext->vigRadius, renderContext->vigSmoothness);
 	
-	v4 colorVec = NewVec4(renderContext->color);
+	v4 colorVec = NewVec4FromColor(renderContext->color);
 	glUniform4f(renderContext->boundShader->locations.diffuseColor, colorVec.r, colorVec.g, colorVec.b, colorVec.a);
-	colorVec = NewVec4(renderContext->secondaryColor);
+	colorVec = NewVec4FromColor(renderContext->secondaryColor);
 	glUniform4f(renderContext->boundShader->locations.secondaryColor, colorVec.r, colorVec.g, colorVec.b, colorVec.a);
 }
 
@@ -238,14 +238,14 @@ void RcSetColor(Color_t color)
 {
 	renderContext->color = color;
 	
-	v4 colorVec = NewVec4(color);
+	v4 colorVec = NewVec4FromColor(color);
 	glUniform4f(renderContext->boundShader->locations.diffuseColor, colorVec.r, colorVec.g, colorVec.b, colorVec.a);
 }
 void RcSetSecondaryColor(Color_t color)
 {
 	renderContext->secondaryColor = color;
 	
-	v4 colorVec = NewVec4(color);
+	v4 colorVec = NewVec4FromColor(color);
 	glUniform4f(renderContext->boundShader->locations.secondaryColor, colorVec.r, colorVec.g, colorVec.b, colorVec.a);
 }
 
@@ -315,8 +315,8 @@ void RcBegin(const Shader_t* startShader, const Font_t* startFont, rec viewport)
 	RcSetViewMatrix(Matrix4_Identity);
 	RcSetProjectionMatrix(Matrix4_Identity);
 	RcSetViewport(viewport);
-	RcSetColor(NewColor(Color_White));
-	RcSetSecondaryColor(NewColor(Color_White));
+	RcSetColor(White);
+	RcSetSecondaryColor(White);
 	RcSetSourceRectangle(NewRec(0, 0, 1, 1));
 	RcSetGradientEnabled(false);
 	RcSetCircleRadius(0.0f, 0.0f);
@@ -329,7 +329,7 @@ void RcBegin(const Shader_t* startShader, const Font_t* startFont, rec viewport)
 // +--------------------------------------------------------------+
 void RcClearColorBuffer(Color_t clearColor)
 {
-	v4 clearColorVec = NewVec4(clearColor);
+	v4 clearColorVec = NewVec4FromColor(clearColor);
 	glClearColor(clearColorVec.x, clearColorVec.y, clearColorVec.z, clearColorVec.w);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -398,11 +398,11 @@ void RcDrawTexture(const Texture_t* texturePntr, v2 topLeft, r32 scale, Color_t 
 }
 void RcDrawTexture(const Texture_t* texturePntr, v2 topLeft, r32 scale)
 {
-	RcDrawTexture(texturePntr, topLeft, scale, NewColor(Color_White), NewRec(0, 0, (r32)texturePntr->width, (r32)texturePntr->height));
+	RcDrawTexture(texturePntr, topLeft, scale, White, NewRec(0, 0, (r32)texturePntr->width, (r32)texturePntr->height));
 }
 void RcDrawTexture(const Texture_t* texturePntr, v2 topLeft)
 {
-	RcDrawTexture(texturePntr, topLeft, 1.0f, NewColor(Color_White), NewRec(0, 0, (r32)texturePntr->width, (r32)texturePntr->height));
+	RcDrawTexture(texturePntr, topLeft, 1.0f, White, NewRec(0, 0, (r32)texturePntr->width, (r32)texturePntr->height));
 }
 
 void RcDrawRectangle(rec rectangle, Color_t color)
@@ -538,7 +538,7 @@ void RcDrawHexCharacter(u8 hexValue, v2 bottomLeft, Color_t color, r32 scale = 1
 	charRec.x = (r32)RoundR32(charRec.x);
 	charRec.y = (r32)RoundR32(charRec.y);
 	RcDrawRectangle(charRec, color);
-	RcDrawRectangle(NewRec(charRec.x, charRec.y, 1, charRec.height), NewColor(Color_Black));
+	RcDrawRectangle(NewRec(charRec.x, charRec.y, 1, charRec.height), Black);
 	// RcDrawButton(charRec, NewColor(Color_TransparentBlack), color, 1.0f);
 	
 	r32 innerCharScale = scale*5/8;
@@ -553,8 +553,8 @@ void RcDrawHexCharacter(u8 hexValue, v2 bottomLeft, Color_t color, r32 scale = 1
 	v2 charPosLower = charRec.topLeft + NewVec2(charRec.width - lowerCharInfo->width*innerCharScale - 1, charRec.height - 1);
 	// RcDrawCharacter(upperCharIndex, charPosUpper, color, innerCharScale);
 	// RcDrawCharacter(lowerCharIndex, charPosLower, color, innerCharScale);
-	RcDrawCharacter(upperCharIndex, charPosUpper, NewColor(Color_White), innerCharScale);
-	RcDrawCharacter(lowerCharIndex, charPosLower, NewColor(Color_White), innerCharScale);
+	RcDrawCharacter(upperCharIndex, charPosUpper, White, innerCharScale);
+	RcDrawCharacter(lowerCharIndex, charPosLower, White, innerCharScale);
 }
 
 void RcDrawString(const char* string, u32 numCharacters, v2 position, Color_t color, r32 scale = 1.0f, Alignment_t alignment = Alignment_Left)

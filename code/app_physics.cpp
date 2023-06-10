@@ -126,7 +126,7 @@ void UpdateAndRenderPhysicsState()
 		// +==============================+
 		{
 			RcBegin(&app->defaultShader, &app->defaultFont, NewRec(Vec2_Zero, RenderScreenSize));
-			RcClearColorBuffer(NewColor(Color_Black));
+			RcClearColorBuffer(Black);
 			RcClearDepthBuffer(1.0f);
 			RcBindNewFont(&app->newFont);
 			RcSetFontSize(24);
@@ -138,17 +138,17 @@ void UpdateAndRenderPhysicsState()
 		{
 			v2 planetPos = phys->planetPositions[pIndex];
 			r32 planetRadius = Vec2Length(planetPos - orbitCenter);
-			RcDrawDonut(orbitCenter, planetRadius, planetRadius-3, ColorLerp(NewColor(Color_Red), NewColor(Color_Black), planetRadius/orbitRadius));
-			RcDrawLine(orbitCenter, planetPos, 1, ColorTransparent(NewColor(Color_Yellow), 0.5f));
+			RcDrawDonut(orbitCenter, planetRadius, planetRadius-3, ColorLerp(PureRed, Black, planetRadius/orbitRadius));
+			RcDrawLine(orbitCenter, planetPos, 1, ColorTransparent(PureYellow, 0.5f));
 		}
 		
 		for (u32 pIndex = 0; pIndex < phys->numPlanets; pIndex++)
 		{
 			v2 planetPos = phys->planetPositions[pIndex];
-			RcDrawCircle(planetPos, PLANET_RADIUS, NewColor(Color_White));
+			RcDrawCircle(planetPos, PLANET_RADIUS, White);
 		}
 		
-		RcDrawCircle(orbitCenter, SUN_RADIUS, NewColor(Color_White));
+		RcDrawCircle(orbitCenter, SUN_RADIUS, White);
 		
 		// v2 textPos = orbitCenter + Vec2Normalize(phys->planetPos - orbitCenter) * (SUN_RADIUS + 10);
 		// if (textPos.x >= orbitCenter.x) { RcSetFontAlignment(Alignment_Left); }

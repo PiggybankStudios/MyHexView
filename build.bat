@@ -11,9 +11,12 @@ set TimeString=%date:~-4,4%%date:~-10,2%%date:~-7,2%%time:~0,2%%time:~3,2%%time:
 rem echo Time: %TimeString%
 
 echo Running from %cd%
-call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
+rem call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+rem call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64 -no_logo
+call "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64
 
-set ProjectName=Playground
+rem set ProjectName=Playground
+set ProjectName=MyHexView
 set LibDirectory=..\..\..\lib
 set SourceDirectory=..\code
 set DataDirectory=..\data
@@ -38,7 +41,7 @@ set IgnoredWarnings=/wd4201 /wd4100 /wd4189 /wd4996 /wd4127 /wd4505 /wd4101 /wd4
 set IncludeDirectories=/I"%LibDirectory%\mylib" /I"%LibDirectory%\glew-2.0.0\include" /I"%LibDirectory%\glfw-3.2.1\include" /I"%LibDirectory%\stb"
 set CompilerFlags=/FC /Zi /EHsc /nologo /GS- /Gm- -GR- /EHa- /Fm /Od /Oi /WX /W4 %DebugDependantFlags% %Definitions% %IgnoredWarnings% %IncludeDirectories%
 
-set LibraryDirectories=/LIBPATH:"%LibDirectory%\Python-3.6.4\PCbuild\amd64" %DebugDependantPaths%
+set LibraryDirectories=%DebugDependantPaths%
 set Libraries=gdi32.lib User32.lib Shell32.lib opengl32.lib glfw3.lib Shlwapi.lib Advapi32.lib %DebugDependantLibraries%
 set LinkerFlags=-incremental:no %LibraryDirectories% %Libraries%
 

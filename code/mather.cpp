@@ -118,13 +118,13 @@ void UpdateAndRenderMatherState()
 		// +==============================+
 		// |            Setup             |
 		// +==============================+
-		Color_t backgroundColor = NewColor(Color_LightGrey);
+		Color_t backgroundColor = ColorLightGrey;
 		{
 			RcBegin(&app->defaultShader, &app->defaultFont, NewRec(Vec2_Zero, RenderScreenSize));
 			RcClearColorBuffer(backgroundColor);
 			RcClearDepthBuffer(1.0f);
 			RcEnableVignette(0.05f, 0.8f);
-			RcDrawRectangle(NewRec(0, 0, RenderScreenSize.width, RenderScreenSize.height), NewColor(Color_DarkGray));
+			RcDrawRectangle(NewRec(0, 0, RenderScreenSize.width, RenderScreenSize.height), ColorDarkGrey);
 			RcDisableVignette();
 			RcBindNewFont(&app->newFont);
 			RcSetFontSize(12);
@@ -132,7 +132,7 @@ void UpdateAndRenderMatherState()
 			RcSetFontStyle(FontStyle_Default);
 		}
 		
-		RcDrawButton(mather->viewRec, NewColor(Color_TransparentBlack), NewColor(Color_White), 1.0f);
+		RcDrawButton(mather->viewRec, TransparentBlack, White, 1.0f);
 		
 		RcSetViewport(mather->viewRec);
 		{
@@ -143,8 +143,8 @@ void UpdateAndRenderMatherState()
 					ClampR32(displayOrigin.x, mather->viewRec.x+1, mather->viewRec.x + mather->viewRec.width-1),
 					ClampR32(displayOrigin.y, mather->viewRec.y+1, mather->viewRec.y + mather->viewRec.height-1)
 				);
-				RcDrawLine(NewVec2(0, clampedOrigin.y), NewVec2(RenderScreenSize.width, clampedOrigin.y), 3, NewColor(Color_Red));
-				RcDrawLine(NewVec2(clampedOrigin.x, 0), NewVec2(clampedOrigin.x, RenderScreenSize.height), 3, NewColor(Color_Green));
+				RcDrawLine(NewVec2(0, clampedOrigin.y), NewVec2(RenderScreenSize.width, clampedOrigin.y), 3, PureRed);
+				RcDrawLine(NewVec2(clampedOrigin.x, 0), NewVec2(clampedOrigin.x, RenderScreenSize.height), 3, PureGreen);
 			}
 			
 			v2 lastPos = Vec2_Zero;
@@ -157,7 +157,7 @@ void UpdateAndRenderMatherState()
 				v2 displayPos = NewVec2(displayX, mather->viewRec.y + ((sampleY - mather->sampleRec.y) / mather->sampleRec.height) * mather->viewRec.height);
 				if (xOff > 0)
 				{
-					RcDrawLine(lastPos, displayPos, 2.0f, NewColor(Color_Orange));
+					RcDrawLine(lastPos, displayPos, 2.0f, PureOrange);
 				}
 				lastPos = displayPos;
 				xOff += 1;
@@ -177,24 +177,24 @@ void UpdateAndRenderMatherState()
 			if (viewFunctionPos.x >= mather->viewRec.x && viewFunctionPos.x <= mather->viewRec.x + mather->viewRec.width &&
 				viewFunctionPos.y >= mather->viewRec.y && viewFunctionPos.y <= mather->viewRec.y + mather->viewRec.height)
 			{
-				RcDrawCircle(viewFunctionPos, 5, NewColor(Color_Cyan));
+				RcDrawCircle(viewFunctionPos, 5, ColorCyan);
 			}
 			
 			if (viewFunctionPos.y >= mather->viewRec.y && viewFunctionPos.y <= mather->viewRec.y + mather->viewRec.height)
 			{
 				v2 rightMarkPos = NewVec2(mather->viewRec.x + mather->viewRec.width, viewFunctionPos.y);
-				RcDrawLine(viewFunctionPos, rightMarkPos, 1.0f, NewColor(Color_Yellow));
+				RcDrawLine(viewFunctionPos, rightMarkPos, 1.0f, PureYellow);
 				v2 rightTextPos = rightMarkPos + NewVec2(5, RcGetMaxExtendUp() - RcGetLineHeight()/2);
-				RcNewPrintString(rightTextPos, NewColor(Color_White), "y = %.02f", sampleFunctionPos.y);
+				RcNewPrintString(rightTextPos, White, "y = %.02f", sampleFunctionPos.y);
 			}
 			
 			if (viewFunctionPos.x >= mather->viewRec.x && viewFunctionPos.x <= mather->viewRec.x + mather->viewRec.width)
 			{
 				v2 bottomMarkPos = NewVec2(viewFunctionPos.x, mather->viewRec.y + mather->viewRec.height);
-				RcDrawLine(viewFunctionPos, bottomMarkPos, 1.0f, NewColor(Color_Yellow));
+				RcDrawLine(viewFunctionPos, bottomMarkPos, 1.0f, PureYellow);
 				v2 bottomTextPos = bottomMarkPos + NewVec2(0, 5 + RcGetMaxExtendUp());
 				RcSetFontAlignment(Alignment_Center);
-				RcNewPrintString(bottomTextPos, NewColor(Color_White), "x = %.02f", sampleFunctionPos.x);
+				RcNewPrintString(bottomTextPos, White, "x = %.02f", sampleFunctionPos.x);
 				RcSetFontAlignment(Alignment_Left);
 			}
 		}

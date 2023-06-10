@@ -261,7 +261,7 @@ void UpdateAndRenderLifeState()
 		// +==============================+
 		{
 			RcBegin(&app->defaultShader, &app->defaultFont, NewRec(Vec2_Zero, RenderScreenSize));
-			RcClearColorBuffer(NewColor(Color_Black));
+			RcClearColorBuffer(Black);
 			RcClearDepthBuffer(1.0f);
 		}
 		
@@ -277,16 +277,16 @@ void UpdateAndRenderLifeState()
 			rec baseCellRec = NewRec(Vec2_Zero, cellSize);
 			for (i32 y = 0; y < lifeData->boardSize.height; y++)
 			{
-				RcDrawRectangle(NewRec(0, cellSize.height*y, RenderScreenSize.width, 1), NewColor(Color_White));
+				RcDrawRectangle(NewRec(0, cellSize.height*y, RenderScreenSize.width, 1), White);
 				for (i32 x = 0; x < lifeData->boardSize.width; x++)
 				{
-					if (y == 0) { RcDrawRectangle(NewRec(cellSize.width*x, 0, 1, RenderScreenSize.height), NewColor(Color_White)); }
+					if (y == 0) { RcDrawRectangle(NewRec(cellSize.width*x, 0, 1, RenderScreenSize.height), White); }
 					rec cellRec = NewRec(Vec2Multiply(cellSize, NewVec2((r32)x, (r32)y)), cellSize);
 					u8* cell = &lifeData->boardData[y*lifeData->boardSize.width + x];
 					
 					if (*cell != 0x00)
 					{
-						RcDrawRectangle(cellRec, NewColor(Color_White));
+						RcDrawRectangle(cellRec, White);
 					}
 				}
 			}

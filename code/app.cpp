@@ -139,23 +139,23 @@ void AppLoadContent(bool firstLoad)
 	}
 	
 	app->defaultShader = LoadShader(SHADERS_FOLDER "simple-vertex.glsl", SHADERS_FOLDER "simple-fragment.glsl");
-	app->defaultFont   = LoadFont(FONTS_FOLDER "georgiab.ttf", 24, 256, 256, ' ', 96);
+	app->defaultFont   = LoadFont(FONTS_FOLDER "consolab.ttf", 24, 256, 256, ' ', 96);
 	
-	CreateGameFont(&app->newFont, mainHeap);
-	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiab.ttf", FontStyle_Bold);
-	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiai.ttf", FontStyle_Italic);
-	FontLoadFile(&app->newFont, FONTS_FOLDER "georgiaz.ttf", FontStyle_BoldItalic);
-	FontLoadFile(&app->newFont, FONTS_FOLDER "georgia.ttf",  FontStyle_Default);
-	FontBake(&app->newFont, 12);
-	FontBake(&app->newFont, 24);
-	FontBake(&app->newFont, 32);
-	FontBake(&app->newFont, 32, FontStyle_Bold);
-	FontBake(&app->newFont, 32, FontStyle_Italic);
-	FontBake(&app->newFont, 32, FontStyle_BoldItalic);
-	FontDropFiles(&app->newFont);
+	// CreateGameFont(&app->newFont, mainHeap);
+	// FontLoadFile(&app->newFont, FONTS_FOLDER "georgiab.ttf", FontStyle_Bold);
+	// FontLoadFile(&app->newFont, FONTS_FOLDER "georgiai.ttf", FontStyle_Italic);
+	// FontLoadFile(&app->newFont, FONTS_FOLDER "georgiaz.ttf", FontStyle_BoldItalic);
+	// FontLoadFile(&app->newFont, FONTS_FOLDER "georgia.ttf",  FontStyle_Default);
+	// FontBake(&app->newFont, 12);
+	// FontBake(&app->newFont, 24);
+	// FontBake(&app->newFont, 32);
+	// FontBake(&app->newFont, 32, FontStyle_Bold);
+	// FontBake(&app->newFont, 32, FontStyle_Italic);
+	// FontBake(&app->newFont, 32, FontStyle_BoldItalic);
+	// FontDropFiles(&app->newFont);
 	
 	CreateGameFont(&app->debugFont, mainHeap);
-	FontLoadFile(&app->debugFont, FONTS_FOLDER "consola.ttf", FontStyle_Default);
+	FontLoadFile(&app->debugFont, FONTS_FOLDER "consolab.ttf", FontStyle_Default);
 	FontBake(&app->debugFont, 12);
 	FontBake(&app->debugFont, 16);
 	FontBake(&app->debugFont, 18);
@@ -163,8 +163,8 @@ void AppLoadContent(bool firstLoad)
 	FontBake(&app->debugFont, 24);
 	FontDropFiles(&app->debugFont);
 	
-	CreateGameFont(&app->japaneseFont, &app->stdArena);
-	FontLoadFile(&app->japaneseFont, FONTS_FOLDER "yumin.ttf", FontStyle_Default);
+	// CreateGameFont(&app->japaneseFont, &app->stdArena);
+	// FontLoadFile(&app->japaneseFont, FONTS_FOLDER "yumin.ttf", FontStyle_Default);
 }
 
 // +--------------------------------------------------------------+
@@ -370,7 +370,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 		{
 			rec appUpdateRec = NewRec(10, 10, 20, RenderScreenSize.height-20);
 			
-			RcDrawButton(RecInflate(appUpdateRec, 1), NewColor(Color_LightGrey), NewColor(Color_White));
+			RcDrawButton(RecInflate(appUpdateRec, 1), ColorLightGrey, White);
 			
 			r32 blockOffset = 0;
 			r32 keyOffset = 0;
@@ -386,7 +386,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 				rec partRec = appUpdateRec;
 				partRec.y += blockOffset;
 				partRec.height *= percent;
-				Color_t partColor = NewColor(GetColorByIndex(bIndex));
+				Color_t partColor = GetNamedColorByIndex(bIndex);
 				RcDrawRectangle(partRec, partColor);
 				// if (partRec.height >= RcGetLineHeight() || IsInsideRec(partRec, RenderMousePos))
 				{
@@ -394,14 +394,14 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 					keyColorRec.x += 5;
 					keyColorRec.y -= keyColorRec.height + 20 + keyOffset;
 					v2 textPos = keyColorRec.topLeft + NewVec2(keyColorRec.width + 2, keyColorRec.height/2 - RcGetLineHeight()/2 + RcGetMaxExtendUp());
-					RcDrawButton(keyColorRec, partColor, NewColor(Color_White));
+					RcDrawButton(keyColorRec, partColor, White);
 					if (blockInfo->numCalls > 1)
 					{
-						RcNewPrintString(textPos, NewColor(Color_White), "%s x %u: %.1f%% %lu avg", blockInfo->blockName, blockInfo->numCalls, percent*100, blockInfo->counterElapsed / blockInfo->numCalls);
+						RcNewPrintString(textPos, White, "%s x %u: %.1f%% %lu avg", blockInfo->blockName, blockInfo->numCalls, percent*100, blockInfo->counterElapsed / blockInfo->numCalls);
 					}
 					else
 					{
-						RcNewPrintString(textPos, NewColor(Color_White), "%s: %.1f%% %lu", blockInfo->blockName, percent*100, blockInfo->counterElapsed);
+						RcNewPrintString(textPos, White, "%s: %.1f%% %lu", blockInfo->blockName, percent*100, blockInfo->counterElapsed);
 					}
 					keyOffset += RcGetLineHeight();
 				}
@@ -412,7 +412,7 @@ EXPORT AppUpdate_DEFINITION(App_Update)
 			v2 lastTextPos = appUpdateRec.topLeft + appUpdateRec.size;
 			lastTextPos.x += 5;
 			lastTextPos.y -= 10 + 20 + keyOffset;
-			RcNewPrintString(lastTextPos, NewColor(Color_White), "Total: %lu", appUpdateBlock->counterElapsed);
+			RcNewPrintString(lastTextPos, White, "Total: %lu", appUpdateBlock->counterElapsed);
 		}
 		EndTimeBlock();
 	}
