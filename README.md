@@ -2,6 +2,7 @@
 An incomplete binary file viewer that had some experimental features that I wish I saw in things like HxD. One of those features was interpretting .hex files as proper addressed binary data and displaying info about consecutive ranges of filled bytes (dropping a .hex file will do just that)
 
 ## Screenshot
+
 ![Screenshot](/release/screenshot1.png)
 
 ## Controls
