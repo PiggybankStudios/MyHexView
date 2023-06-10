@@ -5,12 +5,21 @@ An incomplete binary file viewer that had some experimental features that I wish
 ![Screenshot](/release/screenshot1.png)
 
 ## Controls
+
 **Left Click**: Select bytes (bytes with same value as selected are highlighted)
+
 **Shift + Left Click**: Expand selection to byte
+
 **Scroll Wheel**: Move up/down
+
 **Shift + Scroll Wheel**: Move left/right
+
 **Page Up/Down**: Move Up/Down One Full Screen Height
+
 **Home/End**: Move to Beginning/End of File
+
 **F5**: Reload Fonts
+
 **F7**: Refresh UI
+
 **F11**: Show Debug Menu (Timing info)
