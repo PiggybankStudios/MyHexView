@@ -11,10 +11,6 @@ struct DefaultData_t
 {
 	bool initialized;
 	
-	Texture_t testTexture;
-	Texture_t circuitTexture;
-	Texture_t missingTexture;
-	
 	u32 backgroundColorIndex;
 	
 	v2 quadStart;

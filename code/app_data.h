@@ -54,7 +54,6 @@ struct AppData_t
 	NewFont_t newFont;
 	NewFont_t debugFont;
 	NewFont_t japaneseFont;
-	Texture_t testTexture;
 	
 	bool glyphFilled;
 	Texture_t glyphTexture;

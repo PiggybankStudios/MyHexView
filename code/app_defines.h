@@ -23,7 +23,7 @@ Date:   03\02\2018
 #define TEXTURES_FOLDER "Resources/Textures/"
 
 #define MISSING_SPRITE_PATH  SPRITES_FOLDER "missing.png"
-#define MISSING_TEXTURE_PATH TEXTURES_FOLDER "missing.jpg"
+#define MISSING_TEXTURE_PATH TEXTURES_FOLDER "missing.png"
 
 #define VisLightSeaGreen NewColor(0xFF1ABC9C)
 #define VisLightGreen    NewColor(0xFF2ECC71)

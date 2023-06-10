@@ -11,11 +11,6 @@ Description:
 // +--------------------------------------------------------------+
 void InitializeDefaultState()
 {
-	//TODO: Initialize stuff
-	defData->testTexture = LoadTexture(TEXTURES_FOLDER "test.png");
-	defData->circuitTexture = LoadTexture(TEXTURES_FOLDER "circuit.png");
-	defData->missingTexture = LoadTexture(TEXTURES_FOLDER "something_that_doesnt_exit.png");
-	
 	defData->quadStart = NewVec2(10, 100);
 	defData->quadControl = NewVec2(50, 130);
 	defData->quadEnd = NewVec2(210, 100);
@@ -56,9 +51,6 @@ void DeinitializeDefaultState()
 	}
 	
 	DestroyAlgGroup(&defData->algGroup);
-	DestroyTexture(&defData->testTexture);
-	DestroyTexture(&defData->circuitTexture);
-	DestroyTexture(&defData->missingTexture);
 	
 	ClearPointer(defData);
 }
@@ -424,24 +416,6 @@ void UpdateAndRenderDefaultState()
 			RcBindTexture(&app->glyphTexture);
 			RcDrawTexturedRec(glyphRec, White);
 		}
-		
-		// +==============================+
-		// |        Draw Textures         |
-		// +==============================+
-		#if 0
-		{
-			v2 drawPos = NewVec2(0, 100);
-			
-			RcDrawTexture(&defData->testTexture, drawPos);
-			drawPos.x += renderContext->boundTexture->width;
-			
-			RcDrawTexture(&defData->circuitTexture, drawPos);
-			drawPos.x += renderContext->boundTexture->width;
-			
-			RcDrawTexture(&defData->missingTexture, drawPos);
-			drawPos.x += renderContext->boundTexture->width;
-		}
-		#endif
 		
 		// +==============================+
 		// |   New Font Rendering Tests   |
