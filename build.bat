@@ -15,9 +15,9 @@ rem call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" 
 rem call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64 -no_logo
 call "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64
 
-rem set ProjectName=Playground
 set ProjectName=MyHexView
 rem set ProjectName=Playground
+rem set ProjectName=GameOfLife
 set LibDirectory=..\..\..\lib
 set SourceDirectory=..\code
 set DataDirectory=..\data
