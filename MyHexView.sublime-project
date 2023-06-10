@@ -1040,7 +1040,6 @@
 			"void InitializePhysicsState()",
 			"void InitializeRenderContext()",
 			"void LinkedListPop(LinkedList_t* list, MemoryArena_t* memoryArena, int32 index)",
-			"void LoadPlaygroundPythonModule()",
 			"void MultiplyGroups(const AlgGroup_t* group1, const AlgGroup_t* group2, AlgGroup_t* result, MemoryArena_t* arenaPntr)",
 			"void Plugin_ButtonPressed(const PythonPlugin_t* pluginPntr, const char* button)",
 			"void Plugin_MousePressed(const PythonPlugin_t* pluginPntr, v2 mousePos)",
