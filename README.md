@@ -24,3 +24,9 @@ An incomplete binary file viewer that had some experimental features that I wish
 **F7**: Refresh UI
 
 **F11**: Show Debug Menu (Timing info)
+
+## Other Things In the Repository (Screenshots)
+
+![Playground](/release/screenshot1.png)
+
+![Game of Life](/release/screenshot2.png)
